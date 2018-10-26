@@ -1,0 +1,21 @@
+# Rename or copy this file to terraform.tfvars
+# Some of these variables must be unique, so replace with your own values.
+
+resource_group = "consul_Example"
+hostname = "consulexample"
+location = "ukwest"
+admin_username = "guyser"
+admin_password = "Sup3rS3cureP4ssw0rd"
+server = 3
+subscription = "c0a607b2"
+tenant = "0e3e2e88"
+client_id = "052d"
+client_secret = "ff02"
+owner = "example"
+public_key = "ssh"
+servers = 3
+nomadworkers = 3
+vaultlicense = ""
+consullicense = ""
+enterprise = false
+
