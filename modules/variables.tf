@@ -259,3 +259,10 @@ variable "namespace" {
   description = "Enterprise License for Consul"
   default     = "consuldemo"
 }
+
+locals {
+  consul_join_tag_value = "${var.hostname}-${random_id.consul_join_tag_value.hex}"
+
+   consul_join_tag_name = "ConsulDemo"
+
+}

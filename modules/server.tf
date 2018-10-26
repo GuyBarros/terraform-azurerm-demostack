@@ -4,15 +4,15 @@ data "template_file" "server" {
   count = "${var.servers}"
 
   template = "${join("\n", list(
-    file("templates/shared/base.sh"),
-    file("templates/shared/docker.sh"),
+    file("${path.module}/templates/shared/base.sh"),
+    file("${path.module}/templates/shared/docker.sh"),
 
-    file("templates/server/consul.sh"),
-    file("templates/server/vault.sh"),
-    file("templates/server/nomad.sh"),
-    file("templates/server/nomad-jobs.sh"),
+    file("${path.module}/templates/server/consul.sh"),
+    file("${path.module}/templates/server/vault.sh"),
+    file("${path.module}/templates/server/nomad.sh"),
+    file("${path.module}/templates/server/nomad-jobs.sh"),
 
-    file("templates/shared/cleanup.sh"),
+    file("${path.module}/templates/shared/cleanup.sh"),
   ))}"
 
   vars {
