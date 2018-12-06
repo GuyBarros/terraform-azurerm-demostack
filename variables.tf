@@ -12,12 +12,12 @@ variable "resource_group" {
 
 variable "demo_prefix" {
   description = "This prefix will be included in the name of some resources."
-  default     = "consuldemo"
+  default     = "demostack"
 }
 
 variable "hostname" {
   description = "VM hostname. Used for local hostname, DNS, and storage-related names."
-  default     = "consuldemo"
+  default     = "demostack"
 }
 
 variable "location" {
@@ -92,6 +92,11 @@ variable "admin_password" {
 
 variable "server" {
   description = "Ammount of Consul Instances to be created"
+  default     = 3
+}
+
+variable "workers" {
+  description = "Ammount of Nomad workers to be created"
   default     = 3
 }
 
@@ -257,5 +262,19 @@ variable "consullicense" {
 
 variable "namespace" {
   description = "Enterprise License for Consul"
-  default     = "consuldemo"
+  default     = "demostack"
+}
+
+variable "ca_key_algorithm" {
+default     = ""
+}
+
+
+variable "ca_private_key_pem" {
+  default     = ""
+}
+
+
+variable "ca_cert_pem" {
+  default     = ""
 }

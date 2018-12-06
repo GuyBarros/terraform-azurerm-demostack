@@ -22,7 +22,7 @@ sudo mkdir -p /etc/vault.d
 sudo tee /etc/vault.d/config.hcl > /dev/null <<EOF
 
 
-cluster_name = "${hostname}-consuldemo"
+cluster_name = "${hostname}-demostack"
 
 storage "consul" {
   path = "vault/"
@@ -34,6 +34,7 @@ listener "tcp" {
   tls_key_file  = "/etc/ssl/certs/me.key"
 }
 
+api_addr = "https://$(public_ip):8200"
 
 
 ui = true
@@ -148,7 +149,7 @@ echo "--> Writing configuration"
 sudo mkdir -p /etc/vault.d
 sudo tee /etc/vault.d/config.hcl > /dev/null <<EOF
 
-cluster_name = "${hostname}-consuldemo"
+cluster_name = "${hostname}-demostack"
 
 storage "consul" {
   path = "vault/"
@@ -168,6 +169,8 @@ seal "azurekeyvault" {
   vault_name     = "vaultkms"
   key_name       = "vault-key"
 }
+
+api_addr = "https://$(public_ip):8200"
 
 
 ui = true

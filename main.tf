@@ -5,7 +5,10 @@ hostname =  "${var.hostname}"
 location =  "${var.location}"
 admin_username =  "${var.admin_username}"
 admin_password =  "${var.admin_password}"
+demo_username = "${var.demo_username}"
+demo_password = "${var.demo_password}"
 server =  "${var.server}"
+workers =  "${var.workers}"
 subscription =  "${var.subscription}"
 tenant =  "${var.tenant}"
 client_id =  "${var.client_id}"
@@ -33,4 +36,21 @@ enterprise =  "${var.enterprise}"
   created-by          = "${var.created-by}"
   sleep-at-night      = "${var.sleep-at-night}"
   TTL                 = "${var.TTL}"
+  //  ca_key_algorithm   = "${var.ca_key_algorithm}"
+//  ca_private_key_pem = "${var.ca_private_key_pem}"
+//  ca_cert_pem        = "${var.ca_cert_pem}"
+ca_key_algorithm   = "${module.rootcertificate.ca_key_algorithm}"
+  ca_private_key_pem = "${module.rootcertificate.ca_private_key_pem}"
+  ca_cert_pem        = "${module.rootcertificate.ca_cert_pem}"
+}
+
+module "rootcertificate" {
+  source              = "github.com/GuyBarros/terraform-tls-certificate"
+  version = "0.0.1"
+  algorithm = "ECDSA"
+  ecdsa_curve = "P521"
+  common_name   = "service.consul"
+  organization = "service.consul"
+  validity_period_hours = 720
+  is_ca_certificate = true
 }
