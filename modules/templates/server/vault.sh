@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-echo "==> Vault (server)"
+echo "==> Vault (servers)"
 # Vault expects the key to be concatenated with the CA
 sudo mkdir -p /etc/vault.d/tls/
 sudo tee /etc/vault.d/tls/vault.crt > /dev/null <<EOF
@@ -58,7 +58,7 @@ After=network-online.target
 
 [Service]
 Restart=on-failure
-ExecStart=/usr/local/bin/vault server -config="/etc/vault.d/config.hcl"
+ExecStart=/usr/local/bin/vault servers -config="/etc/vault.d/config.hcl"
 ExecReload=/bin/kill -HUP $MAINPID
 KillSignal=SIGINT
 
@@ -194,7 +194,7 @@ After=network-online.target
 
 [Service]
 Restart=on-failure
-ExecStart=/usr/local/bin/vault server -config="/etc/vault.d/config.hcl"
+ExecStart=/usr/local/bin/vault servers -config="/etc/vault.d/config.hcl"
 ExecReload=/bin/kill -HUP $MAINPID
 KillSignal=SIGINT
 
@@ -258,7 +258,7 @@ consul lock tmp/vault/create-nomad-role "$(cat <<"EOF"
   consul kv get service/vault/root-token | vault login -
 
   echo "--> Adding Nomad policy"
-  vault policy write nomad-server - <<EOR
+  vault policy write nomad-servers - <<EOR
   path "auth/token/create/nomad-cluster" {
     capabilities = ["update"]
   }
@@ -294,7 +294,7 @@ EOR
     period=259200 \
     renewable=true \
     orphan=false \
-    disallowed_policies=nomad-server \
+    disallowed_policies=nomad-servers \
     explicit_max_ttl=0
 
   echo "--> Marking Vault Nomad setup complete"

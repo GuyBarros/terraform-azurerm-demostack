@@ -1,41 +1,41 @@
 
 
 
-# Server private key
-resource "tls_private_key" "server" {
+# servers private key
+resource "tls_private_key" "servers" {
   count       = "${var.servers}"
   algorithm   = "ECDSA"
   ecdsa_curve = "P521"
 }
 
-# Server signing request
-resource "tls_cert_request" "server" {
+# servers signing request
+resource "tls_cert_request" "servers" {
   count           = "${var.servers}"
-  key_algorithm   = "${element(tls_private_key.server.*.algorithm, count.index)}"
-  private_key_pem = "${element(tls_private_key.server.*.private_key_pem, count.index)}"
+  key_algorithm   = "${element(tls_private_key.servers.*.algorithm, count.index)}"
+  private_key_pem = "${element(tls_private_key.servers.*.private_key_pem, count.index)}"
 
   subject {
-    common_name  = "${var.hostname}-server-${count.index}.node.consul"
+    common_name  = "${var.hostname}-servers-${count.index}.node.consul"
     organization = "HashiCorp Consul Connect Demo"
   }
 
   dns_names = [
     # Consul
-    #"${var.namespace}-server-${count.index}.node.consul",
-    "${element(azurerm_public_ip.server-pip.*.fqdn, count.index)}",
-    "${var.hostname}-server-${count.index}.node.consul",
+    #"${var.namespace}-servers-${count.index}.node.consul",
+    "${element(azurerm_public_ip.servers-pip.*.fqdn, count.index)}",
+    "${var.hostname}-servers-${count.index}.node.consul",
 
     "consul.service.consul",
-    "server.dc1.consul",
+    "servers.dc1.consul",
 
     # Nomad
     "nomad.service.consul",
 
     "client.global.nomad",
-    "server.global.nomad",
+    "servers.global.nomad",
 
     # Vault
-    #"${element(azurerm_public_ip.consuldemo-pip.*.fqdn, count.index)}",
+    #"${element(azurerm_public_ip.demostack-pip.*.fqdn, count.index)}",
 
 
     "vault.service.consul",
@@ -46,7 +46,7 @@ resource "tls_cert_request" "server" {
     "localhost",
   ]
 
-  #"${var.namespace}-server-${count.index}.node.consul",
+  #"${var.namespace}-servers-${count.index}.node.consul",
 
   /*
   ip_addresses = [
@@ -55,10 +55,10 @@ resource "tls_cert_request" "server" {
   */
 }
 
-# Server certificate
-resource "tls_locally_signed_cert" "server" {
+# servers certificate
+resource "tls_locally_signed_cert" "servers" {
   count              = "${var.servers}"
-  cert_request_pem   = "${element(tls_cert_request.server.*.cert_request_pem, count.index)}"
+  cert_request_pem   = "${element(tls_cert_request.servers.*.cert_request_pem, count.index)}"
     ca_key_algorithm   = "${var.ca_key_algorithm}"
   ca_private_key_pem = "${var.ca_private_key_pem}"
   ca_cert_pem        = "${var.ca_cert_pem}"
@@ -71,7 +71,7 @@ resource "tls_locally_signed_cert" "server" {
     "digital_signature",
     "key_agreement",
     "key_encipherment",
-    "server_auth",
+    "servers_auth",
   ]
 }
 
@@ -128,7 +128,7 @@ resource "tls_locally_signed_cert" "workers" {
     "digital_signature",
     "key_agreement",
     "key_encipherment",
-    "server_auth",
+    "servers_auth",
   ]
 }
 

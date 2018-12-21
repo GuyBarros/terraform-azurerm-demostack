@@ -1,25 +1,25 @@
 
-data "template_file" "server" {
-  depends_on = ["azurerm_public_ip.server-pip"]
+data "template_file" "servers" {
+  depends_on = ["azurerm_public_ip.servers-pip"]
   count = "${var.servers}"
 
   template = "${join("\n", list(
     file("${path.module}/templates/shared/base.sh"),
     file("${path.module}/templates/shared/docker.sh"),
 
-    file("${path.module}/templates/server/consul.sh"),
-    file("${path.module}/templates/server/vault.sh"),
-    file("${path.module}/templates/server/nomad.sh"),
-    file("${path.module}/templates/server/nomad-jobs.sh"),
+    file("${path.module}/templates/servers/consul.sh"),
+    file("${path.module}/templates/servers/vault.sh"),
+    file("${path.module}/templates/servers/nomad.sh"),
+    file("${path.module}/templates/servers/nomad-jobs.sh"),
 
     file("${path.module}/templates/shared/cleanup.sh"),
   ))}"
 
   vars {
 
-    hostname      = "${var.hostname}-server-${count.index}"
-    private_ip    = "${element(azurerm_network_interface.server-nic.*.private_ip_address, count.index)}"
-    public_ip     = "${element(azurerm_public_ip.server-pip.*.ip_address, count.index)}"  
+    hostname      = "${var.hostname}-servers-${count.index}"
+    private_ip    = "${element(azurerm_network_interface.servers-nic.*.private_ip_address, count.index)}"
+    public_ip     = "${element(azurerm_public_ip.servers-pip.*.ip_address, count.index)}"  
     demo_username = "${var.demo_username}"
     demo_password = "${var.demo_password}"
     enterprise    = "${var.enterprise}"
@@ -30,11 +30,11 @@ data "template_file" "server" {
     tenant_id     = "${var.tenant}"
     client_id     = "${var.client_id}"
     client_secret = "${var.client_secret}"
-    fqdn          = "${element(azurerm_public_ip.server-pip.*.fqdn, count.index)}"
-    node_name = "${var.hostname}-server-${count.index}"
+    fqdn          = "${element(azurerm_public_ip.servers-pip.*.fqdn, count.index)}"
+    node_name = "${var.hostname}-servers-${count.index}"
     me_ca         =  "${var.ca_cert_pem}"
-    me_cert       = "${element(tls_locally_signed_cert.server.*.cert_pem, count.index)}"
-    me_key        = "${element(tls_private_key.server.*.private_key_pem, count.index)}"
+    me_cert       = "${element(tls_locally_signed_cert.servers.*.cert_pem, count.index)}"
+    me_key        = "${element(tls_private_key.servers.*.private_key_pem, count.index)}"
 
 
     # Consul
@@ -65,7 +65,7 @@ data "template_file" "server" {
 }
 
 # Gzip cloud-init config
-data "template_cloudinit_config" "server" {
+data "template_cloudinit_config" "servers" {
   count = "${var.servers}"
 
   gzip          = true
@@ -73,13 +73,13 @@ data "template_cloudinit_config" "server" {
 
   part {
     content_type = "text/x-shellscript"
-    content      = "${element(data.template_file.server.*.rendered, count.index)}"
+    content      = "${element(data.template_file.servers.*.rendered, count.index)}"
   }
 }
 
-resource "azurerm_network_interface" "server-nic" {
-  count               = "${var.server}"
-  name                = "${var.demo_prefix}server-nic-${count.index}"
+resource "azurerm_network_interface" "servers-nic" {
+  count               = "${var.servers}"
+  name                = "${var.demo_prefix}servers-nic-${count.index}"
   location            = "${var.location}"
   resource_group_name = "${azurerm_resource_group.demostack.name}"
 
@@ -89,7 +89,7 @@ resource "azurerm_network_interface" "server-nic" {
     name                          = "${var.demo_prefix}-${count.index}-ipconfig"
     subnet_id                     = "${azurerm_subnet.subnet.id}"
     private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = "${element(azurerm_public_ip.server-pip.*.id, count.index)}"
+    public_ip_address_id          = "${element(azurerm_public_ip.servers-pip.*.id, count.index)}"
 
   }
   
@@ -105,13 +105,13 @@ resource "azurerm_network_interface" "server-nic" {
 # Every Azure Virtual Machine comes with a private IP address. You can also 
 # optionally add a public IP address for Internet-facing applications and 
 # demo environments like this one.
-resource "azurerm_public_ip" "server-pip" {
-  count                        = "${var.server}"
-  name                         = "${var.demo_prefix}-server-ip-${count.index}"
+resource "azurerm_public_ip" "servers-pip" {
+  count                        = "${var.servers}"
+  name                         = "${var.demo_prefix}-servers-ip-${count.index}"
   location                     = "${var.location}"
   resource_group_name          = "${azurerm_resource_group.demostack.name}"
   public_ip_address_allocation = "Dynamic"
-  domain_name_label            = "${var.hostname}-server-${count.index}"
+  domain_name_label            = "${var.hostname}-servers-${count.index}"
 /*
     tags {
     name  = "Guy Barros"
@@ -122,18 +122,18 @@ resource "azurerm_public_ip" "server-pip" {
 */
 }
 
-# And finally we build our demostack server. This is a standard Ubuntu instance.
+# And finally we build our demostack servers. This is a standard Ubuntu instance.
 # We use the shell provisioner to run a Bash script that configures demostack for 
 # the demo environment. Terraform supports several different types of 
 # provisioners including Bash, Powershell and Chef.
-resource "azurerm_virtual_machine" "server" {
-  count               = "${var.server}"
-  name                = "${var.hostname}-server-${count.index}"
+resource "azurerm_virtual_machine" "servers" {
+  count               = "${var.servers}"
+  name                = "${var.hostname}-servers-${count.index}"
   location            = "${var.location}"
   resource_group_name = "${azurerm_resource_group.demostack.name}"
   vm_size             = "${var.vm_size}"
 
-  network_interface_ids         = ["${element(azurerm_network_interface.server-nic.*.id, count.index)}"]
+  network_interface_ids         = ["${element(azurerm_network_interface.servers-nic.*.id, count.index)}"]
   delete_os_disk_on_termination = "true"
 
   storage_image_reference {
@@ -152,10 +152,10 @@ resource "azurerm_virtual_machine" "server" {
   }
 
   os_profile {
-    computer_name  = "${var.hostname}-server-${count.index}"
+    computer_name  = "${var.hostname}-servers-${count.index}"
     admin_username = "${var.admin_username}"
     admin_password = "${var.admin_password}"
-    custom_data    = "${element(data.template_cloudinit_config.server.*.rendered, count.index)}"
+    custom_data    = "${element(data.template_cloudinit_config.servers.*.rendered, count.index)}"
   }
 
   os_profile_linux_config {

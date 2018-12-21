@@ -15,7 +15,7 @@
     "retry_join": [
         "provider=aws tag_key=${consul_join_tag_key} tag_value=${consul_join_tag_value}"
     ],
-    "server": true,
+    "servers": true,
     "ui": true,
     "addresses": {
         "http": "127.0.0.1",
@@ -30,7 +30,7 @@
     "ca_file": "/usr/local/share/ca-certificates/01-me.crt",
     "verify_incoming": true,
     "verify_outgoing": true,
-    "verify_server_hostname": true,
+    "verify_servers_hostname": true,
     "connect": {
         "enabled": true,
         "proxy": {

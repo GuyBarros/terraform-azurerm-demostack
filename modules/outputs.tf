@@ -7,7 +7,7 @@ output "key_vault_name" {
 }
 
 output "servers" {
-    value = "${formatlist("http://%s:8500/", azurerm_public_ip.server-pip.*.fqdn,)}"
+    value = "${formatlist("http://%s:8500/", azurerm_public_ip.servers-pip.*.fqdn,)}"
 }
 
 /**

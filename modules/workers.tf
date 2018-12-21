@@ -34,8 +34,8 @@ data "template_file" "workers" {
     fqdn          = "${element(azurerm_public_ip.workers-pip.*.fqdn, count.index)}"
     node_name = "${var.hostname}-workers-${count.index}"
     me_ca         =  "${var.ca_cert_pem}"
-    me_cert       = "${element(tls_locally_signed_cert.server.*.cert_pem, count.index)}"
-    me_key        = "${element(tls_private_key.server.*.private_key_pem, count.index)}"
+    me_cert       = "${element(tls_locally_signed_cert.servers.*.cert_pem, count.index)}"
+    me_key        = "${element(tls_private_key.servers.*.private_key_pem, count.index)}"
 
     # Consul
     consul_url            = "${var.consul_url}"

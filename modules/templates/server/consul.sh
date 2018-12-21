@@ -4,7 +4,7 @@ echo "==> Disable UFW"
 sudo systemctl stop ufw
 sudo systemctl disable ufw
 
-echo "==> Consul (server)"
+echo "==> Consul (servers)"
 if [ ${enterprise} == 0 ]
 then
 echo "--> Fetching"
@@ -36,7 +36,7 @@ sudo tee /etc/consul.d/config.json > /dev/null <<EOF
   "raft_protocol": 3,
   "retry_join": ["provider=azure tag_name=${consul_join_tag_name}  tag_value=${consul_join_tag_value} tenant_id=${tenant_id} client_id=${client_id} subscription_id=${subscription_id} secret_access_key=${client_secret} "],
 
-  "server": true,
+  "servers": true,
   "addresses": {
     "http": "0.0.0.0",
     "https": "$(private_ip)"
@@ -50,7 +50,7 @@ sudo tee /etc/consul.d/config.json > /dev/null <<EOF
   "ca_file": "/usr/local/share/ca-certificates/01-me.crt",
   "verify_incoming": false,
   "verify_outgoing": false,
-  "verify_server_hostname": false,
+  "verify_servers_hostname": false,
   "ui": true,
  "connect":{
   "enabled": true,
@@ -89,17 +89,17 @@ sudo systemctl restart consul
 echo "--> Installing dnsmasq"
 ssh-apt install dnsmasq
 sudo tee /etc/dnsmasq.d/10-consul > /dev/null <<"EOF"
-server=/consul/127.0.0.1#8600
+servers=/consul/127.0.0.1#8600
 no-poll
-server=168.63.129.16
-server=1.1.1.1
+servers=168.63.129.16
+servers=1.1.1.1
 cache-size=0
 EOF
 sudo systemctl enable dnsmasq
 sudo systemctl restart dnsmasq
 
 echo "--> Waiting for all Consul servers"
-while [ "$(consul members 2>&1 | grep "server" | grep "alive" | wc -l)" -lt "${consul_servers}" ]; do
+while [ "$(consul members 2>&1 | grep "servers" | grep "alive" | wc -l)" -lt "${consul_servers}" ]; do
   sleep 3
 done
 

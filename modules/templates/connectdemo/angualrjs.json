@@ -17,7 +17,7 @@
     "checks": [
        {
         "id": "angular",
-        "name": "web server up and running",
+        "name": "web servers up and running",
         "tcp": "localhost:3000",
         "interval": "30s",
         "timeout": "1s"

@@ -164,13 +164,13 @@ resource "random_id" "keyvault" {
   byte_length = 4
 }
 
-resource "azurerm_key_vault" "keyvault" {
-  name                        = "${var.environment}-demostack-${random_id.keyvault.hex}"
+resource "azurerm_key_vault" "demostack" {
+  name                        = "demostack-${random_id.keyvault.hex}"
   location                    = "${azurerm_resource_group.demostack.location}"
   resource_group_name         = "${azurerm_resource_group.demostack.name}"
   enabled_for_deployment      = true
   enabled_for_disk_encryption = true
-  tenant_id                   = "${var.tenant_id}"
+  tenant_id                   = "${var.tenant}"
 
   sku {
     name = "standard"
@@ -188,15 +188,15 @@ resource "azurerm_user_assigned_identity" "demostack" {
   resource_group_name = "${azurerm_resource_group.demostack.name}"
   location            = "${azurerm_resource_group.demostack.location}"
 
-  name = "${var.environment}-demostack-vm"
+  name = "demostack-vm-identity"
 }
 
 resource "azurerm_key_vault_access_policy" "demostack_vm" {
   vault_name          = "${azurerm_key_vault.demostack.name}"
   resource_group_name = "${azurerm_key_vault.demostack.resource_group_name}"
 
-  tenant_id = "${var.tenant_id}"
-  object_id = "${azurerm_user_assigned_identity.demostack.principal_id}"
+  tenant_id = "${var.tenant}"
+  object_id = "${azurerm_user_assigned_identity.demostack.client_id}"
 
   certificate_permissions = [
     "get",
@@ -220,7 +220,7 @@ resource "azurerm_key_vault_access_policy" "vaultkmspolicy" {
   vault_name           = "${azurerm_key_vault.vaultkms.name}"
   resource_group_name  = "${azurerm_key_vault.vaultkms.resource_group_name}"
 
-    count     = "${var.server}"
+    count     = "${var.servers}"
     tenant_id = "${var.tenant}"
     object_id = "${element(azurerm_virtual_machine.demostack.*.id, count.index)}"
 

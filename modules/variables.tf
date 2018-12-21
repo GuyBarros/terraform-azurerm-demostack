@@ -67,7 +67,7 @@ variable "image_publisher" {
 
 variable "image_offer" {
   description = "Name of the offer (az vm image list)"
-  default     = "UbuntuServer"
+  default     = "Ubuntuservers"
 }
 
 variable "image_sku" {
@@ -90,7 +90,7 @@ variable "admin_password" {
   default     = "replace-with-your-password"
 }
 
-variable "server" {
+variable "servers" {
   description = "Ammount of Consul Instances to be created"
   default     = 3
 }
@@ -100,17 +100,6 @@ variable "workers" {
   default     = 3
 }
 
-
-
-variable "servers" {
-  description = "The number of data servers (consul, nomad, etc)."
-  default     = "3"
-}
-
-variable "nomadworkers" {
-  description = "The number of nomad worker vms to create."
-  default     = "3"
-}
 
 variable "consul_url" {
   description = "The url to download Consul."

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-echo "==> Nomad (server)"
+echo "==> Nomad (servers)"
 
 echo "--> Fetching"
 install_from_url "nomad" "${nomad_url}"
@@ -11,7 +11,7 @@ export VAULT_TOKEN="$(consul kv get service/vault/root-token)"
 export NOMAD_VAULT_TOKEN="$(VAULT_TOKEN="$VAULT_TOKEN" \
   VAULT_ADDR="https://vault.service.consul:8200" \
   VAULT_SKIP_VERIFY=true \
-  vault token create -field=token -policy=nomad-server -period=72h)"
+  vault token create -field=token -policy=nomad-servers -period=72h)"
 
 echo "--> Writing configuration"
 sudo mkdir -p /mnt/nomad
@@ -29,7 +29,7 @@ advertise {
   serf = "${node_name}.node.consul:4648"
 }
 
-server {
+servers {
   enabled          = true
   bootstrap_expect = ${nomad_servers}
   encrypt          = "${nomad_gossip_key}"
@@ -50,7 +50,7 @@ tls {
   cert_file = "/etc/ssl/certs/me.crt"
   key_file  = "/etc/ssl/certs/me.key"
 
-  verify_server_hostname = false
+  verify_servers_hostname = false
 }
 
 vault {
@@ -99,7 +99,7 @@ sudo systemctl start nomad
 sleep 2
 
 echo "--> Waiting for all Nomad servers"
-while [ "$(nomad server-members 2>&1 | grep "alive" | wc -l)" -lt "${nomad_servers}" ]; do
+while [ "$(nomad servers-members 2>&1 | grep "alive" | wc -l)" -lt "${nomad_servers}" ]; do
   sleep 5
 done
 

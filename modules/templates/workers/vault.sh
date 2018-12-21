@@ -24,7 +24,7 @@ After=network-online.target
 Environment=GOMAXPROCS=8
 Environment=VAULT_DEV_ROOT_TOKEN_ID=root
 Restart=on-failure
-ExecStart=/usr/local/bin/vault server -dev
+ExecStart=/usr/local/bin/vault servers -dev
 ExecReload=/bin/kill -HUP $MAINPID
 KillSignal=SIGINT
 [Install]
@@ -78,7 +78,7 @@ Requires=network-online.target
 After=network-online.target
 [Service]
 Restart=on-failure
-ExecStart=/usr/local/bin/vault server -config=/workstation/vault/config.hcl
+ExecStart=/usr/local/bin/vault servers -config=/workstation/vault/config.hcl
 ExecReload=/bin/kill -HUP $MAINPID
 KillSignal=SIGINT
 [Install]
