@@ -67,7 +67,7 @@ variable "image_publisher" {
 
 variable "image_offer" {
   description = "Name of the offer (az vm image list)"
-  default     = "Ubuntuservers"
+  default     = "UbuntuServer"
 }
 
 variable "image_sku" {
@@ -99,7 +99,6 @@ variable "workers" {
   description = "Ammount of Nomad workers to be created"
   default     = 3
 }
-
 
 variable "consul_url" {
   description = "The url to download Consul."
@@ -222,18 +221,15 @@ variable "enterprise" {
 
 variable "subscription" {
   description = "your subscription ID for Vault KMS Auto Unseal"
-  
 }
 
 variable "tenant" {
   description = "your tenant ID for Vault KMS Auto Unseal"
- 
 }
 
 variable "client_id" {
   description = "your client ID for Vault KMS Auto Unseal"
 }
-
 
 variable "client_secret" {
   description = "your client ID for Vault KMS Auto Unseal"
@@ -257,21 +253,17 @@ variable "namespace" {
 locals {
   consul_join_tag_value = "${var.hostname}-${random_id.consul_join_tag_value.hex}"
 
-   consul_join_tag_name = "demostack"
-
+  consul_join_tag_name = "demostack"
 }
-
 
 variable "ca_key_algorithm" {
-default     = ""
+  default = ""
 }
-
 
 variable "ca_private_key_pem" {
-  default     = ""
+  default = ""
 }
 
-
 variable "ca_cert_pem" {
-  default     = ""
+  default = ""
 }

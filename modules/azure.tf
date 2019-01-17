@@ -1,16 +1,30 @@
-
-
 resource "azurerm_resource_group" "demostack" {
   name     = "${var.resource_group}"
   location = "${var.location}"
 
-    tags {
-    name  = "Guy Barros"
-    ttl   = "13"
-    owner = "guy@hashicorp.com"
+  tags {
+    name      = "Guy Barros"
+    ttl       = "13"
+    owner     = "guy@hashicorp.com"
     demostack = "${local.consul_join_tag_value}"
   }
+}
 
+resource "azurerm_availability_set" "vm" {
+  # count                          = "${var.servers}"
+  name                         = "${var.demo_prefix}-aval-set"
+  location                     = "${var.location}"
+  resource_group_name          = "${azurerm_resource_group.demostack.name}"
+  platform_fault_domain_count  = 2
+  platform_update_domain_count = 2
+  managed                      = true
+
+  tags {
+    name      = "Guy Barros"
+    ttl       = "13"
+    owner     = "guy@hashicorp.com"
+    demostack = "${local.consul_join_tag_value}"
+  }
 }
 
 resource "azurerm_virtual_network" "vnet" {
@@ -19,13 +33,12 @@ resource "azurerm_virtual_network" "vnet" {
   address_space       = ["${var.address_space}"]
   resource_group_name = "${azurerm_resource_group.demostack.name}"
 
-    tags {
-    name  = "Guy Barros"
-    ttl   = "13"
-    owner = "guy@hashicorp.com"
+  tags {
+    name      = "Guy Barros"
+    ttl       = "13"
+    owner     = "guy@hashicorp.com"
     demostack = "${local.consul_join_tag_value}"
   }
-
 }
 
 resource "azurerm_subnet" "subnet" {
@@ -33,8 +46,6 @@ resource "azurerm_subnet" "subnet" {
   virtual_network_name = "${azurerm_virtual_network.vnet.name}"
   resource_group_name  = "${azurerm_resource_group.demostack.name}"
   address_prefix       = "${var.subnet_prefix}"
-
-
 }
 
 resource "azurerm_network_security_group" "demostack-sg" {
@@ -42,11 +53,10 @@ resource "azurerm_network_security_group" "demostack-sg" {
   location            = "${var.location}"
   resource_group_name = "${azurerm_resource_group.demostack.name}"
 
-
-    tags {
-    name  = "Guy Barros"
-    ttl   = "13"
-    owner = "guy@hashicorp.com"
+  tags {
+    name      = "Guy Barros"
+    ttl       = "13"
+    owner     = "guy@hashicorp.com"
     demostack = "${local.consul_join_tag_value}"
   }
 
@@ -110,7 +120,7 @@ resource "azurerm_network_security_group" "demostack-sg" {
     destination_address_prefix = "*"
   }
 
-    security_rule {
+  security_rule {
     name                       = "demostack-nodejs"
     priority                   = 105
     direction                  = "Inbound"
@@ -122,7 +132,7 @@ resource "azurerm_network_security_group" "demostack-sg" {
     destination_address_prefix = "*"
   }
 
-    security_rule {
+  security_rule {
     name                       = "demostack-web"
     priority                   = 106
     direction                  = "Inbound"
@@ -134,150 +144,3 @@ resource "azurerm_network_security_group" "demostack-sg" {
     destination_address_prefix = "*"
   }
 }
-
-
-resource "azurerm_key_vault" "vaultkms" {
-  name                        = "vaultkms"
-  location                    = "${var.location}"
-  resource_group_name         = "${azurerm_resource_group.demostack.name}"
-  enabled_for_disk_encryption = true
-  tenant_id                   = "${var.tenant}"
-
-  sku {
-    name = "standard"
-  }
-
-
-
-
-    tags {
-    name  = "Guy Barros"
-    ttl   = "13"
-    owner = "guy@hashicorp.com"
-    demostack = "${local.consul_join_tag_value}"
-  }
-
-}
-
-
-resource "random_id" "keyvault" {
-  byte_length = 4
-}
-
-resource "azurerm_key_vault" "demostack" {
-  name                        = "demostack-${random_id.keyvault.hex}"
-  location                    = "${azurerm_resource_group.demostack.location}"
-  resource_group_name         = "${azurerm_resource_group.demostack.name}"
-  enabled_for_deployment      = true
-  enabled_for_disk_encryption = true
-  tenant_id                   = "${var.tenant}"
-
-  sku {
-    name = "standard"
-  }
-
-  tags {
-    name  = "Guy Barros"
-    ttl   = "13"
-    owner = "guy@hashicorp.com"
-    demostack = "${local.consul_join_tag_value}"
-  }
-}
-
-resource "azurerm_user_assigned_identity" "demostack" {
-  resource_group_name = "${azurerm_resource_group.demostack.name}"
-  location            = "${azurerm_resource_group.demostack.location}"
-
-  name = "demostack-vm-identity"
-}
-
-resource "azurerm_key_vault_access_policy" "demostack_vm" {
-  vault_name          = "${azurerm_key_vault.demostack.name}"
-  resource_group_name = "${azurerm_key_vault.demostack.resource_group_name}"
-
-  tenant_id = "${var.tenant}"
-  object_id = "${azurerm_user_assigned_identity.demostack.client_id}"
-
-  certificate_permissions = [
-    "get",
-  ]
-
-  key_permissions = [
-    "get",
-  ]
-
-  secret_permissions = [
-    "get",
-  ]
-}
-
-
-
-/*
-
-//First Test, this code is crap. do not use
-resource "azurerm_key_vault_access_policy" "vaultkmspolicy" {
-  vault_name           = "${azurerm_key_vault.vaultkms.name}"
-  resource_group_name  = "${azurerm_key_vault.vaultkms.resource_group_name}"
-
-    count     = "${var.servers}"
-    tenant_id = "${var.tenant}"
-    object_id = "${element(azurerm_virtual_machine.demostack.*.id, count.index)}"
-
-    key_permissions = [
-      "backup",
-      "create",
-      "decrypt",
-      "delete",
-      "encrypt",
-      "get",
-      "import",
-      "list",
-      "purge",
-      "recover",
-      "restore",
-      "sign",
-      "unwrapKey",
-      "update",
-      "verify",
-      "wrapKey",
-    ]
-
-    secret_permissions = [
-      "backup",
-      "delete",
-      "get",
-      "list",
-      "purge",
-      "recover",
-      "restore",
-      "set",
-    ]
-
-
-  network_acls {
-    default_action             = "Deny"
-    bypass                     = "None"
-    virtual_network_subnet_ids = ["${azurerm_subnet.subnet.id}"]
-  }
-}
-*/
-
-/* 
-resource "azurerm_key_vault_key" "vault-key" {
-  name      = "vault-key"
-  vault_uri = "${azurerm_key_vault.vaultkms.vault_uri}"
-  key_type  = "RSA"
-  key_size  = 2048
-
-  key_opts = [
-    "decrypt",
-    "encrypt",
-    "sign",
-    "unwrapKey",
-    "verify",
-    "wrapKey",
-  ]
-}
-
-*/

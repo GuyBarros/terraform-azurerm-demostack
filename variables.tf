@@ -90,7 +90,6 @@ variable "admin_password" {
   default     = "replace-with-your-password"
 }
 
-
 variable "servers" {
   description = "The number of data servers (consul, nomad, etc)."
   default     = "3"
@@ -222,18 +221,15 @@ variable "enterprise" {
 
 variable "subscription" {
   description = "your subscription ID for Vault KMS Auto Unseal"
-  
 }
 
 variable "tenant" {
   description = "your tenant ID for Vault KMS Auto Unseal"
- 
 }
 
 variable "client_id" {
   description = "your client ID for Vault KMS Auto Unseal"
 }
-
 
 variable "client_secret" {
   description = "your client ID for Vault KMS Auto Unseal"
@@ -255,15 +251,13 @@ variable "namespace" {
 }
 
 variable "ca_key_algorithm" {
-default     = ""
+  default = ""
 }
-
 
 variable "ca_private_key_pem" {
-  default     = ""
+  default = ""
 }
 
-
 variable "ca_cert_pem" {
-  default     = ""
+  default = ""
 }

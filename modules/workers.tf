@@ -1,7 +1,6 @@
-
 data "template_file" "workers" {
   depends_on = ["azurerm_public_ip.workers-pip"]
-  count = "${var.workers}"
+  count      = "${var.workers}"
 
   template = "${join("\n", list(
     file("${path.module}/templates/shared/base.sh"),
@@ -16,33 +15,32 @@ data "template_file" "workers" {
   ))}"
 
   vars {
-
     hostname      = "${var.hostname}-workers-${count.index}"
     private_ip    = "${element(azurerm_network_interface.workers-nic.*.private_ip_address, count.index)}"
-    public_ip     = "${element(azurerm_public_ip.workers-pip.*.ip_address, count.index)}"  
+    public_ip     = "${element(azurerm_public_ip.workers-pip.*.ip_address, count.index)}"
     demo_username = "${var.demo_username}"
     demo_password = "${var.demo_password}"
 
-    enterprise    = "${var.enterprise}"
-    vaultlicense  = "${var.vaultlicense}"
-    consullicense = "${var.consullicense}"
-    kmskey        = "${azurerm_key_vault.vaultkms.id}"
+    enterprise      = "${var.enterprise}"
+    vaultlicense    = "${var.vaultlicense}"
+    consullicense   = "${var.consullicense}"
+    kmskey          = "${azurerm_key_vault.demostack.id}"
     subscription_id = "${var.subscription}"
-    tenant_id     = "${var.tenant}"
-    client_id     = "${var.client_id}"
-    client_secret = "${var.client_secret}"
-    fqdn          = "${element(azurerm_public_ip.workers-pip.*.fqdn, count.index)}"
-    node_name = "${var.hostname}-workers-${count.index}"
-    me_ca         =  "${var.ca_cert_pem}"
-    me_cert       = "${element(tls_locally_signed_cert.servers.*.cert_pem, count.index)}"
-    me_key        = "${element(tls_private_key.servers.*.private_key_pem, count.index)}"
+    tenant_id       = "${var.tenant}"
+    client_id       = "${var.client_id}"
+    client_secret   = "${var.client_secret}"
+    fqdn            = "${element(azurerm_public_ip.workers-pip.*.fqdn, count.index)}"
+    node_name       = "${var.hostname}-workers-${count.index}"
+    me_ca           = "${var.ca_cert_pem}"
+    me_cert         = "${element(tls_locally_signed_cert.servers.*.cert_pem, count.index)}"
+    me_key          = "${element(tls_private_key.servers.*.private_key_pem, count.index)}"
 
     # Consul
     consul_url            = "${var.consul_url}"
     consul_ent_url        = "${var.consul_ent_url}"
     consul_gossip_key     = "${base64encode(random_id.consul_gossip_key.hex)}"
     consul_join_tag_key   = "ConsulJoin"
-    consul_join_tag_name = "demostack"
+    consul_join_tag_name  = "demostack"
     consul_join_tag_value = "${local.consul_join_tag_value}"
     consul_master_token   = "${random_id.consul_master_token.hex}"
     consul_servers        = "${var.workers}"
@@ -90,29 +88,27 @@ resource "azurerm_network_interface" "workers-nic" {
     subnet_id                     = "${azurerm_subnet.subnet.id}"
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = "${element(azurerm_public_ip.workers-pip.*.id, count.index)}"
-
   }
-  
-    tags {
-    name  = "Guy Barros"
-    ttl   = "13"
-    owner = "guy@hashicorp.com"
+  tags {
+    name      = "Guy Barros"
+    ttl       = "13"
+    owner     = "guy@hashicorp.com"
     demostack = "${local.consul_join_tag_value}"
   }
-
 }
 
 # Every Azure Virtual Machine comes with a private IP address. You can also 
 # optionally add a public IP address for Internet-facing applications and 
 # demo environments like this one.
 resource "azurerm_public_ip" "workers-pip" {
-  count                        = "${var.workers}"
-  name                         = "${var.demo_prefix}-workers-ip-${count.index}"
-  location                     = "${var.location}"
-  resource_group_name          = "${azurerm_resource_group.demostack.name}"
-  public_ip_address_allocation = "Dynamic"
-  domain_name_label            = "${var.hostname}-workers-${count.index}"
-/*
+  count               = "${var.workers}"
+  name                = "${var.demo_prefix}-workers-ip-${count.index}"
+  location            = "${var.location}"
+  resource_group_name = "${azurerm_resource_group.demostack.name}"
+  allocation_method   = "Dynamic"
+  domain_name_label   = "${var.hostname}-workers-${count.index}"
+
+  /*
     tags {
     name  = "Guy Barros"
     ttl   = "13"
@@ -163,10 +159,9 @@ resource "azurerm_virtual_machine" "workers" {
   }
 
   tags {
-    name  = "Guy Barros"
-    ttl   = "13"
-    owner = "guy@hashicorp.com"
+    name      = "Guy Barros"
+    ttl       = "13"
+    owner     = "guy@hashicorp.com"
     demostack = "${local.consul_join_tag_value}"
   }
-
 }

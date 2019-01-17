@@ -1,6 +1,3 @@
-
-
-
 # servers private key
 resource "tls_private_key" "servers" {
   count       = "${var.servers}"
@@ -21,10 +18,9 @@ resource "tls_cert_request" "servers" {
 
   dns_names = [
     # Consul
-    #"${var.namespace}-servers-${count.index}.node.consul",
-    "${element(azurerm_public_ip.servers-pip.*.fqdn, count.index)}",
-    "${var.hostname}-servers-${count.index}.node.consul",
+    "*.cloudapp.azure.com",
 
+    "${var.hostname}-servers-${count.index}.node.consul",
     "consul.service.consul",
     "servers.dc1.consul",
 
@@ -33,11 +29,6 @@ resource "tls_cert_request" "servers" {
 
     "client.global.nomad",
     "servers.global.nomad",
-
-    # Vault
-    #"${element(azurerm_public_ip.demostack-pip.*.fqdn, count.index)}",
-
-
     "vault.service.consul",
     "active.vault.service.consul",
     "standby.vault.service.consul",
@@ -45,6 +36,9 @@ resource "tls_cert_request" "servers" {
     # Common
     "localhost",
   ]
+
+  # Vault
+  #"${element(azurerm_public_ip.demostack-pip.*.fqdn, count.index)}",
 
   #"${var.namespace}-servers-${count.index}.node.consul",
 
@@ -59,10 +53,9 @@ resource "tls_cert_request" "servers" {
 resource "tls_locally_signed_cert" "servers" {
   count              = "${var.servers}"
   cert_request_pem   = "${element(tls_cert_request.servers.*.cert_request_pem, count.index)}"
-    ca_key_algorithm   = "${var.ca_key_algorithm}"
+  ca_key_algorithm   = "${var.ca_key_algorithm}"
   ca_private_key_pem = "${var.ca_private_key_pem}"
   ca_cert_pem        = "${var.ca_cert_pem}"
-
 
   validity_period_hours = 720 # 30 days
 
@@ -71,7 +64,7 @@ resource "tls_locally_signed_cert" "servers" {
     "digital_signature",
     "key_agreement",
     "key_encipherment",
-    "servers_auth",
+    "server_auth",
   ]
 }
 
@@ -87,24 +80,31 @@ resource "tls_private_key" "workers" {
   algorithm   = "ECDSA"
   ecdsa_curve = "P521"
 }
+
 # Client signing request
 resource "tls_cert_request" "workers" {
   count           = "${var.workers}"
   key_algorithm   = "${element(tls_private_key.workers.*.algorithm, count.index)}"
   private_key_pem = "${element(tls_private_key.workers.*.private_key_pem, count.index)}"
+
   subject {
     common_name  = "${var.hostname}-worker-${count.index}.node.consul"
     organization = "HashiCorp Consul Connect Demo"
   }
+
   dns_names = [
     # Consul
     "${var.hostname}-worker-${count.index}.node.consul",
+
     # Nomad
     "nomad.service.consul",
+
     "client.global.nomad",
+
     # Common
     "localhost",
   ]
+
   /*
   ip_addresses = [
     "127.0.0.1",
@@ -123,12 +123,13 @@ resource "tls_locally_signed_cert" "workers" {
   ca_cert_pem        = "${var.ca_cert_pem}"
 
   validity_period_hours = 720 # 30 days
+
   allowed_uses = [
     "client_auth",
     "digital_signature",
     "key_agreement",
     "key_encipherment",
-    "servers_auth",
+    "server_auth",
   ]
 }
 

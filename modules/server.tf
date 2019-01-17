@@ -1,48 +1,64 @@
-
 data "template_file" "servers" {
-  depends_on = ["azurerm_public_ip.servers-pip"]
-  count = "${var.servers}"
+  depends_on = ["azurerm_public_ip.servers-pip","azurerm_key_vault.demostack"]
+  count      = "${var.servers}"
 
   template = "${join("\n", list(
     file("${path.module}/templates/shared/base.sh"),
     file("${path.module}/templates/shared/docker.sh"),
-
-    file("${path.module}/templates/servers/consul.sh"),
-    file("${path.module}/templates/servers/vault.sh"),
-    file("${path.module}/templates/servers/nomad.sh"),
-    file("${path.module}/templates/servers/nomad-jobs.sh"),
-
+    file("${path.module}/templates/server/consul.sh"),
+    file("${path.module}/templates/server/vault.sh"),
+    file("${path.module}/templates/server/nomad.sh"),
+    file("${path.module}/templates/server/nomad-jobs.sh"),
     file("${path.module}/templates/shared/cleanup.sh"),
   ))}"
 
+  /**
+template = "${join("\n", list(
+    file("https://raw.githubusercontent.com/GuyBarros/demostack-cloud-scripts/master/azure/shared/base.sh"),
+    file("https://raw.githubusercontent.com/GuyBarros/demostack-cloud-scripts/master/azure/shared/docker.sh"),
+    file("https://raw.githubusercontent.com/GuyBarros/demostack-cloud-scripts/master/azure/server/consul.sh"),
+    file("https://raw.githubusercontent.com/GuyBarros/demostack-cloud-scripts/master/azure/server/vault.sh"),
+    file("https://raw.githubusercontent.com/GuyBarros/demostack-cloud-scripts/master/azure/server/nomad.sh"),
+    file("https://raw.githubusercontent.com/GuyBarros/demostack-cloud-scripts/master/azure/server/nomad-jobs.sh"),
+
+    file("https://raw.githubusercontent.com/GuyBarros/demostack-cloud-scripts/master/azure/shared/cleanup.sh"),
+  ))}"
+
+  settings = <<SETTINGS
+  { 
+    "fileUris": ["https://raw.githubusercontent.com/nehrman/terraform-azure-demo/master/modules/azure-instance/user-data.sh"],
+  "commandToExecute": "sudo sh user-data.sh" 
+  }
+*/
+
   vars {
-
-    hostname      = "${var.hostname}-servers-${count.index}"
-    private_ip    = "${element(azurerm_network_interface.servers-nic.*.private_ip_address, count.index)}"
-    public_ip     = "${element(azurerm_public_ip.servers-pip.*.ip_address, count.index)}"  
-    demo_username = "${var.demo_username}"
-    demo_password = "${var.demo_password}"
-    enterprise    = "${var.enterprise}"
-    vaultlicense  = "${var.vaultlicense}"
-    consullicense = "${var.consullicense}"
-    kmskey        = "${azurerm_key_vault.vaultkms.id}"
+    hostname        = "${var.hostname}-servers-${count.index}"
+    private_ip      = "${element(azurerm_network_interface.servers-nic.*.private_ip_address, count.index)}"
+    public_ip       = "${element(azurerm_public_ip.servers-pip.*.ip_address, count.index)}"
+    demo_username   = "${var.demo_username}"
+    demo_password   = "${var.demo_password}"
+    enterprise      = "${var.enterprise}"
+    vaultlicense    = "${var.vaultlicense}"
+    consullicense   = "${var.consullicense}"
+    kmsvaultname    = "${azurerm_key_vault.demostack.id}"
+    kmskeyname      = "${azurerm_key_vault.demostack.name}"
     subscription_id = "${var.subscription}"
-    tenant_id     = "${var.tenant}"
-    client_id     = "${var.client_id}"
-    client_secret = "${var.client_secret}"
-    fqdn          = "${element(azurerm_public_ip.servers-pip.*.fqdn, count.index)}"
-    node_name = "${var.hostname}-servers-${count.index}"
-    me_ca         =  "${var.ca_cert_pem}"
-    me_cert       = "${element(tls_locally_signed_cert.servers.*.cert_pem, count.index)}"
-    me_key        = "${element(tls_private_key.servers.*.private_key_pem, count.index)}"
-
+    tenant_id       = "${var.tenant}"
+    client_id       = "${var.client_id}"
+    client_secret   = "${var.client_secret}"
+    object_id       = "${azurerm_user_assigned_identity.demostack.principal_id}"
+    fqdn            = "${element(azurerm_public_ip.servers-pip.*.fqdn, count.index)}"
+    node_name       = "${var.hostname}-servers-${count.index}"
+    me_ca           = "${var.ca_cert_pem}"
+    me_cert         = "${element(tls_locally_signed_cert.servers.*.cert_pem, count.index)}"
+    me_key          = "${element(tls_private_key.servers.*.private_key_pem, count.index)}"
 
     # Consul
     consul_url            = "${var.consul_url}"
     consul_ent_url        = "${var.consul_ent_url}"
     consul_gossip_key     = "${base64encode(random_id.consul_gossip_key.hex)}"
     consul_join_tag_key   = "ConsulJoin"
-    consul_join_tag_name = "demostack"
+    consul_join_tag_name  = "demostack"
     consul_join_tag_value = "${local.consul_join_tag_value}"
     consul_master_token   = "${random_id.consul_master_token.hex}"
     consul_servers        = "${var.servers}"
@@ -83,43 +99,47 @@ resource "azurerm_network_interface" "servers-nic" {
   location            = "${var.location}"
   resource_group_name = "${azurerm_resource_group.demostack.name}"
 
-  # network_security_group_id = "${azurerm_network_security_group.demostack-sg.id}"
-
   ip_configuration {
     name                          = "${var.demo_prefix}-${count.index}-ipconfig"
     subnet_id                     = "${azurerm_subnet.subnet.id}"
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = "${element(azurerm_public_ip.servers-pip.*.id, count.index)}"
 
-  }
-  
-    tags {
-    name  = "Guy Barros"
-    ttl   = "13"
-    owner = "guy@hashicorp.com"
-    demostack = "${local.consul_join_tag_value}"
+    # azurerm_network_interface_backend_address_pool_association  = ["${azurerm_lb_backend_address_pool.lb.id }"]
   }
 
+  tags {
+    name      = "Guy Barros"
+    ttl       = "13"
+    owner     = "guy@hashicorp.com"
+    demostack = "${local.consul_join_tag_value}"
+  }
+}
+
+resource "azurerm_network_interface_backend_address_pool_association" "servertest" {
+  count                   = "${var.servers}"
+  network_interface_id    = "${element(azurerm_network_interface.servers-nic.*.id, count.index)}"
+  ip_configuration_name   = "${var.demo_prefix}-${count.index}-ipconfig"
+  backend_address_pool_id = "${azurerm_lb_backend_address_pool.lb.id }"
 }
 
 # Every Azure Virtual Machine comes with a private IP address. You can also 
 # optionally add a public IP address for Internet-facing applications and 
 # demo environments like this one.
 resource "azurerm_public_ip" "servers-pip" {
-  count                        = "${var.servers}"
-  name                         = "${var.demo_prefix}-servers-ip-${count.index}"
-  location                     = "${var.location}"
-  resource_group_name          = "${azurerm_resource_group.demostack.name}"
-  public_ip_address_allocation = "Dynamic"
-  domain_name_label            = "${var.hostname}-servers-${count.index}"
-/*
-    tags {
-    name  = "Guy Barros"
-    ttl   = "13"
-    owner = "guy@hashicorp.com"
+  count               = "${var.servers}"
+  name                = "${var.demo_prefix}-servers-ip-${count.index}"
+  location            = "${var.location}"
+  resource_group_name = "${azurerm_resource_group.demostack.name}"
+  allocation_method   = "Dynamic"
+  domain_name_label   = "${var.hostname}-servers-${count.index}"
+
+  tags {
+    name      = "Guy Barros"
+    ttl       = "13"
+    owner     = "guy@hashicorp.com"
     demostack = "${local.consul_join_tag_value}"
   }
-*/
 }
 
 # And finally we build our demostack servers. This is a standard Ubuntu instance.
@@ -132,6 +152,7 @@ resource "azurerm_virtual_machine" "servers" {
   location            = "${var.location}"
   resource_group_name = "${azurerm_resource_group.demostack.name}"
   vm_size             = "${var.vm_size}"
+  availability_set_id = "${azurerm_availability_set.vm.id}"
 
   network_interface_ids         = ["${element(azurerm_network_interface.servers-nic.*.id, count.index)}"]
   delete_os_disk_on_termination = "true"
@@ -163,10 +184,9 @@ resource "azurerm_virtual_machine" "servers" {
   }
 
   tags {
-    name  = "Guy Barros"
-    ttl   = "13"
-    owner = "guy@hashicorp.com"
+    name      = "Guy Barros"
+    ttl       = "13"
+    owner     = "guy@hashicorp.com"
     demostack = "${local.consul_join_tag_value}"
   }
-
 }
