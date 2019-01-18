@@ -168,6 +168,7 @@ seal "azurekeyvault" {
   client_secret  = "${client_secret}"
   vault_name     = "${kmsvaultname}"
   key_name       = "${kmskeyname}"
+  enviromente    = "${AzurePublicCloud}"
 }
 
 api_addr = "https://$(public_ip):8200"
