@@ -1,87 +1,69 @@
+data "azurerm_client_config" "current" {}
 
-
-resource "azurerm_resource_group" "consul_demo" {
+resource "azurerm_resource_group" "demostack" {
   name     = "${var.resource_group}"
   location = "${var.location}"
-/*
-    tags {
-    name  = "Guy Barros"
-    ttl   = "13"
-    owner = "guy@hashicorp.com"
-    ConsulDemo = "${local.consul_join_tag_value}"
+
+  tags {
+    name      = "Guy Barros"
+    ttl       = "13"
+    owner     = "guy@hashicorp.com"
+    demostack = "${local.consul_join_tag_value}"
   }
-*/
 }
 
-# The next resource is a Virtual Network. We can dynamically place it into the
-# resource group without knowing its name ahead of time. Terraform handles all
-# of that for you, so everything is named consistently every time. Say goodbye
-# to weirdly-named mystery resources in your Azure Portal. To see how all this
-# works visually, run `terraform graph` and copy the output into the online
-# GraphViz tool: http://www.webgraphviz.com/
+resource "azurerm_availability_set" "vm" {
+  # count                          = "${var.servers}"
+  name                         = "${var.demo_prefix}-aval-set"
+  location                     = "${var.location}"
+  resource_group_name          = "${azurerm_resource_group.demostack.name}"
+  platform_fault_domain_count  = 2
+  platform_update_domain_count = 2
+  managed                      = true
+
+  tags {
+    name      = "Guy Barros"
+    ttl       = "13"
+    owner     = "guy@hashicorp.com"
+    demostack = "${local.consul_join_tag_value}"
+  }
+}
+
 resource "azurerm_virtual_network" "vnet" {
   name                = "${var.virtual_network_name}"
-  location            = "${azurerm_resource_group.consul_demo.location}"
+  location            = "${azurerm_resource_group.demostack.location}"
   address_space       = ["${var.address_space}"]
-  resource_group_name = "${azurerm_resource_group.consul_demo.name}"
-/*
-    tags {
-    name  = "Guy Barros"
-    ttl   = "13"
-    owner = "guy@hashicorp.com"
-    ConsulDemo = "${local.consul_join_tag_value}"
+  resource_group_name = "${azurerm_resource_group.demostack.name}"
+
+  tags {
+    name      = "Guy Barros"
+    ttl       = "13"
+    owner     = "guy@hashicorp.com"
+    demostack = "${local.consul_join_tag_value}"
   }
-*/
 }
 
-# Next we'll build a subnet to run our VMs in. These variables can be defined 
-# via environment variables, a config file, or command line flags. Default 
-# values will be used if the user does not override them. You can find all the
-# default variables in the variables.tf file. You can customize this demo by
-# making a copy of the terraform.tfvars.example file.
 resource "azurerm_subnet" "subnet" {
   name                 = "${var.demo_prefix}subnet"
   virtual_network_name = "${azurerm_virtual_network.vnet.name}"
-  resource_group_name  = "${azurerm_resource_group.consul_demo.name}"
+  resource_group_name  = "${azurerm_resource_group.demostack.name}"
   address_prefix       = "${var.subnet_prefix}"
-/*
-    tags {
-    name  = "Guy Barros"
-    ttl   = "13"
-    owner = "guy@hashicorp.com"
-    ConsulDemo = "${local.consul_join_tag_value}"
-  }
-*/
 }
 
-##############################################################################
-# HashiCorp consuldemo Server
-#
-# Now that we have a network, we'll deploy a stand-alone HashiCorp consuldemo 
-# server. consuldemo supports a 'dev' mode which is appropriate for demonstrations
-# and development purposes. In other words, don't do this in production.
-
-# An Azure Virtual Machine has several components. In this example we'll build
-# a security group, a network interface, a public ip address, a storage 
-# account and finally the VM itself. Terraform handles all the dependencies 
-# automatically, and each resource is named with user-defined variables.
-
-# Security group to allow inbound access on port 8200 and 22
-resource "azurerm_network_security_group" "consuldemo-sg" {
+resource "azurerm_network_security_group" "demostack-sg" {
   name                = "${var.demo_prefix}-sg"
   location            = "${var.location}"
-  resource_group_name = "${azurerm_resource_group.consul_demo.name}"
+  resource_group_name = "${azurerm_resource_group.demostack.name}"
 
-/*
-    tags {
-    name  = "Guy Barros"
-    ttl   = "13"
-    owner = "guy@hashicorp.com"
-    ConsulDemo = "${local.consul_join_tag_value}"
+  tags {
+    name      = "Guy Barros"
+    ttl       = "13"
+    owner     = "guy@hashicorp.com"
+    demostack = "${local.consul_join_tag_value}"
   }
-*/
+
   security_rule {
-    name                       = "consuldemo-https"
+    name                       = "demostack-443"
     priority                   = 100
     direction                  = "Inbound"
     access                     = "Allow"
@@ -93,7 +75,7 @@ resource "azurerm_network_security_group" "consuldemo-sg" {
   }
 
   security_rule {
-    name                       = "consuldemo-setup"
+    name                       = "demostack-8800"
     priority                   = 101
     direction                  = "Inbound"
     access                     = "Allow"
@@ -105,7 +87,7 @@ resource "azurerm_network_security_group" "consuldemo-sg" {
   }
 
   security_rule {
-    name                       = "SSH"
+    name                       = "demostack-ssh"
     priority                   = 102
     direction                  = "Inbound"
     access                     = "Allow"
@@ -117,7 +99,7 @@ resource "azurerm_network_security_group" "consuldemo-sg" {
   }
 
   security_rule {
-    name                       = "HTTP"
+    name                       = "demostack-http"
     priority                   = 103
     direction                  = "Inbound"
     access                     = "Allow"
@@ -129,7 +111,7 @@ resource "azurerm_network_security_group" "consuldemo-sg" {
   }
 
   security_rule {
-    name                       = "consuldemo-run"
+    name                       = "demostack-run"
     priority                   = 104
     direction                  = "Inbound"
     access                     = "Allow"
@@ -140,8 +122,8 @@ resource "azurerm_network_security_group" "consuldemo-sg" {
     destination_address_prefix = "*"
   }
 
-    security_rule {
-    name                       = "consuldemo-nodejs"
+  security_rule {
+    name                       = "demostack-nodejs"
     priority                   = 105
     direction                  = "Inbound"
     access                     = "Allow"
@@ -152,8 +134,8 @@ resource "azurerm_network_security_group" "consuldemo-sg" {
     destination_address_prefix = "*"
   }
 
-    security_rule {
-    name                       = "consuldemo-web"
+  security_rule {
+    name                       = "demostack-web"
     priority                   = 106
     direction                  = "Inbound"
     access                     = "Allow"
@@ -164,96 +146,3 @@ resource "azurerm_network_security_group" "consuldemo-sg" {
     destination_address_prefix = "*"
   }
 }
-
-# A network interface. This is required by the azurerm_virtual_machine 
-# resource. Terraform will let you know if you're missing a dependency.
-
-
-resource "azurerm_key_vault" "vaultkms" {
-  name                        = "vaultkms"
-  location                    = "${var.location}"
-  resource_group_name         = "${azurerm_resource_group.consul_demo.name}"
-  enabled_for_disk_encryption = true
-  tenant_id                   = "${var.tenant}"
-
-  sku {
-    name = "standard"
-  }
-
-
-
-/*
-    tags {
-    name  = "Guy Barros"
-    ttl   = "13"
-    owner = "guy@hashicorp.com"
-    ConsulDemo = "${local.consul_join_tag_value}"
-  }
-*/
-}
-/*
-resource "azurerm_key_vault_access_policy" "vaultkmspolicy" {
-  vault_name           = "${azurerm_key_vault.vaultkms.name}"
-  resource_group_name  = "${azurerm_key_vault.vaultkms.resource_group_name}"
-
-    count     = "${var.server}"
-    tenant_id = "${var.tenant}"
-    object_id = "${element(azurerm_virtual_machine.consuldemo.*.id, count.index)}"
-
-    key_permissions = [
-      "backup",
-      "create",
-      "decrypt",
-      "delete",
-      "encrypt",
-      "get",
-      "import",
-      "list",
-      "purge",
-      "recover",
-      "restore",
-      "sign",
-      "unwrapKey",
-      "update",
-      "verify",
-      "wrapKey",
-    ]
-
-    secret_permissions = [
-      "backup",
-      "delete",
-      "get",
-      "list",
-      "purge",
-      "recover",
-      "restore",
-      "set",
-    ]
-
-
-  network_acls {
-    default_action             = "Deny"
-    bypass                     = "None"
-    virtual_network_subnet_ids = ["${azurerm_subnet.subnet.id}"]
-  }
-}
-*/
-
-/* 
-resource "azurerm_key_vault_key" "vault-key" {
-  name      = "vault-key"
-  vault_uri = "${azurerm_key_vault.vaultkms.vault_uri}"
-  key_type  = "RSA"
-  key_size  = 2048
-
-  key_opts = [
-    "decrypt",
-    "encrypt",
-    "sign",
-    "unwrapKey",
-    "verify",
-    "wrapKey",
-  ]
-}
-
-*/

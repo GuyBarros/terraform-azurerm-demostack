@@ -12,12 +12,12 @@ variable "resource_group" {
 
 variable "demo_prefix" {
   description = "This prefix will be included in the name of some resources."
-  default     = "consuldemo"
+  default     = "demostack"
 }
 
 variable "hostname" {
   description = "VM hostname. Used for local hostname, DNS, and storage-related names."
-  default     = "consuldemo"
+  default     = "demostack"
 }
 
 variable "location" {
@@ -67,7 +67,7 @@ variable "image_publisher" {
 
 variable "image_offer" {
   description = "Name of the offer (az vm image list)"
-  default     = "UbuntuServer"
+  default     = "Ubuntuservers"
 }
 
 variable "image_sku" {
@@ -90,19 +90,12 @@ variable "admin_password" {
   default     = "replace-with-your-password"
 }
 
-variable "server" {
-  description = "Ammount of Consul Instances to be created"
-  default     = 3
-}
-
-
-
 variable "servers" {
   description = "The number of data servers (consul, nomad, etc)."
   default     = "3"
 }
 
-variable "nomadworkers" {
+variable "workers" {
   description = "The number of nomad worker vms to create."
   default     = "3"
 }
@@ -228,18 +221,15 @@ variable "enterprise" {
 
 variable "subscription" {
   description = "your subscription ID for Vault KMS Auto Unseal"
-  
 }
 
 variable "tenant" {
   description = "your tenant ID for Vault KMS Auto Unseal"
- 
 }
 
 variable "client_id" {
   description = "your client ID for Vault KMS Auto Unseal"
 }
-
 
 variable "client_secret" {
   description = "your client ID for Vault KMS Auto Unseal"
@@ -257,5 +247,17 @@ variable "consullicense" {
 
 variable "namespace" {
   description = "Enterprise License for Consul"
-  default     = "consuldemo"
+  default     = "demostack"
+}
+
+variable "ca_key_algorithm" {
+  default = ""
+}
+
+variable "ca_private_key_pem" {
+  default = ""
+}
+
+variable "ca_cert_pem" {
+  default = ""
 }

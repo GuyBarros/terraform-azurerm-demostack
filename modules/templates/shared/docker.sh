@@ -3,7 +3,7 @@ set -e
 
 echo "==> Docker"
 
-echo "--> Adding keyserver"
+echo "--> Adding keyservers"
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add - &>/dev/null
 
 echo "--> Adding repo"

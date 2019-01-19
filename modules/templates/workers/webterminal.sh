@@ -27,13 +27,13 @@ http {
     include /etc/nginx/mime.types;
     default_type application/octet-stream;
     ssl_protocols TLSv1 TLSv1.1 TLSv1.2; # Dropping SSLv3, ref: POODLE
-    ssl_prefer_server_ciphers on;
+    ssl_prefer_servers_ciphers on;
     access_log /var/log/nginx/access.log;
     error_log /var/log/nginx/error.log;
-  server {
-      listen 80 default_server;
-      listen [::]:80 default_server;
-      server_name _;
+  servers {
+      listen 80 default_servers;
+      listen [::]:80 default_servers;
+      servers_name _;
       location /wetty {
         proxy_pass http://127.0.0.1:3030/wetty;
         proxy_http_version 1.1;

@@ -22,7 +22,7 @@ sudo mkdir -p /etc/vault.d
 sudo tee /etc/vault.d/config.hcl > /dev/null <<EOF
 
 
-cluster_name = "${hostname}-consuldemo"
+cluster_name = "${hostname}-demostack"
 
 storage "consul" {
   path = "vault/"
@@ -34,6 +34,9 @@ listener "tcp" {
   tls_key_file  = "/etc/ssl/certs/me.key"
 }
 
+api_addr = "https://$(public_ip):8200"
+
+disable_mlock = true
 
 
 ui = true
@@ -148,7 +151,7 @@ echo "--> Writing configuration"
 sudo mkdir -p /etc/vault.d
 sudo tee /etc/vault.d/config.hcl > /dev/null <<EOF
 
-cluster_name = "${hostname}-consuldemo"
+cluster_name = "${hostname}-demostack"
 
 storage "consul" {
   path = "vault/"
@@ -165,10 +168,14 @@ seal "azurekeyvault" {
   tenant_id      = "${tenant_id}"
   client_id      = "${client_id}"
   client_secret  = "${client_secret}"
-  vault_name     = "vaultkms"
-  key_name       = "vault-key"
+  vault_name     = "${kmsvaultname}"
+  key_name       = "${kmskeyname}"
+  enviroment    = "AzurePublicCloud"
 }
 
+api_addr = "https://$(public_ip):8200"
+
+disable_mlock = true
 
 ui = true
 
@@ -240,23 +247,21 @@ EOF
 fi
 
 
+
 echo "--> Attempting to create nomad role"
-consul lock tmp/vault/create-nomad-role "$(cat <<"EOF"
-  set -e
 
-  if consul kv get tmp/vault/nomad-setup &>/dev/null; then
-    echo "--> Vault Nomad is configured"
-    exit 0
-  fi
-
+  echo "--> Adding Nomad policy"
   echo "--> Retrieving root token..."
-  export VAULT_ADDR="https://127.0.0.1:8200"
+  export VAULT_ADDR="https://active.vault.service.consul:8200"
   export VAULT_SKIP_VERIFY=true
   consul kv get service/vault/root-token | vault login -
 
-  echo "--> Adding Nomad policy"
   vault policy write nomad-server - <<EOR
   path "auth/token/create/nomad-cluster" {
+    capabilities = ["update"]
+  }
+
+  path "auth/token/revoke-accessor" {
     capabilities = ["update"]
   }
 
@@ -285,6 +290,13 @@ consul lock tmp/vault/create-nomad-role "$(cat <<"EOF"
   }
 EOR
 
+  vault policy write test - <<EOR
+  path "secret/*" {
+    capabilities = ["create", "read", "update", "delete", "list"]
+}
+EOR
+
+
   echo "--> Creating Nomad token role"
   vault write auth/token/roles/nomad-cluster \
     name=nomad-cluster \
@@ -293,32 +305,30 @@ EOR
     orphan=false \
     disallowed_policies=nomad-server \
     explicit_max_ttl=0
+ 
+ echo "--> Creating Initial secret for Nomad KV"
+ vault write secret/test message='Hello world'
 
-  echo "--> Marking Vault Nomad setup complete"
-  consul kv put tmp/vault/nomad-setup
-EOF
-)"
+ echo "--> nomad nginx-vault-pki demo prep"
+{
+vault secrets enable pki &&
 
-echo "--> Attempting to create default root token"
-consul lock tmp/vault/create-root-token "$(cat <<"EOF"
-  set -e
+vault write pki/root/generate/internal common_name=service.consul &&
 
-  if consul kv get tmp/vault/created-root &>/dev/null; then
-    echo "--> Vault root token already exists"
-    exit 0
-  fi
+vault write pki/roles/consul-service generate_lease=true allowed_domains="service.consul" allow_subdomains="true"  &&
 
-  echo "--> Retrieving initial root token..."
-  export VAULT_ADDR="https://127.0.0.1:8200"
-  export VAULT_SKIP_VERIFY=true
-  consul kv get service/vault/root-token | vault login -
+vault write pki/issue/consul-service  common_name=nginx.service.consul  ttl=720h  &&
 
-  echo "--> Creating new root token..."
-  vault token create \
-    -id="${vault_root_token}" \
-    -display-name="training-root" \
-    -orphan
-EOF
-)"
+vault policy-write superuser - <<EOR
+path "*" { 
+  capabilities = ["create", "read", "update", "delete", "list", "sudo"] 
+  }
 
+EOR
+  
+} ||
+{
+  echo "--> pki demo already configured, moving on"
+}
+ 
 echo "==> Vault is done!"

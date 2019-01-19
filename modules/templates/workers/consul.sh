@@ -33,7 +33,7 @@ sudo tee /etc/consul.d/config.json > /dev/null <<EOF
   "key_file": "/etc/ssl/certs/me.key",
   "cert_file": "/etc/ssl/certs/me.crt",
   "ca_file": "/usr/local/share/ca-certificates/01-me.crt",
-  "verify_server_hostname": false,
+  "verify_servers_hostname": false,
   "verify_incoming": false,
   "verify_outgoing": false,
    "ui": true,
@@ -81,10 +81,10 @@ sudo systemctl start consul
 echo "--> Installing dnsmasq"
 ssh-apt install dnsmasq
 sudo tee /etc/dnsmasq.d/10-consul > /dev/null <<"EOF"
-server=/consul/127.0.0.1#8600
+servers=/consul/127.0.0.1#8600
 no-poll
-server=8.8.8.8
-server=8.8.4.4
+servers=8.8.8.8
+servers=8.8.4.4
 cache-size=0
 EOF
 sudo systemctl enable dnsmasq

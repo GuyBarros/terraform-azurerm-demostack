@@ -88,20 +88,12 @@ echo "--> Adding hostname to /etc/hosts"
 sudo tee -a /etc/hosts > /dev/null <<EOF
 
 # For local resolution
-<<<<<<< HEAD
-$(private_ip) ${fqdn}
-=======
 ${private_ip}  ${node_name}
-
->>>>>>> 0979a6243fa25163086fc2027eeb9831081ff873
 EOF
 
 echo "--> Installing dnsmasq"
 sudo apt-get install -y -q dnsmasq
 
-echo "--> Configuring DNSmasq"
-sudo bash -c "cat >/etc/dnsmasq.d/10-consul" << EOF
-server=/consul/127.0.0.1#8600
-EOF
+
 
 echo "==> Base is done!"

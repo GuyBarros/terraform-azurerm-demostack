@@ -37,7 +37,7 @@ tls {
   cert_file = "/etc/ssl/certs/me.crt"
   key_file  = "/etc/ssl/certs/me.key"
 
-  verify_server_hostname = false
+  verify_servers_hostname = false
 }
 
 vault {
@@ -93,7 +93,7 @@ job "http-echo-${node_name}" {
   datacenters = ["dc1"]
 
   group "echo" {
-    task "server" {
+    task "servers" {
       driver = "docker"
 
       config {
