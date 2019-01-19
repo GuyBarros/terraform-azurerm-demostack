@@ -1,3 +1,5 @@
+data "azurerm_client_config" "current" {}
+
 resource "azurerm_resource_group" "demostack" {
   name     = "${var.resource_group}"
   location = "${var.location}"
@@ -61,7 +63,7 @@ resource "azurerm_network_security_group" "demostack-sg" {
   }
 
   security_rule {
-    name                       = "demostack-https"
+    name                       = "demostack-443"
     priority                   = 100
     direction                  = "Inbound"
     access                     = "Allow"
@@ -73,7 +75,7 @@ resource "azurerm_network_security_group" "demostack-sg" {
   }
 
   security_rule {
-    name                       = "demostack-setup"
+    name                       = "demostack-8800"
     priority                   = 101
     direction                  = "Inbound"
     access                     = "Allow"
@@ -85,7 +87,7 @@ resource "azurerm_network_security_group" "demostack-sg" {
   }
 
   security_rule {
-    name                       = "SSH"
+    name                       = "demostack-ssh"
     priority                   = 102
     direction                  = "Inbound"
     access                     = "Allow"
@@ -97,7 +99,7 @@ resource "azurerm_network_security_group" "demostack-sg" {
   }
 
   security_rule {
-    name                       = "HTTP"
+    name                       = "demostack-http"
     priority                   = 103
     direction                  = "Inbound"
     access                     = "Allow"

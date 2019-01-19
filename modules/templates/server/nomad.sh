@@ -1,17 +1,22 @@
 #!/usr/bin/env bash
 set -e
 
-echo "==> Nomad (servers)"
+echo "==> Nomad (server)"
+
 
 echo "--> Fetching"
 install_from_url "nomad" "${nomad_url}"
+sleep 10
+
 
 echo "--> Generating Vault token..."
 export VAULT_TOKEN="$(consul kv get service/vault/root-token)"
-export NOMAD_VAULT_TOKEN="$(VAULT_TOKEN="$VAULT_TOKEN" \
+  NOMAD_VAULT_TOKEN="$(VAULT_TOKEN="$VAULT_TOKEN" \
   VAULT_ADDR="https://active.vault.service.consul:8200" \
   VAULT_SKIP_VERIFY=true \
-  vault token create -field=token -policy=nomad-servers -period=72h)"
+  vault token create -field=token -policy=superuser -period=72h)"
+
+consul kv put service/vault/nomad-token $NOMAD_VAULT_TOKEN
 
 echo "--> Writing configuration"
 sudo mkdir -p /mnt/nomad
@@ -29,7 +34,7 @@ advertise {
   serf = "${node_name}.node.consul:4648"
 }
 
-servers {
+server {
   enabled          = true
   bootstrap_expect = ${nomad_servers}
   encrypt          = "${nomad_gossip_key}"
@@ -50,7 +55,7 @@ tls {
   cert_file = "/etc/ssl/certs/me.crt"
   key_file  = "/etc/ssl/certs/me.key"
 
-  verify_servers_hostname = false
+  verify_server_hostname = false
 }
 
 vault {
@@ -62,7 +67,6 @@ vault {
   create_from_role = "nomad-cluster"
 }
 
-
 autopilot {
     cleanup_dead_servers = true
     last_contact_threshold = "200ms"
@@ -72,6 +76,7 @@ autopilot {
     disable_upgrade_migration = false
     enable_custom_upgrades = false
 }
+
 
 EOF
 
@@ -111,7 +116,7 @@ sudo systemctl start nomad
 sleep 2
 
 echo "--> Waiting for all Nomad servers"
-while [ "$(nomad servers-members 2>&1 | grep "alive" | wc -l)" -lt "${nomad_servers}" ]; do
+while [ "$(nomad server-members 2>&1 | grep "alive" | wc -l)" -lt "${nomad_servers}" ]; do
   sleep 5
 done
 

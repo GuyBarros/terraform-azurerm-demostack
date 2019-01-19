@@ -4,10 +4,11 @@ terraform {
   backend "remote" {
     hostname     = "app.terraform.io"
     organization = "emea-se-playground"
-    token        = "<TFE-API-TOKEN>"
+     token        = "<TFE-API-TOKEN>"
+    
 
     workspaces {
-      name = "Guy-Azure-Demostack"
+      name = "Guy-Azure-Demostack-2"
     }
   }
 }
@@ -39,8 +40,6 @@ module "primarycluster" {
   admin_password      = "${var.admin_password}"
   demo_username       = "${var.demo_username}"
   demo_password       = "${var.demo_password}"
-  servers             = "${var.servers}"
-  workers             = "${var.workers}"
   subscription        = "${var.subscription}"
   tenant              = "${var.tenant}"
   client_id           = "${var.client_id}"

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-echo "==> Vault (servers)"
+echo "==> Vault (server)"
 # Vault expects the key to be concatenated with the CA
 sudo mkdir -p /etc/vault.d/tls/
 sudo tee /etc/vault.d/tls/vault.crt > /dev/null <<EOF
@@ -36,6 +36,8 @@ listener "tcp" {
 
 api_addr = "https://$(public_ip):8200"
 
+disable_mlock = true
+
 
 ui = true
 
@@ -58,7 +60,7 @@ After=network-online.target
 
 [Service]
 Restart=on-failure
-ExecStart=/usr/local/bin/vault servers -config="/etc/vault.d/config.hcl"
+ExecStart=/usr/local/bin/vault server -config="/etc/vault.d/config.hcl"
 ExecReload=/bin/kill -HUP $MAINPID
 KillSignal=SIGINT
 
@@ -168,11 +170,12 @@ seal "azurekeyvault" {
   client_secret  = "${client_secret}"
   vault_name     = "${kmsvaultname}"
   key_name       = "${kmskeyname}"
-  enviromente    = "${AzurePublicCloud}"
+  enviroment    = "AzurePublicCloud"
 }
 
 api_addr = "https://$(public_ip):8200"
 
+disable_mlock = true
 
 ui = true
 
@@ -195,7 +198,7 @@ After=network-online.target
 
 [Service]
 Restart=on-failure
-ExecStart=/usr/local/bin/vault servers -config="/etc/vault.d/config.hcl"
+ExecStart=/usr/local/bin/vault server -config="/etc/vault.d/config.hcl"
 ExecReload=/bin/kill -HUP $MAINPID
 KillSignal=SIGINT
 
