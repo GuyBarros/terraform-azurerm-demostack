@@ -1,7 +1,3 @@
-
-
-
-
 resource "random_id" "keyvault" {
   byte_length = 4
 }
@@ -41,20 +37,20 @@ resource "azurerm_key_vault_access_policy" "demostack_vm" {
   vault_name          = "${azurerm_key_vault.demostack.name}"
   resource_group_name = "${azurerm_key_vault.demostack.resource_group_name}"
 
-   # tenant_id = "${var.tenant}"
-   #  object_id = "${azurerm_user_assigned_identity.demostack.principal_id}"
+  # tenant_id = "${var.tenant}"
+  #  object_id = "${azurerm_user_assigned_identity.demostack.principal_id}"
   tenant_id = "${data.azurerm_client_config.current.tenant_id}"
-  object_id = "${data.azurerm_client_config.current.service_principal_object_id}"
-   # object_id = "${var.client_id}"
-  # application_id = "${var.client_id}"
 
+  object_id = "${data.azurerm_client_config.current.service_principal_object_id}"
+
+  # object_id = "${var.client_id}"
+  # application_id = "${var.client_id}"
 
   certificate_permissions = [
     "get",
     "list",
     "create",
   ]
-
   key_permissions = [
     "backup",
     "create",
@@ -73,7 +69,6 @@ resource "azurerm_key_vault_access_policy" "demostack_vm" {
     "verify",
     "wrapKey",
   ]
-
   secret_permissions = [
     "get",
     "list",
@@ -81,9 +76,8 @@ resource "azurerm_key_vault_access_policy" "demostack_vm" {
   ]
 }
 
-
 resource "azurerm_key_vault_key" "demostack" {
-  name                        = "demostack-${random_id.keyvaultkey.hex}"
+  name      = "demostack-${random_id.keyvaultkey.hex}"
   vault_uri = "${azurerm_key_vault.demostack.vault_uri}"
   key_type  = "RSA"
   key_size  = 2048
@@ -96,7 +90,6 @@ resource "azurerm_key_vault_key" "demostack" {
     "verify",
     "wrapKey",
   ]
-
 
   tags {
     name      = "Guy Barros"

@@ -4,8 +4,9 @@ resource "azurerm_public_ip" "lb" {
   name                = "${var.resource_group}-pubip"
   resource_group_name = "${azurerm_resource_group.demostack.name}"
   location            = "${var.location}"
-  allocation_method   = "Dynamic"
+  allocation_method   = "Static"
   domain_name_label   = "${var.hostname}-lb-${count.index}"
+  sku                 = "Standard"
 
   tags {
     name      = "Guy Barros"
@@ -21,6 +22,7 @@ resource "azurerm_lb" "lb" {
   name                = "${var.resource_group}-lb"
   resource_group_name = "${azurerm_resource_group.demostack.name}"
   location            = "${var.location}"
+  sku                 = "Standard"
 
   frontend_ip_configuration {
     name                 = "${var.resource_group}-frontendip"
@@ -39,7 +41,7 @@ resource "azurerm_lb_probe" "lb" {
   name                = "${var.resource_group}-probe"
   resource_group_name = "${azurerm_resource_group.demostack.name}"
   loadbalancer_id     = "${azurerm_lb.lb.id}"
-  protocol            = "http"
+  protocol            = "https"
   port                = "8200"
   request_path        = "/v1/sys/health"
   number_of_probes    = "1"

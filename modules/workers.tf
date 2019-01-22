@@ -76,10 +76,11 @@ data "template_cloudinit_config" "workers" {
 }
 
 resource "azurerm_network_interface" "workers-nic" {
-  count               = "${var.workers}"
-  name                = "${var.demo_prefix}workers-nic-${count.index}"
-  location            = "${var.location}"
-  resource_group_name = "${azurerm_resource_group.demostack.name}"
+  count                     = "${var.workers}"
+  name                      = "${var.demo_prefix}workers-nic-${count.index}"
+  location                  = "${var.location}"
+  resource_group_name       = "${azurerm_resource_group.demostack.name}"
+  network_security_group_id = "${azurerm_network_security_group.demostack-sg.id}"
 
   # network_security_group_id = "${azurerm_network_security_group.demostack-sg.id}"
 
@@ -97,6 +98,13 @@ resource "azurerm_network_interface" "workers-nic" {
   }
 }
 
+resource "azurerm_network_interface_backend_address_pool_association" "workers" {
+  count                   = "${var.workers}"
+  network_interface_id    = "${element(azurerm_network_interface.workers-nic.*.id, count.index)}"
+  ip_configuration_name   = "${var.demo_prefix}-${count.index}-ipconfig"
+  backend_address_pool_id = "${azurerm_lb_backend_address_pool.lb.id }"
+}
+
 # Every Azure Virtual Machine comes with a private IP address. You can also 
 # optionally add a public IP address for Internet-facing applications and 
 # demo environments like this one.
@@ -105,8 +113,9 @@ resource "azurerm_public_ip" "workers-pip" {
   name                = "${var.demo_prefix}-workers-ip-${count.index}"
   location            = "${var.location}"
   resource_group_name = "${azurerm_resource_group.demostack.name}"
-  allocation_method   = "Dynamic"
+  allocation_method   = "Static"
   domain_name_label   = "${var.hostname}-workers-${count.index}"
+  sku                 = "Standard"
 
   /*
     tags {

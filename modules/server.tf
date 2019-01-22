@@ -1,5 +1,5 @@
 data "template_file" "servers" {
-  depends_on = ["azurerm_public_ip.servers-pip","azurerm_key_vault.demostack"]
+  depends_on = ["azurerm_public_ip.servers-pip", "azurerm_key_vault.demostack"]
   count      = "${var.servers}"
 
   template = "${join("\n", list(
@@ -32,29 +32,31 @@ template = "${join("\n", list(
 */
 
   vars {
-    hostname        = "${var.hostname}-servers-${count.index}"
-    private_ip      = "${element(azurerm_network_interface.servers-nic.*.private_ip_address, count.index)}"
-    public_ip       = "${element(azurerm_public_ip.servers-pip.*.ip_address, count.index)}"
-    demo_username   = "${var.demo_username}"
-    demo_password   = "${var.demo_password}"
-    enterprise      = "${var.enterprise}"
-    vaultlicense    = "${var.vaultlicense}"
-    consullicense   = "${var.consullicense}"
-    kmsvaultname    = "${azurerm_key_vault.demostack.name}"
-    kmskeyname      = "${azurerm_key_vault_key.demostack.name}"
+    hostname      = "${var.hostname}-servers-${count.index}"
+    private_ip    = "${element(azurerm_network_interface.servers-nic.*.private_ip_address, count.index)}"
+    public_ip     = "${element(azurerm_public_ip.servers-pip.*.ip_address, count.index)}"
+    demo_username = "${var.demo_username}"
+    demo_password = "${var.demo_password}"
+    enterprise    = "${var.enterprise}"
+    vaultlicense  = "${var.vaultlicense}"
+    consullicense = "${var.consullicense}"
+    kmsvaultname  = "${azurerm_key_vault.demostack.name}"
+    kmskeyname    = "${azurerm_key_vault_key.demostack.name}"
+
     # subscription_id = "${data.azurerm_client_config.current.subscription_id}"
     # tenant_id       = "${data.azurerm_client_config.current.tenant_id}"
     # client_id       = "${data.azurerm_client_config.current.service_principal_object_id}"
     subscription_id = "${var.subscription}"
-    tenant_id       = "${var.tenant}"
-    client_id       = "${var.client_id}"
-    client_secret   = "${var.client_secret}"
-    object_id       = "${azurerm_user_assigned_identity.demostack.principal_id}"
-    fqdn            = "${element(azurerm_public_ip.servers-pip.*.fqdn, count.index)}"
-    node_name       = "${var.hostname}-servers-${count.index}"
-    me_ca           = "${var.ca_cert_pem}"
-    me_cert         = "${element(tls_locally_signed_cert.servers.*.cert_pem, count.index)}"
-    me_key          = "${element(tls_private_key.servers.*.private_key_pem, count.index)}"
+
+    tenant_id     = "${var.tenant}"
+    client_id     = "${var.client_id}"
+    client_secret = "${var.client_secret}"
+    object_id     = "${azurerm_user_assigned_identity.demostack.principal_id}"
+    fqdn          = "${element(azurerm_public_ip.servers-pip.*.fqdn, count.index)}"
+    node_name     = "${var.hostname}-servers-${count.index}"
+    me_ca         = "${var.ca_cert_pem}"
+    me_cert       = "${element(tls_locally_signed_cert.servers.*.cert_pem, count.index)}"
+    me_key        = "${element(tls_private_key.servers.*.private_key_pem, count.index)}"
 
     # Consul
     consul_url            = "${var.consul_url}"
@@ -97,10 +99,11 @@ data "template_cloudinit_config" "servers" {
 }
 
 resource "azurerm_network_interface" "servers-nic" {
-  count               = "${var.servers}"
-  name                = "${var.demo_prefix}servers-nic-${count.index}"
-  location            = "${var.location}"
-  resource_group_name = "${azurerm_resource_group.demostack.name}"
+  count                     = "${var.servers}"
+  name                      = "${var.demo_prefix}servers-nic-${count.index}"
+  location                  = "${var.location}"
+  resource_group_name       = "${azurerm_resource_group.demostack.name}"
+  network_security_group_id = "${azurerm_network_security_group.demostack-sg.id}"
 
   ip_configuration {
     name                          = "${var.demo_prefix}-${count.index}-ipconfig"
@@ -119,7 +122,7 @@ resource "azurerm_network_interface" "servers-nic" {
   }
 }
 
-resource "azurerm_network_interface_backend_address_pool_association" "servertest" {
+resource "azurerm_network_interface_backend_address_pool_association" "servers" {
   count                   = "${var.servers}"
   network_interface_id    = "${element(azurerm_network_interface.servers-nic.*.id, count.index)}"
   ip_configuration_name   = "${var.demo_prefix}-${count.index}-ipconfig"
@@ -134,8 +137,9 @@ resource "azurerm_public_ip" "servers-pip" {
   name                = "${var.demo_prefix}-servers-ip-${count.index}"
   location            = "${var.location}"
   resource_group_name = "${azurerm_resource_group.demostack.name}"
-  allocation_method   = "Dynamic"
+  allocation_method   = "Static"
   domain_name_label   = "${var.hostname}-servers-${count.index}"
+  sku                 = "Standard"
 
   tags {
     name      = "Guy Barros"
