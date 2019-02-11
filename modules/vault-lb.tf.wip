@@ -52,7 +52,7 @@ resource "azurerm_lb_rule" "lb" {
   resource_group_name            = "${azurerm_resource_group.demostack.name}"
   loadbalancer_id                = "${azurerm_lb.lb.id}"
   protocol                       = "Tcp"
-  frontend_port                  = "80"
+  frontend_port                  = "8200"
   backend_port                   = "8200"
   frontend_ip_configuration_name = "${var.resource_group}-frontendip"
   probe_id                       = "${azurerm_lb_probe.lb.id}"

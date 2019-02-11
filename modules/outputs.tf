@@ -11,6 +11,11 @@ output "key_vault_name" {
 }
 
 /**
+output "vault-lb" {
+  value = "${azurerm_public_ip.lb.fqdn}"
+}
+
+
 output "nomad_workers_consul_ui" {
   value = "${formatlist("http://%s:8500/", aws_instance.workers.*.public_ip,)}"
 }

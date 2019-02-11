@@ -63,7 +63,7 @@ resource "azurerm_network_security_group" "demostack-sg" {
   }
 
   security_rule {
-    name                       = "demostack-443"
+    name                       = "demostack-https"
     priority                   = 100
     direction                  = "Inbound"
     access                     = "Allow"
@@ -74,18 +74,7 @@ resource "azurerm_network_security_group" "demostack-sg" {
     destination_address_prefix = "*"
   }
 
-  security_rule {
-    name                       = "demostack-8800"
-    priority                   = 101
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "8800"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
-
+  
   security_rule {
     name                       = "demostack-ssh"
     priority                   = 102
@@ -111,31 +100,31 @@ resource "azurerm_network_security_group" "demostack-sg" {
   }
 
   security_rule {
-    name                       = "demostack-run"
+    name                       = "demostack-consulandvault"
     priority                   = 104
     direction                  = "Inbound"
     access                     = "Allow"
     protocol                   = "Tcp"
     source_port_range          = "*"
-    destination_port_range     = "8000-8800"
+    destination_port_range     = "8000-8999"
     source_address_prefix      = "*"
     destination_address_prefix = "*"
   }
 
   security_rule {
-    name                       = "demostack-nodejs"
+    name                       = "demostack-fabio"
     priority                   = 105
     direction                  = "Inbound"
     access                     = "Allow"
     protocol                   = "Tcp"
     source_port_range          = "*"
-    destination_port_range     = "5000"
+    destination_port_range     = "9998-9999"
     source_address_prefix      = "*"
     destination_address_prefix = "*"
   }
 
   security_rule {
-    name                       = "demostack-web"
+    name                       = "demostack-nomad"
     priority                   = 106
     direction                  = "Inbound"
     access                     = "Allow"

@@ -81,6 +81,7 @@ resource "tls_private_key" "workers" {
   ecdsa_curve = "P521"
 }
 
+
 # Client signing request
 resource "tls_cert_request" "workers" {
   count           = "${var.workers}"
