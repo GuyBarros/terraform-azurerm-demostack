@@ -86,7 +86,7 @@ resource "azurerm_network_interface" "workers-nic" {
 
   ip_configuration {
     name                          = "${var.demo_prefix}-${count.index}-ipconfig"
-    subnet_id                     = "${azurerm_subnet.subnet.id}"
+    subnet_id                     = "${azurerm_subnet.workers.id}"
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = "${element(azurerm_public_ip.workers-pip.*.id, count.index)}"
   }
