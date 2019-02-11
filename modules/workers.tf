@@ -98,12 +98,14 @@ resource "azurerm_network_interface" "workers-nic" {
   }
 }
 
+/*
 resource "azurerm_network_interface_backend_address_pool_association" "workers" {
   count                   = "${var.workers}"
   network_interface_id    = "${element(azurerm_network_interface.workers-nic.*.id, count.index)}"
   ip_configuration_name   = "${var.demo_prefix}-${count.index}-ipconfig"
   backend_address_pool_id = "${azurerm_lb_backend_address_pool.lb.id }"
 }
+*/
 
 # Every Azure Virtual Machine comes with a private IP address. You can also 
 # optionally add a public IP address for Internet-facing applications and 
