@@ -65,4 +65,17 @@ resource "azurerm_application_gateway" "demostack" {
     backend_http_settings_name = "vault_backend"
   }
 
+  ssl_certificate {
+    name = "test cert"
+    data = "${tls_locally_signed_cert.awg.cert_pem}"
+  }
+
+    ssl_certificate {
+    count      = "${var.servers}" 
+    name = "demostack server ${count.index} "
+    data = "${element(tls_locally_signed_cert.servers.*.cert_pem, count.index)}"
+  }
+
+
+
 }

@@ -4,7 +4,7 @@ terraform {
   backend "remote" {
     hostname     = "app.terraform.io"
     organization = "emea-se-playground"
-     token        = "<TFE-API-TOKEN>"
+    token        = "<TFE-API-TOKEN>"
 
     workspaces {
       name = "Guy-Azure-Demostack"
