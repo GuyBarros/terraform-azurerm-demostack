@@ -35,6 +35,7 @@ resource "azurerm_application_gateway" "demostack" {
     frontend_ip_configuration_name = "frontend_ip"
     frontend_port_name             = "gateway_http"
     protocol                       = "Http"
+    
   }
 
   probe {
@@ -47,6 +48,19 @@ resource "azurerm_application_gateway" "demostack" {
     unhealthy_threshold = "3"
   }
 
+authentication_certificate{
+ name = "server-0"
+ data = "${tls_locally_signed_cert.servers.0.cert_pem}"
+}
+authentication_certificate{
+ name = "server-1"
+ data = "${tls_locally_signed_cert.servers.1.cert_pem}"
+}
+authentication_certificate{
+ name = "server-2"
+ data = "${tls_locally_signed_cert.servers.2.cert_pem}"
+}
+
   backend_http_settings {
     name                  = "vault_backend"
     cookie_based_affinity = "Disabled"
@@ -54,6 +68,17 @@ resource "azurerm_application_gateway" "demostack" {
     protocol              = "Https"
     request_timeout       = 1
     probe_name            = "vault_health"
+    authentication_certificate{
+       name = "server-0"
+    }
+    authentication_certificate{
+       name = "server-1"
+    }
+    authentication_certificate{
+       name = "server-2"
+    }
+
+
   }
 
 
@@ -65,16 +90,7 @@ resource "azurerm_application_gateway" "demostack" {
     backend_http_settings_name = "vault_backend"
   }
 
-  ssl_certificate {
-    name = "test cert"
-    data = "${tls_locally_signed_cert.awg.cert_pem}"
-  }
 
-    ssl_certificate {
-    count      = "${var.servers}" 
-    name = "demostack server ${count.index} "
-    data = "${element(tls_locally_signed_cert.servers.*.cert_pem, count.index)}"
-  }
 
 
 

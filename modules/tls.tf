@@ -69,57 +69,6 @@ resource "tls_locally_signed_cert" "servers" {
 }
 
 
-resource "tls_cert_request" "awg" {
-  key_algorithm   = "${element(tls_private_key.servers.*.algorithm, count.index)}"
-  private_key_pem = "${element(tls_private_key.servers.*.private_key_pem, count.index)}"
-
-  subject {
-    # common_name  = "${var.hostname}-servers-${count.index}.node.consul"
-    common_name  = "blabla"
-    organization = "HashiCorp Consul Connect Demo"
-  }
-
-  dns_names = [
-    # Consul
-    "*.cloudapp.azure.com",
-
-    "*.node.consul",
-    "consul.service.consul",
-    "servers.dc1.consul",
-
-    # Nomad
-    "nomad.service.consul",
-
-    "client.global.nomad",
-    "servers.global.nomad",
-    "vault.service.consul",
-    "active.vault.service.consul",
-    "standby.vault.service.consul",
-
-    # Common
-    "localhost",
-  ]
-
-}
-
-# servers certificate
-resource "tls_locally_signed_cert" "awg" {
-  cert_request_pem   = "${tls_cert_request.awg.cert_request_pem}"
-  ca_key_algorithm   = "${var.ca_key_algorithm}"
-  ca_private_key_pem = "${var.ca_private_key_pem}"
-  ca_cert_pem        = "${var.ca_cert_pem}"
-
-  validity_period_hours = 720 # 30 days
-
-  allowed_uses = [
-    "client_auth",
-    "digital_signature",
-    "key_agreement",
-    "key_encipherment",
-    "server_auth",
-  ]
-}
-
 
 # Vault initial root token
 resource "random_id" "vault-root-token" {
