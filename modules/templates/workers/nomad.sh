@@ -14,7 +14,7 @@ name         = "${node_name}"
 data_dir     = "/mnt/nomad"
 enable_debug = true
 
-bind_addr = "0.0.0.0"
+"bind_addr" = "0.0.0.0"
 
 advertise {
   http = "${node_name}.node.consul:4646"
@@ -37,16 +37,18 @@ tls {
   cert_file = "/etc/ssl/certs/me.crt"
   key_file  = "/etc/ssl/certs/me.key"
 
-  verify_servers_hostname = false
+  verify_server_hostname = false
 }
 
 vault {
   enabled   = true
-  address   = "https://vault.service.consul:8200"
+  address   = "https://active.vault.service.consul:8200"
   ca_file   = "/usr/local/share/ca-certificates/01-me.crt"
   cert_file = "/etc/ssl/certs/me.crt"
   key_file  = "/etc/ssl/certs/me.key"
 }
+
+
 EOF
 
 echo "--> Writing profile"
@@ -84,61 +86,12 @@ echo "--> Starting nomad"
 sudo systemctl enable nomad
 sudo systemctl start nomad
 
-echo "--> Creating workspace"
-sudo mkdir -p /workstation/nomad
 
-echo "--> Creating http-echo"
-sudo tee /workstation/nomad/http-echo.nomad > /dev/null <<"EOF"
-job "http-echo-${node_name}" {
-  datacenters = ["dc1"]
 
-  group "echo" {
-    task "servers" {
-      driver = "docker"
+echo "--> Waiting for all Nomad servers"
+while [ "$(nomad server members 2>&1 | grep "alive" | wc -l)" -lt "3" ]; do
+  sleep 5
+done
 
-      config {
-        image = "hashicorp/http-echo:0.2.3"
-        args  = [
-          "-listen", ":80",
-          "-text", "hello world",
-        ]
-      }
-
-      resources {
-        network {
-          mbits = 10
-          port "http" {
-            static = 80
-          }
-        }
-      }
-
-      service {
-        name = "http-echo"
-        port = "http"
-
-        tags = [
-          "${node_name}",
-          "urlprefix-/http-echo",
-        ]
-
-        check {
-          type     = "http"
-          path     = "/health"
-          interval = "2s"
-          timeout  = "2s"
-        }
-      }
-    }
-  }
-}
-EOF
-
-echo "--> Changing ownership"
-sudo chown -R "${demo_username}:${demo_username}" "/workstation/nomad"
-
-echo "--> Installing completions"
-sudo su ${demo_username} \
-  -c 'nomad -autocomplete-install'
 
 echo "==> Nomad is done!"

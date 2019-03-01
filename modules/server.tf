@@ -107,14 +107,11 @@ resource "azurerm_network_interface" "servers-nic" {
 
   ip_configuration {
     name                          = "${var.demo_prefix}-${count.index}-ipconfig"
-    # subnet_id                     = "${azurerm_subnet.subnet.id}"
-    # subnet_id                     = "${azurerm_subnet.awg.id}"
     subnet_id                     = "${azurerm_subnet.servers.id}"
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = "${element(azurerm_public_ip.servers-pip.*.id, count.index)}"
 
-    # azurerm_network_interface_backend_address_pool_association  = ["${azurerm_lb_backend_address_pool.lb.id }"]
-  }
+    }
 
   tags {
     name      = "Guy Barros"
@@ -125,11 +122,18 @@ resource "azurerm_network_interface" "servers-nic" {
 }
 
 
-resource "azurerm_network_interface_application_gateway_backend_address_pool_association" "servers" {
+resource "azurerm_network_interface_application_gateway_backend_address_pool_association" "vault-servers-awg" {
   count                   = "${var.servers}"
   network_interface_id    = "${element(azurerm_network_interface.servers-nic.*.id, count.index)}"
   ip_configuration_name   = "${var.demo_prefix}-${count.index}-ipconfig"
-  backend_address_pool_id = "${azurerm_application_gateway.demostack.backend_address_pool.0.id }"
+  backend_address_pool_id = "${azurerm_application_gateway.vault-awg.backend_address_pool.0.id }"
+}
+
+resource "azurerm_network_interface_application_gateway_backend_address_pool_association" "fabio-servers-awg" {
+  count                   = "${var.servers}"
+  network_interface_id    = "${element(azurerm_network_interface.servers-nic.*.id, count.index)}"
+  ip_configuration_name   = "${var.demo_prefix}-${count.index}-ipconfig"
+  backend_address_pool_id = "${azurerm_application_gateway.fabio-awg.backend_address_pool.0.id }"
 }
 
 

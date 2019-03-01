@@ -6,12 +6,14 @@ data "template_file" "workers" {
     file("${path.module}/templates/shared/base.sh"),
     file("${path.module}/templates/shared/docker.sh"),
 
+    file("${path.module}/templates/workers/user.sh"),
     file("${path.module}/templates/workers/consul.sh"),
     file("${path.module}/templates/workers/vault.sh"),
+    
+    file("${path.module}/templates/workers/tools.sh"),
     file("${path.module}/templates/workers/nomad.sh"),
     
-
-    file("${path.module}/templates/shared/cleanup.sh"),
+    file("${path.module}/templates/workers/connectdemo.sh"),
   ))}"
 
   vars {
@@ -32,8 +34,8 @@ data "template_file" "workers" {
     fqdn            = "${element(azurerm_public_ip.workers-pip.*.fqdn, count.index)}"
     node_name       = "${var.hostname}-workers-${count.index}"
     me_ca           = "${var.ca_cert_pem}"
-    me_cert         = "${element(tls_locally_signed_cert.servers.*.cert_pem, count.index)}"
-    me_key          = "${element(tls_private_key.servers.*.private_key_pem, count.index)}"
+    me_cert         = "${element(tls_locally_signed_cert.workers.*.cert_pem, count.index)}"
+    me_key          = "${element(tls_private_key.workers.*.private_key_pem, count.index)}"
 
     # Consul
     consul_url            = "${var.consul_url}"
@@ -59,6 +61,15 @@ data "template_file" "workers" {
     vault_ent_url    = "${var.vault_ent_url}"
     vault_root_token = "${random_id.vault-root-token.hex}"
     vault_servers    = "${var.workers}"
+
+
+    # Tools
+    consul_template_url = "${var.consul_template_url}"
+    envconsul_url       = "${var.envconsul_url}"
+    packer_url          = "${var.packer_url}"
+    sentinel_url        = "${var.sentinel_url}"
+
+
   }
 }
 
@@ -98,14 +109,6 @@ resource "azurerm_network_interface" "workers-nic" {
   }
 }
 
-/*
-resource "azurerm_network_interface_backend_address_pool_association" "workers" {
-  count                   = "${var.workers}"
-  network_interface_id    = "${element(azurerm_network_interface.workers-nic.*.id, count.index)}"
-  ip_configuration_name   = "${var.demo_prefix}-${count.index}-ipconfig"
-  backend_address_pool_id = "${azurerm_lb_backend_address_pool.lb.id }"
-}
-*/
 
 # Every Azure Virtual Machine comes with a private IP address. You can also 
 # optionally add a public IP address for Internet-facing applications and 
@@ -119,14 +122,21 @@ resource "azurerm_public_ip" "workers-pip" {
   domain_name_label   = "${var.hostname}-workers-${count.index}"
   sku                 = "Standard"
 
-  /*
+  
     tags {
     name  = "Guy Barros"
     ttl   = "13"
     owner = "guy@hashicorp.com"
     demostack = "${local.consul_join_tag_value}"
   }
-*/
+
+}
+
+resource "azurerm_network_interface_application_gateway_backend_address_pool_association" "fabio-workers-awg" {
+  count                   = "${var.workers}"
+  network_interface_id    = "${element(azurerm_network_interface.workers-nic.*.id, count.index)}"
+  ip_configuration_name   = "${var.demo_prefix}-${count.index}-ipconfig"
+  backend_address_pool_id = "${azurerm_application_gateway.fabio-awg.backend_address_pool.0.id }"
 }
 
 # And finally we build our demostack workers. This is a standard Ubuntu instance.

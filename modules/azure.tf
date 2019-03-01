@@ -29,67 +29,6 @@ resource "azurerm_availability_set" "vm" {
   }
 }
 
-resource "azurerm_virtual_network" "vnet" {
-  name                = "${var.virtual_network_name}"
-  location            = "${azurerm_resource_group.demostack.location}"
-  address_space       = ["${var.address_space}"]
-  resource_group_name = "${azurerm_resource_group.demostack.name}"
-
-  tags {
-    name      = "Guy Barros"
-    ttl       = "13"
-    owner     = "guy@hashicorp.com"
-    demostack = "${local.consul_join_tag_value}"
-  }
-}
-
-resource "azurerm_subnet" "subnet" {
-  name                 = "${var.demo_prefix}subnet"
-  virtual_network_name = "${azurerm_virtual_network.vnet.name}"
-  resource_group_name  = "${azurerm_resource_group.demostack.name}"
-  address_prefix       = "${var.subnet_prefix}"
-}
-
-
-resource "azurerm_subnet" "awg" {
-  name                 = "${var.demo_prefix}-awg"
-  virtual_network_name = "${azurerm_virtual_network.awg.name}"
-  resource_group_name  = "${azurerm_resource_group.demostack.name}"
-  address_prefix       = "10.0.10.0/24"
-}
-
-resource "azurerm_subnet" "servers" {
-  name                 = "${var.demo_prefix}-servers"
-  virtual_network_name = "${azurerm_virtual_network.awg.name}"
-  resource_group_name  = "${azurerm_resource_group.demostack.name}"
-  address_prefix       = "10.0.20.0/24"
-}
-
-resource "azurerm_subnet" "workers" {
-  name                 = "${var.demo_prefix}-workers"
-  virtual_network_name = "${azurerm_virtual_network.awg.name}"
-  resource_group_name  = "${azurerm_resource_group.demostack.name}"
-  address_prefix       = "10.0.30.0/24"
-}
-
-
-resource "azurerm_public_ip" "awg" {
-  count               = 1
-  name                = "${var.resource_group}-awg"
-  resource_group_name = "${azurerm_resource_group.demostack.name}"
-  location            = "${var.location}"
-  allocation_method   = "Dynamic"
-  domain_name_label   = "${var.hostname}-awg-${count.index}"
-  sku                 = "Basic"
-
-  tags {
-    name      = "Guy Barros"
-    ttl       = "13"
-    owner     = "guy@hashicorp.com"
-    demostack = "${local.consul_join_tag_value}"
-  }
-}
-
 
 
 
@@ -106,6 +45,72 @@ resource "azurerm_virtual_network" "awg" {
     demostack = "${local.consul_join_tag_value}"
   }
 }
+
+resource "azurerm_subnet" "vault-awg" {
+  name                 = "${var.demo_prefix}-vault-awg"
+  virtual_network_name = "${azurerm_virtual_network.awg.name}"
+  resource_group_name  = "${azurerm_resource_group.demostack.name}"
+  address_prefix       = "10.0.10.0/24"
+}
+
+resource "azurerm_subnet" "fabio-awg" {
+  name                 = "${var.demo_prefix}-fabio-awg"
+  virtual_network_name = "${azurerm_virtual_network.awg.name}"
+  resource_group_name  = "${azurerm_resource_group.demostack.name}"
+  address_prefix       = "10.0.20.0/24"
+}
+resource "azurerm_subnet" "servers" {
+  name                 = "${var.demo_prefix}-servers"
+  virtual_network_name = "${azurerm_virtual_network.awg.name}"
+  resource_group_name  = "${azurerm_resource_group.demostack.name}"
+  address_prefix       = "10.0.30.0/24"
+}
+
+resource "azurerm_subnet" "workers" {
+  name                 = "${var.demo_prefix}-workers"
+  virtual_network_name = "${azurerm_virtual_network.awg.name}"
+  resource_group_name  = "${azurerm_resource_group.demostack.name}"
+  address_prefix       = "10.0.40.0/24"
+}
+
+
+
+resource "azurerm_public_ip" "vault-awg" {
+  count               = 1
+  name                = "${var.resource_group}-vault-awg"
+  resource_group_name = "${azurerm_resource_group.demostack.name}"
+  location            = "${var.location}"
+  allocation_method   = "Dynamic"
+  domain_name_label   = "${var.hostname}-vault-awg-${count.index}"
+  sku                 = "Basic"
+
+  tags {
+    name      = "Guy Barros"
+    ttl       = "13"
+    owner     = "guy@hashicorp.com"
+    demostack = "${local.consul_join_tag_value}"
+  }
+}
+
+resource "azurerm_public_ip" "fabio-awg" {
+  count               = 1
+  name                = "${var.resource_group}-fabio-awg"
+  resource_group_name = "${azurerm_resource_group.demostack.name}"
+  location            = "${var.location}"
+  allocation_method   = "Dynamic"
+  domain_name_label   = "${var.hostname}-fabio-awg-${count.index}"
+  sku                 = "Basic"
+
+  tags {
+    name      = "Guy Barros"
+    ttl       = "13"
+    owner     = "guy@hashicorp.com"
+    demostack = "${local.consul_join_tag_value}"
+  }
+}
+
+
+
 
 
 resource "azurerm_network_security_group" "demostack-sg" {

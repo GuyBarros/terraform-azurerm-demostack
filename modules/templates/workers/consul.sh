@@ -11,8 +11,8 @@ sudo mkdir -p /mnt/consul
 sudo mkdir -p /etc/consul.d
 sudo tee /etc/consul.d/config.json > /dev/null <<EOF
 {
-  "advertise_addr": "${private_ip}",
-  "advertise_addr_wan": "${public_ip}",
+  "advertise_addr": "$(private_ip)",
+  "advertise_addr_wan": "$(public_ip)",
   "bind_addr": "0.0.0.0",
   "data_dir": "/mnt/consul",
   "disable_update_check": true,
@@ -20,7 +20,7 @@ sudo tee /etc/consul.d/config.json > /dev/null <<EOF
   "leave_on_terminate": true,
   "node_name": "${node_name}",
   "raft_protocol": 3,
-  "retry_join": ["provider=aws tag_key=${consul_join_tag_key} tag_value=${consul_join_tag_value}"],
+  "retry_join": ["provider=azure tag_name=${consul_join_tag_name}  tag_value=${consul_join_tag_value} tenant_id=${tenant_id} client_id=${client_id} subscription_id=${subscription_id} secret_access_key=${client_secret} "],
 
   "addresses": {
     "http": "0.0.0.0",
@@ -33,7 +33,7 @@ sudo tee /etc/consul.d/config.json > /dev/null <<EOF
   "key_file": "/etc/ssl/certs/me.key",
   "cert_file": "/etc/ssl/certs/me.crt",
   "ca_file": "/usr/local/share/ca-certificates/01-me.crt",
-  "verify_servers_hostname": false,
+  "verify_server_hostname": false,
   "verify_incoming": false,
   "verify_outgoing": false,
    "ui": true,
@@ -79,12 +79,12 @@ sudo systemctl enable consul
 sudo systemctl start consul
 
 echo "--> Installing dnsmasq"
-ssh-apt install dnsmasq
+
 sudo tee /etc/dnsmasq.d/10-consul > /dev/null <<"EOF"
-servers=/consul/127.0.0.1#8600
+server=/consul/127.0.0.1#8600
 no-poll
-servers=8.8.8.8
-servers=8.8.4.4
+server=8.8.8.8
+server=8.8.4.4
 cache-size=0
 EOF
 sudo systemctl enable dnsmasq

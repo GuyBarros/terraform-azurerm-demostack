@@ -87,7 +87,7 @@ sudo systemctl enable consul
 sudo systemctl restart consul
 
 echo "--> Installing dnsmasq"
-ssh-apt install dnsmasq
+
 sudo tee /etc/dnsmasq.d/10-consul > /dev/null <<"EOF"
 server=/consul/127.0.0.1#8600
 no-poll

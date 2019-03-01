@@ -10,12 +10,20 @@ output "key_vault_name" {
   value = "${azurerm_key_vault.demostack.name}"
 }
 
-/**
-output "vault-lb" {
-  value = "${azurerm_public_ip.lb.fqdn}"
+output "vault_ui" {
+  value = "http://${azurerm_public_ip.vault-awg.fqdn}/"
+  }
+
+
+output "fabio_ui" {
+  value = "http://${azurerm_public_ip.fabio-awg.fqdn}/"
+  }
+
+output "workers" {
+  value = "${formatlist("http://%s:8500/", azurerm_public_ip.workers-pip.*.fqdn,)}"
 }
 
-
+/*
 output "nomad_workers_consul_ui" {
   value = "${formatlist("http://%s:8500/", aws_instance.workers.*.public_ip,)}"
 }

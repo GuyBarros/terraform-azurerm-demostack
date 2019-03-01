@@ -20,7 +20,7 @@ echo "--> Installing fallback credentials"
 sudo tee ~/.metadata > /dev/null <<"EOF"
 ami                = "${ami_id}"
 region             = "${region}"
-identity           = "${identity}"
+identity           = "${demo_username}"
 access_key         = "${access_key}"
 secret_key         = "${secret_key}"
 subnet_id          = "${subnet_id}"
@@ -52,7 +52,7 @@ sudo tee /workstation/terraform/main.tf > /dev/null <<"EOF"
 #
 # Your Identity is:
 #
-#     ${identity}
+#     ${demo_username}
 #
 
 provider "aws" {
@@ -72,7 +72,7 @@ sudo tee /workstation/terraform/terraform.tfvars > /dev/null <<"EOF"
 # secret_key        = "${secret_key}"
 # ami               = "${ami_id}"
 # subnet_id         = "${subnet_id}"
-# identity          = "${identity}"
+# identity          = "${demo_username}"
 # region            = "${region}"
 # vpc_security_group_id = "${security_group_id}"
 EOF

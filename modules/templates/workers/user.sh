@@ -39,7 +39,7 @@ sudo tee /etc/update-motd.d/00-hashicorp > /dev/null <<"EOF"
 echo "Welcome to HashiCorp Consul Connecg Demo!"
 echo "this nodejs animal identity is:"
 echo ""
-echo "    ${identity}"
+echo "    ${demo_username}"
 echo ""
 echo "Please do not lose this identity as it will be important in"
 echo "completing this training course. Have a great day!"
@@ -50,7 +50,7 @@ sudo run-parts /etc/update-motd.d/ &>/dev/null
 echo "--> Adding helper for identity retrieval"
 sudo tee /etc/profile.d/identity.sh > /dev/null <<"EOF"
 function identity {
-  echo "${identity}"
+  echo "${demo_username}"
 }
 EOF
 

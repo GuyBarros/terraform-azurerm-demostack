@@ -1,20 +1,21 @@
 // Primary
 
+output "primary_consul_workers" {
+  value = "${module.primarycluster.workers}"
+}
+
+
 output "primary_consul_servers" {
   value = "${module.primarycluster.servers}"
 }
 
-output "service_identity_principal_id" {
-  value = "${module.primarycluster.service_identity_principal_id}"
+
+output "Vault_UI" {
+  value = "${module.primarycluster.vault_ui}"
 }
 
-output "key_vault_name" {
-  value = "${module.primarycluster.key_vault_name}"
+output "Fabio_UI" {
+  value = "${module.primarycluster.fabio_ui}"
 }
 
-/**
-output "Vault-LB" {
-  value = "${module.primarycluster.vault-lb}"
-}
-*/
 
