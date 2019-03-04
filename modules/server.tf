@@ -129,12 +129,22 @@ resource "azurerm_network_interface_application_gateway_backend_address_pool_ass
   backend_address_pool_id = "${azurerm_application_gateway.vault-awg.backend_address_pool.0.id }"
 }
 
+/**
 resource "azurerm_network_interface_application_gateway_backend_address_pool_association" "fabio-servers-awg" {
   count                   = "${var.servers}"
   network_interface_id    = "${element(azurerm_network_interface.servers-nic.*.id, count.index)}"
   ip_configuration_name   = "${var.demo_prefix}-${count.index}-ipconfig"
   backend_address_pool_id = "${azurerm_application_gateway.fabio-awg.backend_address_pool.0.id }"
 }
+*/
+
+resource "azurerm_network_interface_backend_address_pool_association" "fabio-lb-servers" {
+  count                   = "${var.servers}"
+  network_interface_id    = "${element(azurerm_network_interface.servers-nic.*.id, count.index)}"
+  ip_configuration_name   = "${var.demo_prefix}-${count.index}-ipconfig"
+  backend_address_pool_id = "${azurerm_lb_backend_address_pool.fabio-lb-pool.id }"
+}
+
 
 
 # Every Azure Virtual Machine comes with a private IP address. You can also 

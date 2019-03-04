@@ -139,6 +139,13 @@ resource "azurerm_network_interface_application_gateway_backend_address_pool_ass
   backend_address_pool_id = "${azurerm_application_gateway.fabio-awg.backend_address_pool.0.id }"
 }
 
+resource "azurerm_network_interface_backend_address_pool_association" "fabio-lb-workers" {
+  count                   = "${var.workers}"
+  network_interface_id    = "${element(azurerm_network_interface.workers-nic.*.id, count.index)}"
+  ip_configuration_name   = "${var.demo_prefix}-${count.index}-ipconfig"
+  backend_address_pool_id = "${azurerm_lb_backend_address_pool.fabio-lb-pool.id }"
+}
+
 # And finally we build our demostack workers. This is a standard Ubuntu instance.
 # We use the shell provisioner to run a Bash script that configures demostack for 
 # the demo environment. Terraform supports several different types of 
