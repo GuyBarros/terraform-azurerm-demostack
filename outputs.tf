@@ -1,5 +1,4 @@
 // Primary
-
 output "primary_consul_workers" {
   value = "${module.primarycluster.workers}"
 }
@@ -14,8 +13,8 @@ output "Vault_UI" {
   value = "${module.primarycluster.vault_ui}"
 }
 
-output "Fabio_UI" {
-  value = "${module.primarycluster.fabio_ui}"
+output "Fabio_LB" {
+  value = "${module.primarycluster.fabio_lb}"
 }
 
 

@@ -18,7 +18,7 @@ EOF
 echo "--> HashiUI"
 sudo tee /tmp/hashi-ui.hcl > /dev/null <<"EOF"
 job "hashi-ui" {
-  datacenters = ["dc1"]
+  datacenters = ["azure"]
 
   type     = "system"
   priority = 75
@@ -78,7 +78,7 @@ nomad_run /tmp/hashi-ui.hcl
 echo "--> Fabio"
 sudo tee /tmp/fabio.hcl > /dev/null <<"EOF"
 job "fabio" {
-  datacenters = ["dc1"]
+  datacenters = ["azure"]
 
   type     = "system"
   priority = 75

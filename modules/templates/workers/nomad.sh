@@ -14,6 +14,10 @@ name         = "${node_name}"
 data_dir     = "/mnt/nomad"
 enable_debug = true
 
+datacenter = "azure"
+
+region = "azure"
+
 "bind_addr" = "0.0.0.0"
 
 advertise {

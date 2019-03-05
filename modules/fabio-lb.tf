@@ -12,7 +12,7 @@ resource "azurerm_public_ip" "fabio-lb-pip" {
     name      = "Guy Barros"
     ttl       = "13"
     owner     = "guy@hashicorp.com"
-    demostack = "${local.consul_join_tag_value}"
+    demostack = "${var.consul_join_tag_value}"
   }
 }
 
@@ -33,7 +33,7 @@ resource "azurerm_lb" "fabio-lb" {
     name      = "Guy Barros"
     ttl       = "13"
     owner     = "guy@hashicorp.com"
-    demostack = "${local.consul_join_tag_value}"
+    demostack = "${var.consul_join_tag_value}"
   }
 }
 
@@ -54,11 +54,12 @@ resource "azurerm_lb_rule" "fabio-lb-rule" {
   protocol                       = "Tcp"
   frontend_port                  = "80"
   backend_port                   = "9999"
-  frontend_ip_configuration_name = "${var.resource_group}-fabio-lb-pip"
+  frontend_ip_configuration_name = "${azurerm_lb.fabio-lb.frontend_ip_configuration.0.name}"
   probe_id                       = "${azurerm_lb_probe.fabio-lb-probe.id}"
   backend_address_pool_id        = "${azurerm_lb_backend_address_pool.fabio-lb-pool.id}"
-  depends_on                     = ["azurerm_lb_probe.fabio-lb-probe", "azurerm_lb_backend_address_pool.fabio-lb-pool"]
+  depends_on                     = ["azurerm_public_ip.fabio-lb-pip","azurerm_lb_probe.fabio-lb-probe", "azurerm_lb_backend_address_pool.fabio-lb-pool"]
 }
+#"${azurerm_lb.fabio-lb.frontend_ip_configuration.0.name }"
 
 resource "azurerm_lb_backend_address_pool" "fabio-lb-pool" {
   name                = "${var.resource_group}-fabio-lb-pool"

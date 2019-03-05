@@ -11,12 +11,14 @@ sudo mkdir -p /mnt/consul
 sudo mkdir -p /etc/consul.d
 sudo tee /etc/consul.d/config.json > /dev/null <<EOF
 {
+  "datacenter": "azure",
   "advertise_addr": "$(private_ip)",
-  "advertise_addr_wan": "$(public_ip)",
+  "advertise_addr_wan": "${public_ip}",
   "bind_addr": "0.0.0.0",
   "data_dir": "/mnt/consul",
   "disable_update_check": true,
   "encrypt": "${consul_gossip_key}",
+  
   "leave_on_terminate": true,
   "node_name": "${node_name}",
   "raft_protocol": 3,

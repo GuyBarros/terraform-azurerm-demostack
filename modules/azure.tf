@@ -8,7 +8,7 @@ resource "azurerm_resource_group" "demostack" {
     name      = "Guy Barros"
     ttl       = "13"
     owner     = "guy@hashicorp.com"
-    demostack = "${local.consul_join_tag_value}"
+    demostack = "${var.consul_join_tag_value}"
   }
 }
 
@@ -25,7 +25,7 @@ resource "azurerm_availability_set" "vm" {
     name      = "Guy Barros"
     ttl       = "13"
     owner     = "guy@hashicorp.com"
-    demostack = "${local.consul_join_tag_value}"
+    demostack = "${var.consul_join_tag_value}"
   }
 }
 
@@ -42,7 +42,7 @@ resource "azurerm_virtual_network" "awg" {
     name      = "Guy Barros"
     ttl       = "13"
     owner     = "guy@hashicorp.com"
-    demostack = "${local.consul_join_tag_value}"
+    demostack = "${var.consul_join_tag_value}"
   }
 }
 
@@ -88,10 +88,11 @@ resource "azurerm_public_ip" "vault-awg" {
     name      = "Guy Barros"
     ttl       = "13"
     owner     = "guy@hashicorp.com"
-    demostack = "${local.consul_join_tag_value}"
+    demostack = "${var.consul_join_tag_value}"
   }
 }
 
+/*
 resource "azurerm_public_ip" "fabio-awg" {
   count               = 1
   name                = "${var.resource_group}-fabio-awg"
@@ -108,7 +109,7 @@ resource "azurerm_public_ip" "fabio-awg" {
     demostack = "${local.consul_join_tag_value}"
   }
 }
-
+*/
 
 
 
@@ -122,7 +123,7 @@ resource "azurerm_network_security_group" "demostack-sg" {
     name      = "Guy Barros"
     ttl       = "13"
     owner     = "guy@hashicorp.com"
-    demostack = "${local.consul_join_tag_value}"
+    demostack = "${var.consul_join_tag_value}"
   }
 
   security_rule {

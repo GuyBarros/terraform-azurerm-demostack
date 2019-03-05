@@ -27,11 +27,11 @@ function ssh-apt {
 echo "--> Adding helper for IP retrieval"
 sudo tee /etc/profile.d/ips.sh > /dev/null <<EOF
 function private_ip {
-  curl -s curl -H Metadata:true "http://169.254.169.254/metadata/instance/network/interface/0/ipv4/ipAddress/0/privateIpAddress?api-version=2017-08-01&format=text"
+  curl -H Metadata:true "http://169.254.169.254/metadata/instance/network/interface/0/ipv4/ipAddress/0/privateIpAddress?api-version=2017-08-01&format=text"
 }
 
 function public_ip {
-  curl -s curl -H Metadata:true "http://169.254.169.254/metadata/instance/network/interface/0/ipv4/ipAddress/0/publicIpAddress?api-version=2017-08-01&format=text"
+  curl -H Metadata:true "http://169.254.169.254/metadata/instance/network/interface/0/ipv4/ipAddress/0/publicIpAddress?api-version=2017-08-01&format=text"
 }
 EOF
 source /etc/profile.d/ips.sh

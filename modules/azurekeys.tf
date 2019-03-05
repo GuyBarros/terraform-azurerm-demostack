@@ -22,7 +22,7 @@ resource "azurerm_key_vault" "demostack" {
     name      = "Guy Barros"
     ttl       = "13"
     owner     = "guy@hashicorp.com"
-    demostack = "${local.consul_join_tag_value}"
+    demostack = "${var.consul_join_tag_value}"
   }
 }
 
@@ -34,8 +34,8 @@ resource "azurerm_user_assigned_identity" "demostack" {
 }
 
 resource "azurerm_key_vault_access_policy" "demostack_vm" {
-  vault_name          = "${azurerm_key_vault.demostack.name}"
-  resource_group_name = "${azurerm_key_vault.demostack.resource_group_name}"
+  key_vault_id          = "${azurerm_key_vault.demostack.id}"
+  # resource_group_name = "${azurerm_key_vault.demostack.resource_group_name}"
 
   # tenant_id = "${var.tenant}"
   #  object_id = "${azurerm_user_assigned_identity.demostack.principal_id}"
@@ -78,7 +78,7 @@ resource "azurerm_key_vault_access_policy" "demostack_vm" {
 
 resource "azurerm_key_vault_key" "demostack" {
   name      = "demostack-${random_id.keyvaultkey.hex}"
-  vault_uri = "${azurerm_key_vault.demostack.vault_uri}"
+  key_vault_id = "${azurerm_key_vault.demostack.id}"
   key_type  = "RSA"
   key_size  = 2048
 
@@ -95,6 +95,6 @@ resource "azurerm_key_vault_key" "demostack" {
     name      = "Guy Barros"
     ttl       = "13"
     owner     = "guy@hashicorp.com"
-    demostack = "${local.consul_join_tag_value}"
+    demostack = "${var.consul_join_tag_value}"
   }
 }

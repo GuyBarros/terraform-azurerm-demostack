@@ -34,7 +34,7 @@ listener "tcp" {
   tls_key_file  = "/etc/ssl/certs/me.key"
 }
 
-api_addr = "https://$(public_ip):8200"
+api_addr = "https://${public_ip}:8200"
 
 disable_mlock = true
 

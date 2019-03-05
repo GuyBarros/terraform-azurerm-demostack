@@ -40,16 +40,16 @@ data "template_file" "workers" {
     # Consul
     consul_url            = "${var.consul_url}"
     consul_ent_url        = "${var.consul_ent_url}"
-    consul_gossip_key     = "${base64encode(random_id.consul_gossip_key.hex)}"
+    consul_gossip_key     = "${var.consul_gossip_key}"
     consul_join_tag_key   = "ConsulJoin"
     consul_join_tag_name  = "demostack"
-    consul_join_tag_value = "${local.consul_join_tag_value}"
-    consul_master_token   = "${random_id.consul_master_token.hex}"
+    consul_join_tag_value = "${var.consul_join_tag_value}"
+    consul_master_token   = "${var.consul_master_token}"
     consul_servers        = "${var.workers}"
 
     # Nomad
     nomad_url        = "${var.nomad_url}"
-    nomad_gossip_key = "${base64encode(random_id.nomad_gossip_key.hex)}"
+    nomad_gossip_key = "${var.nomad_gossip_key}"
     nomad_servers    = "${var.workers}"
 
     # Nomad jobs
@@ -105,7 +105,7 @@ resource "azurerm_network_interface" "workers-nic" {
     name      = "Guy Barros"
     ttl       = "13"
     owner     = "guy@hashicorp.com"
-    demostack = "${local.consul_join_tag_value}"
+    demostack = "${var.consul_join_tag_value}"
   }
 }
 
@@ -127,18 +127,19 @@ resource "azurerm_public_ip" "workers-pip" {
     name  = "Guy Barros"
     ttl   = "13"
     owner = "guy@hashicorp.com"
-    demostack = "${local.consul_join_tag_value}"
+    demostack = "${var.consul_join_tag_value}"
   }
 
 }
 
+/*
 resource "azurerm_network_interface_application_gateway_backend_address_pool_association" "fabio-workers-awg" {
   count                   = "${var.workers}"
   network_interface_id    = "${element(azurerm_network_interface.workers-nic.*.id, count.index)}"
   ip_configuration_name   = "${var.demo_prefix}-${count.index}-ipconfig"
   backend_address_pool_id = "${azurerm_application_gateway.fabio-awg.backend_address_pool.0.id }"
 }
-
+*/
 resource "azurerm_network_interface_backend_address_pool_association" "fabio-lb-workers" {
   count                   = "${var.workers}"
   network_interface_id    = "${element(azurerm_network_interface.workers-nic.*.id, count.index)}"
@@ -190,6 +191,6 @@ resource "azurerm_virtual_machine" "workers" {
     name      = "Guy Barros"
     ttl       = "13"
     owner     = "guy@hashicorp.com"
-    demostack = "${local.consul_join_tag_value}"
+    demostack = "${var.consul_join_tag_value}"
   }
 }

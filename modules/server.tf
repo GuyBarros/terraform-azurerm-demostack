@@ -61,16 +61,16 @@ template = "${join("\n", list(
     # Consul
     consul_url            = "${var.consul_url}"
     consul_ent_url        = "${var.consul_ent_url}"
-    consul_gossip_key     = "${base64encode(random_id.consul_gossip_key.hex)}"
+    consul_gossip_key     = "${var.consul_gossip_key}"
     consul_join_tag_key   = "ConsulJoin"
     consul_join_tag_name  = "demostack"
-    consul_join_tag_value = "${local.consul_join_tag_value}"
-    consul_master_token   = "${random_id.consul_master_token.hex}"
+    consul_join_tag_value = "${var.consul_join_tag_value}"
+    consul_master_token   = "${var.consul_master_token}"
     consul_servers        = "${var.servers}"
 
     # Nomad
     nomad_url        = "${var.nomad_url}"
-    nomad_gossip_key = "${base64encode(random_id.nomad_gossip_key.hex)}"
+    nomad_gossip_key = "${var.nomad_gossip_key}"
     nomad_servers    = "${var.servers}"
 
     # Nomad jobs
@@ -117,7 +117,7 @@ resource "azurerm_network_interface" "servers-nic" {
     name      = "Guy Barros"
     ttl       = "13"
     owner     = "guy@hashicorp.com"
-    demostack = "${local.consul_join_tag_value}"
+    demostack = "${var.consul_join_tag_value}"
   }
 }
 
@@ -163,7 +163,7 @@ resource "azurerm_public_ip" "servers-pip" {
     name      = "Guy Barros"
     ttl       = "13"
     owner     = "guy@hashicorp.com"
-    demostack = "${local.consul_join_tag_value}"
+    demostack = "${var.consul_join_tag_value}"
   }
 }
 
@@ -212,6 +212,6 @@ resource "azurerm_virtual_machine" "servers" {
     name      = "Guy Barros"
     ttl       = "13"
     owner     = "guy@hashicorp.com"
-    demostack = "${local.consul_join_tag_value}"
+    demostack = "${var.consul_join_tag_value}"
   }
 }

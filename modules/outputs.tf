@@ -15,8 +15,8 @@ output "vault_ui" {
   }
 
 
-output "fabio_ui" {
-  value = "http://${azurerm_public_ip.fabio-awg.fqdn}/"
+output "fabio_lb" {
+  value = "http://${azurerm_public_ip.fabio-lb-pip.fqdn}/"
   }
 
 output "workers" {

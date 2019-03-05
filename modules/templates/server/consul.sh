@@ -20,18 +20,19 @@ sudo mkdir -p /mnt/consul
 sudo mkdir -p /etc/consul.d
 sudo tee /etc/consul.d/config.json > /dev/null <<EOF
 {
-  "acl_datacenter": "dc1",
+  "datacenter": "azure",
+  "acl_datacenter": "azure",
   "acl_master_token": "${consul_master_token}",
   "acl_token": "${consul_master_token}",
   "acl_default_policy": "allow",
   "advertise_addr": "$(private_ip)",
-  "advertise_addr_wan": "$(public_ip)",
+  "advertise_addr_wan": "${public_ip}",
   "bootstrap_expect": ${consul_servers},
   "bind_addr": "$(private_ip)",
   "node_name": "${node_name}",
   "data_dir": "/mnt/consul",
-  "disable_update_check": true,
   "encrypt": "${consul_gossip_key}",
+  "disable_update_check": true,
   "leave_on_terminate": true,
   "raft_protocol": 3,
   "retry_join": ["provider=azure tag_name=${consul_join_tag_name}  tag_value=${consul_join_tag_value} tenant_id=${tenant_id} client_id=${client_id} subscription_id=${subscription_id} secret_access_key=${client_secret} "],
