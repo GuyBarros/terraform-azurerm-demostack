@@ -1,5 +1,5 @@
 data "template_file" "workers" {
-  depends_on = ["azurerm_public_ip.workers-pip"]
+  depends_on = ["azurerm_public_ip.workers-pip","azurerm_public_ip.consul-lb-pip"]
   count      = "${var.workers}"
 
   template = "${join("\n", list(
@@ -13,8 +13,10 @@ data "template_file" "workers" {
     
     file("${path.module}/templates/workers/tools.sh"),
     file("${path.module}/templates/workers/nomad.sh"),
-    file("${path.module}/templates/workers/connectdemo.sh"),
+    file("${path.module}/templates/workers/connectdemo.sh"),    
   ))}"
+
+
 
   vars {
     hostname      = "${var.hostname}-workers-${count.index}"
@@ -55,6 +57,7 @@ data "template_file" "workers" {
     # Nomad jobs
     fabio_url   = "${var.fabio_url}"
     hashiui_url = "${var.hashiui_url}"
+     run_nomad_jobs = "${var.run_nomad_jobs}"
 
     # Vault
     vault_url        = "${var.vault_url}"
@@ -84,6 +87,13 @@ data "template_cloudinit_config" "workers" {
     content_type = "text/x-shellscript"
     content      = "${element(data.template_file.workers.*.rendered, count.index)}"
   }
+}
+
+resource "azurerm_subnet" "workers" {
+  name                 = "${var.demo_prefix}-workers"
+  virtual_network_name = "${azurerm_virtual_network.awg.name}"
+  resource_group_name  = "${azurerm_resource_group.demostack.name}"
+  address_prefix       = "10.0.40.0/24"
 }
 
 resource "azurerm_network_interface" "workers-nic" {
@@ -132,20 +142,7 @@ resource "azurerm_public_ip" "workers-pip" {
 
 }
 
-/*
-resource "azurerm_network_interface_application_gateway_backend_address_pool_association" "fabio-workers-awg" {
-  count                   = "${var.workers}"
-  network_interface_id    = "${element(azurerm_network_interface.workers-nic.*.id, count.index)}"
-  ip_configuration_name   = "${var.demo_prefix}-${count.index}-ipconfig"
-  backend_address_pool_id = "${azurerm_application_gateway.fabio-awg.backend_address_pool.0.id }"
-}
-*/
-resource "azurerm_network_interface_backend_address_pool_association" "fabio-lb-workers" {
-  count                   = "${var.workers}"
-  network_interface_id    = "${element(azurerm_network_interface.workers-nic.*.id, count.index)}"
-  ip_configuration_name   = "${var.demo_prefix}-${count.index}-ipconfig"
-  backend_address_pool_id = "${azurerm_lb_backend_address_pool.fabio-lb-pool.id }"
-}
+
 
 # And finally we build our demostack workers. This is a standard Ubuntu instance.
 # We use the shell provisioner to run a Bash script that configures demostack for 

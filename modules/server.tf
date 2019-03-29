@@ -78,6 +78,7 @@ template = "${join("\n", list(
     # Nomad jobs
     fabio_url   = "${var.fabio_url}"
     hashiui_url = "${var.hashiui_url}"
+    run_nomad_jobs = "${var.run_nomad_jobs}"
 
     # Vault
     vault_url        = "${var.vault_url}"
@@ -123,29 +124,18 @@ resource "azurerm_network_interface" "servers-nic" {
   }
 }
 
-
-resource "azurerm_network_interface_application_gateway_backend_address_pool_association" "vault-servers-awg" {
-  count                   = "${var.servers}"
-  network_interface_id    = "${element(azurerm_network_interface.servers-nic.*.id, count.index)}"
-  ip_configuration_name   = "${var.demo_prefix}-${count.index}-ipconfig"
-  backend_address_pool_id = "${azurerm_application_gateway.vault-awg.backend_address_pool.0.id }"
+resource "azurerm_subnet" "servers" {
+  name                 = "${var.demo_prefix}-servers"
+  virtual_network_name = "${azurerm_virtual_network.awg.name}"
+  resource_group_name  = "${azurerm_resource_group.demostack.name}"
+  address_prefix       = "10.0.30.0/24"
 }
 
-/**
-resource "azurerm_network_interface_application_gateway_backend_address_pool_association" "fabio-servers-awg" {
-  count                   = "${var.servers}"
-  network_interface_id    = "${element(azurerm_network_interface.servers-nic.*.id, count.index)}"
-  ip_configuration_name   = "${var.demo_prefix}-${count.index}-ipconfig"
-  backend_address_pool_id = "${azurerm_application_gateway.fabio-awg.backend_address_pool.0.id }"
-}
-*/
 
-resource "azurerm_network_interface_backend_address_pool_association" "fabio-lb-servers" {
-  count                   = "${var.servers}"
-  network_interface_id    = "${element(azurerm_network_interface.servers-nic.*.id, count.index)}"
-  ip_configuration_name   = "${var.demo_prefix}-${count.index}-ipconfig"
-  backend_address_pool_id = "${azurerm_lb_backend_address_pool.fabio-lb-pool.id }"
-}
+
+
+
+
 
 
 

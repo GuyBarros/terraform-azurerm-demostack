@@ -20,11 +20,14 @@ region = "azure"
 
 "bind_addr" = "0.0.0.0"
 
+region = "eu"
+
 advertise {
-  http = "${node_name}.node.consul:4646"
-  rpc  = "${node_name}.node.consul:4647"
-  serf = "${node_name}.node.consul:4648"
+  http = "${public_ip}:4646"
+  rpc  = "${public_ip}:4647"
+  serf = "${public_ip}:4648"
 }
+
 
 client {
   enabled = true

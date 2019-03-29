@@ -5,7 +5,9 @@ echo "==> Nomad (server)"
 
 
 echo "--> Fetching"
+
 install_from_url "nomad" "${nomad_url}"
+
 sleep 10
 
 
@@ -14,7 +16,7 @@ export VAULT_TOKEN="$(consul kv get service/vault/root-token)"
   NOMAD_VAULT_TOKEN="$(VAULT_TOKEN="$VAULT_TOKEN" \
   VAULT_ADDR="https://active.vault.service.consul:8200" \
   VAULT_SKIP_VERIFY=true \
-  vault token create -field=token -policy=superuser -period=72h)"
+  vault token create -field=token -policy=superuser -policy=nomad-server -period=72h)"
 
 consul kv put service/vault/nomad-token $NOMAD_VAULT_TOKEN
 
@@ -31,14 +33,13 @@ enable_debug = true
 
 datacenter = "azure"
 
-region = "azure"
+region = "eu"
 
 advertise {
-  http = "${node_name}.node.consul:4646"
-  rpc  = "${node_name}.node.consul:4647"
-  serf = "${node_name}.node.consul:4648"
+  http = "${public_ip}:4646"
+  rpc  = "${public_ip}:4647"
+  serf = "${public_ip}:4648"
 }
-
 server {
   enabled          = true
   bootstrap_expect = ${nomad_servers}

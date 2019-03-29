@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 set -e
+echo "create  demo directory"
+sudo mkdir /demostack
 
 echo "==> Nomads jobs"
 
@@ -16,9 +18,9 @@ EOF
 }
 
 echo "--> HashiUI"
-sudo tee /tmp/hashi-ui.hcl > /dev/null <<"EOF"
+sudo tee /demostack/hashi-ui.hcl > /dev/null <<"EOF"
 job "hashi-ui" {
-  datacenters = ["azure"]
+  datacenters = ["aws"]
 
   type     = "system"
   priority = 75
@@ -39,6 +41,7 @@ job "hashi-ui" {
     service {
       port = "http"
       name = "hashi-ui"
+      tags = ["urlprefix-/hashi-ui strip=/hashi-ui"]
 
       check {
         type     = "http"
@@ -60,11 +63,8 @@ job "hashi-ui" {
     }
 
     resources {
-      cpu    = 500
-      memory = 512
-
+      
       network {
-        mbits = 5
         port "http" {
           static = 3000
         }
@@ -73,12 +73,12 @@ job "hashi-ui" {
   }
 }
 EOF
-nomad_run /tmp/hashi-ui.hcl
+
 
 echo "--> Fabio"
-sudo tee /tmp/fabio.hcl > /dev/null <<"EOF"
+sudo tee /demostack/fabio.hcl > /dev/null <<"EOF"
 job "fabio" {
-  datacenters = ["azure"]
+  datacenters = ["aws"]
 
   type     = "system"
   priority = 75
@@ -115,12 +115,9 @@ job "fabio" {
     }
 
     resources {
-      cpu    = 500
-      memory = 50
-
+      
       network {
-        mbits = 10
-
+        
         port "http" {
           static = 9999
         }
@@ -133,6 +130,18 @@ job "fabio" {
   }
 }
 EOF
-nomad_run /tmp/fabio.hcl
+
+
+
+if [ ${run_nomad_jobs} == 0 ]
+then
+echo "--> not running Nomad Jobs"
+
+
+else
+echo "--> Running"
+nomad_run /demostack/hashi-ui.hcl
+nomad_run /demostack/fabio.hcl
+fi
 
 echo "==> Nomad jobs submitted!"
