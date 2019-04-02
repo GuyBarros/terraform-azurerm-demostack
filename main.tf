@@ -60,6 +60,7 @@ data "terraform_remote_state" "nomad_taskforce_tls_root_certificate" {
 //--------------------------------------------------------------------
 
 
+
 module "primarycluster" {
   source              = "./modules"
   resource_group      = "${var.resource_group}"
@@ -69,8 +70,8 @@ module "primarycluster" {
   admin_password      = "${var.admin_password}"
   demo_username       = "${var.demo_username}"
   demo_password       = "${var.demo_password}"
-  subscription        = "${var.subscription}"
-  tenant              = "${var.tenant}"
+  subscription_id        = "${var.subscription_id}"
+  tenant_id              = "${var.tenant_id}"
   client_id           = "${var.client_id}"
   client_secret       = "${var.client_secret}"
   owner               = "${var.owner}"

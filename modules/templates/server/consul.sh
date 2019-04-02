@@ -20,8 +20,8 @@ sudo mkdir -p /mnt/consul
 sudo mkdir -p /etc/consul.d
 sudo tee /etc/consul.d/config.json > /dev/null <<EOF
 {
-  "datacenter": "azure",
-  "acl_datacenter": "azure",
+  "datacenter": "${location}",
+  "acl_datacenter": "${location}",
   "acl_master_token": "${consul_master_token}",
   "acl_token": "${consul_master_token}",
   "acl_default_policy": "allow",

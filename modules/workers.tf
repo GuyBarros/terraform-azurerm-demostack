@@ -19,6 +19,7 @@ data "template_file" "workers" {
 
 
   vars {
+    location = "${var.location}"
     hostname      = "${var.hostname}-workers-${count.index}"
     private_ip    = "${element(azurerm_network_interface.workers-nic.*.private_ip_address, count.index)}"
     public_ip     = "${element(azurerm_public_ip.workers-pip.*.ip_address, count.index)}"
@@ -29,8 +30,8 @@ data "template_file" "workers" {
     vaultlicense    = "${var.vaultlicense}"
     consullicense   = "${var.consullicense}"
     kmskey          = "${azurerm_key_vault.demostack.id}"
-    subscription_id = "${var.subscription}"
-    tenant_id       = "${var.tenant}"
+    subscription_id = "${var.subscription_id}"
+    tenant_id       = "${var.tenant_id}"
     client_id       = "${var.client_id}"
     client_secret   = "${var.client_secret}"
     fqdn            = "${element(azurerm_public_ip.workers-pip.*.fqdn, count.index)}"

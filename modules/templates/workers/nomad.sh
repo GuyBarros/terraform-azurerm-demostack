@@ -14,14 +14,11 @@ name         = "${node_name}"
 data_dir     = "/mnt/nomad"
 enable_debug = true
 
-datacenter = "azure"
+datacenter = "${location}"
 
 region = "azure"
 
 "bind_addr" = "0.0.0.0"
-
-region = "eu"
-
 advertise {
   http = "${public_ip}:4646"
   rpc  = "${public_ip}:4647"

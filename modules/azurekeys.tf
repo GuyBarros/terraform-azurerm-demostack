@@ -12,7 +12,7 @@ resource "azurerm_key_vault" "demostack" {
   resource_group_name         = "${azurerm_resource_group.demostack.name}"
   enabled_for_deployment      = true
   enabled_for_disk_encryption = true
-  tenant_id                   = "${var.tenant}"
+  tenant_id                   = "${var.tenant_id}"
 
   sku {
     name = "standard"

@@ -170,6 +170,11 @@ echo "--> Attempting to create nomad role"
   path "auth/token/renew-self" {
     capabilities = ["update"]
   }
+   path "kv/*" {
+    capabilities = ["create", "read", "update", "delete", "list"]
+}
+
+
 EOR
 
   vault policy write test - <<EOR
@@ -214,6 +219,14 @@ vault policy write superuser - <<EOR
 path "*" { 
   capabilities = ["create", "read", "update", "delete", "list", "sudo"] 
   }
+
+  path "kv/*" {
+    capabilities = ["create", "read", "update", "delete", "list", "sudo"] 
+}
+
+path "kv/test/*" {
+    capabilities = ["create", "read", "update", "delete", "list", "sudo"] 
+}
 EOR
   
 } ||

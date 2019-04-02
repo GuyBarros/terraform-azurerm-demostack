@@ -219,11 +219,11 @@ variable "enterprise" {
   default     = false
 }
 
-variable "subscription" {
+variable "subscription_id" {
   description = "your subscription ID for Vault KMS Auto Unseal"
 }
 
-variable "tenant" {
+variable "tenant_id" {
   description = "your tenant ID for Vault KMS Auto Unseal"
 }
 

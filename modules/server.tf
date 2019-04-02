@@ -34,6 +34,7 @@ template = "${join("\n", list(
 */
 
   vars {
+    location = "${var.location}"
     hostname      = "${var.hostname}-servers-${count.index}"
     private_ip    = "${element(azurerm_network_interface.servers-nic.*.private_ip_address, count.index)}"
     public_ip     = "${element(azurerm_public_ip.servers-pip.*.ip_address, count.index)}"
@@ -44,13 +45,8 @@ template = "${join("\n", list(
     consullicense = "${var.consullicense}"
     kmsvaultname  = "${azurerm_key_vault.demostack.name}"
     kmskeyname    = "${azurerm_key_vault_key.demostack.name}"
-
-    # subscription_id = "${data.azurerm_client_config.current.subscription_id}"
-    # tenant_id       = "${data.azurerm_client_config.current.tenant_id}"
-    # client_id       = "${data.azurerm_client_config.current.service_principal_object_id}"
-    subscription_id = "${var.subscription}"
-
-    tenant_id     = "${var.tenant}"
+    subscription_id = "${var.subscription_id}"
+    tenant_id     = "${var.tenant_id}"
     client_id     = "${var.client_id}"
     client_secret = "${var.client_secret}"
     object_id     = "${azurerm_user_assigned_identity.demostack.principal_id}"

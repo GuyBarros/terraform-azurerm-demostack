@@ -31,9 +31,9 @@ enable_debug = true
 "bind_addr" = "0.0.0.0"
 
 
-datacenter = "azure"
+datacenter = "${location}"
 
-region = "eu"
+region = "azure"
 
 advertise {
   http = "${public_ip}:4646"
