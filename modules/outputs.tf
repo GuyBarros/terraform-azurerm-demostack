@@ -18,21 +18,14 @@ output "fabio_lb" {
   }
 
 output "servers" {
-  value = "${formatlist("http://%s:8500/", azurerm_public_ip.servers-pip.*.fqdn,)}"
+  value = "${formatlist("ssh %s@%s", var.admin_username, azurerm_public_ip.servers-pip.*.fqdn,)}"
 }
 
 output "workers" {
-  value = "${formatlist("http://%s:8500/", azurerm_public_ip.workers-pip.*.fqdn,)}"
+  value = "${formatlist("ssh %s@%s", var.demo_username, azurerm_public_ip.workers-pip.*.fqdn,)}"
 }
 
-/*
-output "nomad_workers_consul_ui" {
-  value = "${formatlist("http://%s:8500/", aws_instance.workers.*.public_ip,)}"
+
+output "hashi_ui" {
+  value = "http://${azurerm_public_ip.workers-pip.0.fqdn}:3000"
 }
-
-output "nomad_workers_ui" {
-  value = "${formatlist("http://%s:3000/", aws_instance.workers.*.public_ip)}"
-}
-
-*/
-
