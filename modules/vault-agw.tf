@@ -1,4 +1,3 @@
-
 resource "azurerm_network_interface_application_gateway_backend_address_pool_association" "vault-servers-awg" {
   count                   = "${var.servers}"
   network_interface_id    = "${element(azurerm_network_interface.servers-nic.*.id, count.index)}"
@@ -12,7 +11,6 @@ resource "azurerm_subnet" "vault-awg" {
   resource_group_name  = "${azurerm_resource_group.demostack.name}"
   address_prefix       = "10.0.10.0/24"
 }
-
 
 resource "azurerm_public_ip" "vault-awg" {
   count               = 1
@@ -30,7 +28,6 @@ resource "azurerm_public_ip" "vault-awg" {
     demostack = "${var.consul_join_tag_value}"
   }
 }
-
 
 resource "azurerm_application_gateway" "vault-awg" {
   name                = "${var.resource_group}vault-awg"
@@ -56,7 +53,6 @@ resource "azurerm_application_gateway" "vault-awg" {
   frontend_ip_configuration {
     name                 = "vault-frontend-ip"
     public_ip_address_id = "${azurerm_public_ip.vault-awg.id}"
-    
   }
 
   backend_address_pool {
@@ -68,7 +64,6 @@ resource "azurerm_application_gateway" "vault-awg" {
     frontend_ip_configuration_name = "vault-frontend-ip"
     frontend_port_name             = "vault-gateway-http"
     protocol                       = "Http"
-    
   }
 
   probe {
@@ -81,18 +76,20 @@ resource "azurerm_application_gateway" "vault-awg" {
     unhealthy_threshold = "3"
   }
 
-authentication_certificate{
- name = "server-0"
- data = "${tls_locally_signed_cert.servers.0.cert_pem}"
-}
-authentication_certificate{
- name = "server-1"
- data = "${tls_locally_signed_cert.servers.1.cert_pem}"
-}
-authentication_certificate{
- name = "server-2"
- data = "${tls_locally_signed_cert.servers.2.cert_pem}"
-}
+  authentication_certificate {
+    name = "server-0"
+    data = "${tls_locally_signed_cert.servers.0.cert_pem}"
+  }
+
+  authentication_certificate {
+    name = "server-1"
+    data = "${tls_locally_signed_cert.servers.1.cert_pem}"
+  }
+
+  authentication_certificate {
+    name = "server-2"
+    data = "${tls_locally_signed_cert.servers.2.cert_pem}"
+  }
 
   backend_http_settings {
     name                  = "vault-backend"
@@ -101,19 +98,19 @@ authentication_certificate{
     protocol              = "Https"
     request_timeout       = 1
     probe_name            = "vault-health"
-    authentication_certificate{
-       name = "server-0"
-    }
-    authentication_certificate{
-       name = "server-1"
-    }
-    authentication_certificate{
-       name = "server-2"
+
+    authentication_certificate {
+      name = "server-0"
     }
 
+    authentication_certificate {
+      name = "server-1"
+    }
 
+    authentication_certificate {
+      name = "server-2"
+    }
   }
-
 
   request_routing_rule {
     name                       = "vault-routing"
@@ -122,9 +119,4 @@ authentication_certificate{
     backend_address_pool_name  = "vault-pool"
     backend_http_settings_name = "vault-backend"
   }
-
-
-
-
-
 }

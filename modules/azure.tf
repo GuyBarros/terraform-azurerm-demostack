@@ -1,8 +1,8 @@
 provider "azurerm" {
-  subscription_id        = "${var.subscription_id}"
-  tenant_id              = "${var.tenant_id}"
-  client_id           = "${var.client_id}"
-  client_secret       = "${var.client_secret}"
+  subscription_id = "${var.subscription_id}"
+  tenant_id       = "${var.tenant_id}"
+  client_id       = "${var.client_id}"
+  client_secret   = "${var.client_secret}"
 }
 
 data "azurerm_client_config" "current" {}
@@ -35,9 +35,6 @@ resource "azurerm_availability_set" "vm" {
     demostack = "${var.consul_join_tag_value}"
   }
 }
-
-
-
 
 resource "azurerm_virtual_network" "awg" {
   name                = "${var.virtual_network_name}-awg"
@@ -77,7 +74,6 @@ resource "azurerm_network_security_group" "demostack-sg" {
     destination_address_prefix = "*"
   }
 
-  
   security_rule {
     name                       = "demostack-ssh"
     priority                   = 102

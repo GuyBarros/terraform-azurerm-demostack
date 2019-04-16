@@ -34,13 +34,13 @@ resource "azurerm_user_assigned_identity" "demostack" {
 }
 
 resource "azurerm_key_vault_access_policy" "demostack_vm" {
-  key_vault_id          = "${azurerm_key_vault.demostack.id}"
+  key_vault_id = "${azurerm_key_vault.demostack.id}"
+
   # resource_group_name = "${azurerm_key_vault.demostack.resource_group_name}"
 
   # tenant_id = "${var.tenant}"
   #  object_id = "${azurerm_user_assigned_identity.demostack.principal_id}"
   tenant_id = "${data.azurerm_client_config.current.tenant_id}"
-
   object_id = "${data.azurerm_client_config.current.service_principal_object_id}"
 
   # object_id = "${var.client_id}"
@@ -50,37 +50,58 @@ resource "azurerm_key_vault_access_policy" "demostack_vm" {
     "get",
     "list",
     "create",
-  ]
-  key_permissions = [
-    "backup",
-    "create",
-    "decrypt",
     "delete",
-    "encrypt",
-    "get",
     "import",
-    "list",
-    "purge",
-    "recover",
-    "restore",
-    "sign",
-    "unwrapKey",
     "update",
-    "verify",
+    "managecontacts",
+    "getissuers",
+    "listissuers",
+    "setissuers",
+    "deleteissuers",
+    "manageissuers",
+    "recover",
+    "purge",
+    "backup",
+    "restore",
+  ]
+
+  // -PermissionsToStorage get,list,delete,set,update,regeneratekey,getsas,listsas,deletesas,setsas,recover,backup,restore,purge 
+
+  key_permissions = [
+    "decrypt",
+    "encrypt",
+    "unwrapKey",
     "wrapKey",
+    "verify",
+    "sign",
+    "get",
+    "list",
+    "update",
+    "create",
+    "import",
+    "delete",
+    "backup",
+    "restore",
+    "recover",
+    "purge",
   ]
   secret_permissions = [
     "get",
     "list",
     "set",
+    "delete",
+    "backup",
+    "restore",
+    "recover",
+    "purge",
   ]
 }
 
 resource "azurerm_key_vault_key" "demostack" {
-  name      = "demostack-${random_id.keyvaultkey.hex}"
+  name         = "demostack-${random_id.keyvaultkey.hex}"
   key_vault_id = "${azurerm_key_vault.demostack.id}"
-  key_type  = "RSA"
-  key_size  = 2048
+  key_type     = "RSA"
+  key_size     = 2048
 
   key_opts = [
     "decrypt",

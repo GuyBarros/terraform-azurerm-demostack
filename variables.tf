@@ -262,26 +262,22 @@ variable "ca_cert_pem" {
   default = ""
 }
 
-variable "consul_gossip_key"{
+variable "consul_gossip_key" {
   default = ""
 }
 
-variable "consul_master_token"{
+variable "consul_master_token" {
   default = ""
 }
 
-variable "consul_join_tag_value"{
+variable "consul_join_tag_value" {
   default = ""
 }
 
-
-variable "nomad_gossip_key"{
+variable "nomad_gossip_key" {
   default = ""
 }
 
-
-variable "run_nomad_jobs"{
+variable "run_nomad_jobs" {
   default = 1
 }
-
-

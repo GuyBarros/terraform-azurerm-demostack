@@ -1,10 +1,10 @@
-
 //--------------------------EMEA-SE_PLAYGROUND------------------------------------------
 # Using a single workspace:
 terraform {
   backend "remote" {
     hostname     = "app.terraform.io"
-    organization = "emea-se-playground"
+    organization = "emea-se-playground-2019"
+
     workspaces {
       name = "Guy-Azure-Demostack"
     }
@@ -17,14 +17,13 @@ data "terraform_remote_state" "emea_se_playground_tls_root_certificate" {
 
   config {
     hostname     = "app.terraform.io"
-    organization = "emea-se-playground"
+    organization = "emea-se-playground-2019"
 
     workspaces {
       name = "tls-root-certificate"
     }
   } //config
 }
-
 
 /*
 //--------------------------------------------------------------------
@@ -59,8 +58,6 @@ data "terraform_remote_state" "nomad_taskforce_tls_root_certificate" {
 
 //--------------------------------------------------------------------
 
-
-
 module "primarycluster" {
   source              = "./modules"
   resource_group      = "${var.resource_group}"
@@ -70,8 +67,8 @@ module "primarycluster" {
   admin_password      = "${var.admin_password}"
   demo_username       = "${var.demo_username}"
   demo_password       = "${var.demo_password}"
-  subscription_id        = "${var.subscription_id}"
-  tenant_id              = "${var.tenant_id}"
+  subscription_id     = "${var.subscription_id}"
+  tenant_id           = "${var.tenant_id}"
   client_id           = "${var.client_id}"
   client_secret       = "${var.client_secret}"
   owner               = "${var.owner}"
@@ -99,14 +96,14 @@ module "primarycluster" {
   TTL                 = "${var.TTL}"
   run_nomad_jobs      = "${var.run_nomad_jobs}"
 
- # EMEA-SE-PLAYGROUND
-  ca_key_algorithm = "${data.terraform_remote_state.emea_se_playground_tls_root_certificate.ca_key_algorithm}"
-  ca_private_key_pem = "${data.terraform_remote_state.emea_se_playground_tls_root_certificate.ca_private_key_pem}"
-  ca_cert_pem        = "${data.terraform_remote_state.emea_se_playground_tls_root_certificate.ca_cert_pem}"
+  # EMEA-SE-PLAYGROUND
+  ca_key_algorithm      = "${data.terraform_remote_state.emea_se_playground_tls_root_certificate.ca_key_algorithm}"
+  ca_private_key_pem    = "${data.terraform_remote_state.emea_se_playground_tls_root_certificate.ca_private_key_pem}"
+  ca_cert_pem           = "${data.terraform_remote_state.emea_se_playground_tls_root_certificate.ca_cert_pem}"
   consul_join_tag_value = "${var.namespace}-${data.terraform_remote_state.emea_se_playground_tls_root_certificate.consul_join_tag_value}"
-  consul_gossip_key = "${data.terraform_remote_state.emea_se_playground_tls_root_certificate.consul_gossip_key}"
-  consul_master_token = "${data.terraform_remote_state.emea_se_playground_tls_root_certificate.consul_master_token}"
-  nomad_gossip_key = "${data.terraform_remote_state.emea_se_playground_tls_root_certificate.nomad_gossip_key}"
+  consul_gossip_key     = "${data.terraform_remote_state.emea_se_playground_tls_root_certificate.consul_gossip_key}"
+  consul_master_token   = "${data.terraform_remote_state.emea_se_playground_tls_root_certificate.consul_master_token}"
+  nomad_gossip_key      = "${data.terraform_remote_state.emea_se_playground_tls_root_certificate.nomad_gossip_key}"
 
   /*
 # NOMAD-TASKFORCE

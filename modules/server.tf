@@ -34,27 +34,27 @@ template = "${join("\n", list(
 */
 
   vars {
-    location = "${var.location}"
-    hostname      = "${var.hostname}-servers-${count.index}"
-    private_ip    = "${element(azurerm_network_interface.servers-nic.*.private_ip_address, count.index)}"
-    public_ip     = "${element(azurerm_public_ip.servers-pip.*.ip_address, count.index)}"
-    demo_username = "${var.demo_username}"
-    demo_password = "${var.demo_password}"
-    enterprise    = "${var.enterprise}"
-    vaultlicense  = "${var.vaultlicense}"
-    consullicense = "${var.consullicense}"
-    kmsvaultname  = "${azurerm_key_vault.demostack.name}"
-    kmskeyname    = "${azurerm_key_vault_key.demostack.name}"
+    location        = "${var.location}"
+    hostname        = "${var.hostname}-servers-${count.index}"
+    private_ip      = "${element(azurerm_network_interface.servers-nic.*.private_ip_address, count.index)}"
+    public_ip       = "${element(azurerm_public_ip.servers-pip.*.ip_address, count.index)}"
+    demo_username   = "${var.demo_username}"
+    demo_password   = "${var.demo_password}"
+    enterprise      = "${var.enterprise}"
+    vaultlicense    = "${var.vaultlicense}"
+    consullicense   = "${var.consullicense}"
+    kmsvaultname    = "${azurerm_key_vault.demostack.name}"
+    kmskeyname      = "${azurerm_key_vault_key.demostack.name}"
     subscription_id = "${var.subscription_id}"
-    tenant_id     = "${var.tenant_id}"
-    client_id     = "${var.client_id}"
-    client_secret = "${var.client_secret}"
-    object_id     = "${azurerm_user_assigned_identity.demostack.principal_id}"
-    fqdn          = "${element(azurerm_public_ip.servers-pip.*.fqdn, count.index)}"
-    node_name     = "${var.hostname}-servers-${count.index}"
-    me_ca         = "${var.ca_cert_pem}"
-    me_cert       = "${element(tls_locally_signed_cert.servers.*.cert_pem, count.index)}"
-    me_key        = "${element(tls_private_key.servers.*.private_key_pem, count.index)}"
+    tenant_id       = "${var.tenant_id}"
+    client_id       = "${var.client_id}"
+    client_secret   = "${var.client_secret}"
+    object_id       = "${azurerm_user_assigned_identity.demostack.principal_id}"
+    fqdn            = "${element(azurerm_public_ip.servers-pip.*.fqdn, count.index)}"
+    node_name       = "${var.hostname}-servers-${count.index}"
+    me_ca           = "${var.ca_cert_pem}"
+    me_cert         = "${element(tls_locally_signed_cert.servers.*.cert_pem, count.index)}"
+    me_key          = "${element(tls_private_key.servers.*.private_key_pem, count.index)}"
 
     # Consul
     consul_url            = "${var.consul_url}"
@@ -72,8 +72,8 @@ template = "${join("\n", list(
     nomad_servers    = "${var.servers}"
 
     # Nomad jobs
-    fabio_url   = "${var.fabio_url}"
-    hashiui_url = "${var.hashiui_url}"
+    fabio_url      = "${var.fabio_url}"
+    hashiui_url    = "${var.hashiui_url}"
     run_nomad_jobs = "${var.run_nomad_jobs}"
 
     # Vault
@@ -109,8 +109,7 @@ resource "azurerm_network_interface" "servers-nic" {
     subnet_id                     = "${azurerm_subnet.servers.id}"
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = "${element(azurerm_public_ip.servers-pip.*.id, count.index)}"
-
-    }
+  }
 
   tags {
     name      = "Guy Barros"
@@ -126,14 +125,6 @@ resource "azurerm_subnet" "servers" {
   resource_group_name  = "${azurerm_resource_group.demostack.name}"
   address_prefix       = "10.0.30.0/24"
 }
-
-
-
-
-
-
-
-
 
 # Every Azure Virtual Machine comes with a private IP address. You can also 
 # optionally add a public IP address for Internet-facing applications and 

@@ -68,8 +68,6 @@ resource "tls_locally_signed_cert" "servers" {
   ]
 }
 
-
-
 # Vault initial root token
 resource "random_id" "vault-root-token" {
   byte_length = 8
@@ -82,7 +80,6 @@ resource "tls_private_key" "workers" {
   algorithm   = "ECDSA"
   ecdsa_curve = "P521"
 }
-
 
 # Client signing request
 resource "tls_cert_request" "workers" {
@@ -135,25 +132,3 @@ resource "tls_locally_signed_cert" "workers" {
     "server_auth",
   ]
 }
-
-/*
-# Consul gossip encryption key
-resource "random_id" "consul_gossip_key" {
-  byte_length = 16
-}
-
-# Consul master token
-resource "random_id" "consul_master_token" {
-  byte_length = 16
-}
-
-# Consul join key
-resource "random_id" "consul_join_tag_value" {
-  byte_length = 16
-}
-
-# Nomad gossip encryption key
-resource "random_id" "nomad_gossip_key" {
-  byte_length = 16
-}
-*/

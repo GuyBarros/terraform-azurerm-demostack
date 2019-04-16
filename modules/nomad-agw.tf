@@ -5,14 +5,12 @@ resource "azurerm_network_interface_application_gateway_backend_address_pool_ass
   backend_address_pool_id = "${azurerm_application_gateway.nomad-awg.backend_address_pool.0.id }"
 }
 
-
 resource "azurerm_network_interface_application_gateway_backend_address_pool_association" "nomad-workers-awg" {
   count                   = "${var.workers}"
   network_interface_id    = "${element(azurerm_network_interface.workers-nic.*.id, count.index)}"
   ip_configuration_name   = "${var.demo_prefix}-${count.index}-ipconfig"
   backend_address_pool_id = "${azurerm_application_gateway.nomad-awg.backend_address_pool.0.id }"
 }
-
 
 resource "azurerm_subnet" "nomad-awg" {
   name                 = "${var.demo_prefix}-nomad-awg"
@@ -62,7 +60,6 @@ resource "azurerm_application_gateway" "nomad-awg" {
   frontend_ip_configuration {
     name                 = "nomad-frontend-ip"
     public_ip_address_id = "${azurerm_public_ip.nomad-awg.id}"
-    
   }
 
   backend_address_pool {
@@ -74,7 +71,6 @@ resource "azurerm_application_gateway" "nomad-awg" {
     frontend_ip_configuration_name = "nomad-frontend-ip"
     frontend_port_name             = "nomad-gateway-http"
     protocol                       = "Http"
-    
   }
 
   probe {
@@ -87,30 +83,35 @@ resource "azurerm_application_gateway" "nomad-awg" {
     unhealthy_threshold = "3"
   }
 
-authentication_certificate{
- name = "server-0"
- data = "${tls_locally_signed_cert.servers.0.cert_pem}"
-}
-authentication_certificate{
- name = "server-1"
- data = "${tls_locally_signed_cert.servers.1.cert_pem}"
-}
-authentication_certificate{
- name = "server-2"
- data = "${tls_locally_signed_cert.servers.2.cert_pem}"
-}
-authentication_certificate{
- name = "worker-0"
- data = "${tls_locally_signed_cert.workers.0.cert_pem}"
-}
-authentication_certificate{
- name = "worker-1"
- data = "${tls_locally_signed_cert.workers.1.cert_pem}"
-}
-authentication_certificate{
- name = "worker-2"
- data = "${tls_locally_signed_cert.workers.2.cert_pem}"
-}
+  authentication_certificate {
+    name = "server-0"
+    data = "${tls_locally_signed_cert.servers.0.cert_pem}"
+  }
+
+  authentication_certificate {
+    name = "server-1"
+    data = "${tls_locally_signed_cert.servers.1.cert_pem}"
+  }
+
+  authentication_certificate {
+    name = "server-2"
+    data = "${tls_locally_signed_cert.servers.2.cert_pem}"
+  }
+
+  authentication_certificate {
+    name = "worker-0"
+    data = "${tls_locally_signed_cert.workers.0.cert_pem}"
+  }
+
+  authentication_certificate {
+    name = "worker-1"
+    data = "${tls_locally_signed_cert.workers.1.cert_pem}"
+  }
+
+  authentication_certificate {
+    name = "worker-2"
+    data = "${tls_locally_signed_cert.workers.2.cert_pem}"
+  }
 
   backend_http_settings {
     name                  = "nomad-backend"
@@ -119,28 +120,31 @@ authentication_certificate{
     protocol              = "Https"
     request_timeout       = 1
     probe_name            = "nomad-health"
-    authentication_certificate{
-       name = "server-0"
-    }
-    authentication_certificate{
-       name = "server-1"
-    }
-    authentication_certificate{
-       name = "server-2"
-    }
-    authentication_certificate{
-       name = "worker-0"
-    }
-    authentication_certificate{
-       name = "worker-1"
-    }
-    authentication_certificate{
-       name = "worker-2"
+
+    authentication_certificate {
+      name = "server-0"
     }
 
+    authentication_certificate {
+      name = "server-1"
+    }
 
+    authentication_certificate {
+      name = "server-2"
+    }
+
+    authentication_certificate {
+      name = "worker-0"
+    }
+
+    authentication_certificate {
+      name = "worker-1"
+    }
+
+    authentication_certificate {
+      name = "worker-2"
+    }
   }
-
 
   request_routing_rule {
     name                       = "nomad-routing"
@@ -149,9 +153,4 @@ authentication_certificate{
     backend_address_pool_name  = "nomad-pool"
     backend_http_settings_name = "nomad-backend"
   }
-
-
-
-
-
 }

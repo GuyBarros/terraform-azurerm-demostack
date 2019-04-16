@@ -28,20 +28,7 @@ output "6 - workers" {
   value = "${module.primarycluster.workers}"
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
 // output "Fabio_LB" {
 //   value = "${module.primarycluster.fabio_lb}"
 // }
-
 

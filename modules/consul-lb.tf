@@ -1,5 +1,3 @@
-
-
 # Create Public IP Address for the Load Balancer
 resource "azurerm_public_ip" "consul-lb-pip" {
   name                = "${var.resource_group}-consul-lb-pip"
@@ -58,8 +56,9 @@ resource "azurerm_lb_rule" "consul-lb-rule" {
   frontend_ip_configuration_name = "${azurerm_lb.consul-lb.frontend_ip_configuration.0.name}"
   probe_id                       = "${azurerm_lb_probe.consul-lb-probe.id}"
   backend_address_pool_id        = "${azurerm_lb_backend_address_pool.consul-lb-pool.id}"
-  depends_on                     = ["azurerm_public_ip.consul-lb-pip","azurerm_lb_probe.consul-lb-probe", "azurerm_lb_backend_address_pool.consul-lb-pool"]
+  depends_on                     = ["azurerm_public_ip.consul-lb-pip", "azurerm_lb_probe.consul-lb-probe", "azurerm_lb_backend_address_pool.consul-lb-pool"]
 }
+
 ################################################
 
 resource "azurerm_lb_probe" "fabio-lb-probe" {
@@ -82,10 +81,10 @@ resource "azurerm_lb_rule" "fabio-lb-rule" {
   frontend_ip_configuration_name = "${azurerm_lb.consul-lb.frontend_ip_configuration.0.name}"
   probe_id                       = "${azurerm_lb_probe.consul-lb-probe.id}"
   backend_address_pool_id        = "${azurerm_lb_backend_address_pool.consul-lb-pool.id}"
-  depends_on                     = ["azurerm_public_ip.consul-lb-pip","azurerm_lb_probe.consul-lb-probe", "azurerm_lb_backend_address_pool.consul-lb-pool"]
+  depends_on                     = ["azurerm_public_ip.consul-lb-pip", "azurerm_lb_probe.consul-lb-probe", "azurerm_lb_backend_address_pool.consul-lb-pool"]
 }
-########################
 
+########################
 
 resource "azurerm_lb_backend_address_pool" "consul-lb-pool" {
   name                = "${var.resource_group}-consul-lb-pool"
@@ -99,7 +98,6 @@ resource "azurerm_network_interface_backend_address_pool_association" "consul-lb
   ip_configuration_name   = "${var.demo_prefix}-${count.index}-ipconfig"
   backend_address_pool_id = "${azurerm_lb_backend_address_pool.consul-lb-pool.id }"
 }
-
 
 resource "azurerm_network_interface_backend_address_pool_association" "consul-lb-workers" {
   count                   = "${var.workers}"

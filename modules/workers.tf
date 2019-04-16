@@ -1,5 +1,5 @@
 data "template_file" "workers" {
-  depends_on = ["azurerm_public_ip.workers-pip","azurerm_public_ip.consul-lb-pip"]
+  depends_on = ["azurerm_public_ip.workers-pip", "azurerm_public_ip.consul-lb-pip"]
   count      = "${var.workers}"
 
   template = "${join("\n", list(
@@ -16,10 +16,8 @@ data "template_file" "workers" {
     file("${path.module}/templates/workers/connectdemo.sh"),    
   ))}"
 
-
-
   vars {
-    location = "${var.location}"
+    location      = "${var.location}"
     hostname      = "${var.hostname}-workers-${count.index}"
     private_ip    = "${element(azurerm_network_interface.workers-nic.*.private_ip_address, count.index)}"
     public_ip     = "${element(azurerm_public_ip.workers-pip.*.ip_address, count.index)}"
@@ -56,9 +54,9 @@ data "template_file" "workers" {
     nomad_servers    = "${var.workers}"
 
     # Nomad jobs
-    fabio_url   = "${var.fabio_url}"
-    hashiui_url = "${var.hashiui_url}"
-     run_nomad_jobs = "${var.run_nomad_jobs}"
+    fabio_url      = "${var.fabio_url}"
+    hashiui_url    = "${var.hashiui_url}"
+    run_nomad_jobs = "${var.run_nomad_jobs}"
 
     # Vault
     vault_url        = "${var.vault_url}"
@@ -66,14 +64,11 @@ data "template_file" "workers" {
     vault_root_token = "${random_id.vault-root-token.hex}"
     vault_servers    = "${var.workers}"
 
-
     # Tools
     consul_template_url = "${var.consul_template_url}"
     envconsul_url       = "${var.envconsul_url}"
     packer_url          = "${var.packer_url}"
     sentinel_url        = "${var.sentinel_url}"
-
-
   }
 }
 
@@ -120,7 +115,6 @@ resource "azurerm_network_interface" "workers-nic" {
   }
 }
 
-
 # Every Azure Virtual Machine comes with a private IP address. You can also 
 # optionally add a public IP address for Internet-facing applications and 
 # demo environments like this one.
@@ -133,17 +127,13 @@ resource "azurerm_public_ip" "workers-pip" {
   domain_name_label   = "${var.hostname}-workers-${count.index}"
   sku                 = "Standard"
 
-  
-    tags {
-    name  = "Guy Barros"
-    ttl   = "13"
-    owner = "guy@hashicorp.com"
+  tags {
+    name      = "Guy Barros"
+    ttl       = "13"
+    owner     = "guy@hashicorp.com"
     demostack = "${var.consul_join_tag_value}"
   }
-
 }
-
-
 
 # And finally we build our demostack workers. This is a standard Ubuntu instance.
 # We use the shell provisioner to run a Bash script that configures demostack for 
