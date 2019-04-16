@@ -133,4 +133,16 @@ resource "azurerm_network_security_group" "demostack-sg" {
     source_address_prefix      = "*"
     destination_address_prefix = "*"
   }
+
+  security_rule {
+    name                       = "demostack-winrm"
+    priority                   = 107
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "5000-5999"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
 }
