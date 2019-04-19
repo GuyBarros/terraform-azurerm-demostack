@@ -7,28 +7,28 @@
   "acl_default_policy": "allow",
   "advertise_addr": "${private_ip}",
   "advertise_addr_wan": "${public_ip}",
-  "bootstrap_expect": ${consul_servers},
   "bind_addr": "0.0.0.0",
   "node_name": "${node_name}",
-  "data_dir": "C:\HashiCorp\Consul\data",  
+  "data_dir": "C:\\HashiCorp\\Consul\\data",  
   "encrypt": "${consul_gossip_key}",
   "disable_update_check": true,
   "leave_on_terminate": true,
   "raft_protocol": 3,
   "retry_join": ["provider=azure tag_name=${consul_join_tag_name}  tag_value=${consul_join_tag_value} tenant_id=${tenant_id} client_id=${client_id} subscription_id=${subscription_id} secret_access_key=${client_secret} "],
 
-  "server": true,
+  
   "addresses": {
     "http": "0.0.0.0",
     "https": "0.0.0.0"
   },
   "ports": {
     "http": 8500,
-    "https": 8533
+    "https": 8533,
+    "dns": 53
   },
-  "key_file": "C:\HashiCorp\certs\me.key",
-  "cert_file": "C:\HashiCorp\certs\me.crt",
-  "ca_file": "C:\HashiCorp\certs\01-me.crt",
+  "key_file": "C:\\HashiCorp\\certs\\me.key",
+  "cert_file": "C:\\HashiCorp\\certs\\me.crt",
+  "ca_file": "C:\\HashiCorp\\certs\\01-me.crt",
   "verify_incoming": false,
   "verify_outgoing": false,
   "verify_server_hostname": false,

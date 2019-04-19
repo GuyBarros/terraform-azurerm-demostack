@@ -76,6 +76,7 @@ resource "azurerm_network_interface" "winmad-nic" {
   location                  = "${var.location}"
   resource_group_name       = "${azurerm_resource_group.demostack.name}"
   network_security_group_id = "${azurerm_network_security_group.demostack-sg.id}"
+  dns_servers               =  ["127.0.0.1","1.1.1.1","8.8.8.8"]
 
   ip_configuration {
     name                          = "${var.demo_prefix}-${count.index}-winpconfig"
@@ -97,30 +98,29 @@ resource "azurerm_subnet" "winmad" {
   virtual_network_name = "${azurerm_virtual_network.awg.name}"
   resource_group_name  = "${azurerm_resource_group.demostack.name}"
   address_prefix       = "10.0.60.0/24"
-
- 
 }
 
 resource "azurerm_virtual_machine" "winmad" {
-  count                 = "${var.servers}"
-  name                  = "demostack-winmad-0"
-  location              = "${var.location}"
-  resource_group_name   = "${azurerm_resource_group.demostack.name}"
-  network_interface_ids = []
-  vm_size               = "Standard_B2s"
+  count               = "${var.servers}"
+  name                = "winmad-${count.index}"
+  location            = "${var.location}"
+  resource_group_name = "${azurerm_resource_group.demostack.name}"
+  vm_size             = "Standard_B2s"
 
   network_interface_ids         = ["${element(azurerm_network_interface.winmad-nic.*.id, count.index)}"]
   delete_os_disk_on_termination = "true"
 
-   storage_image_reference {
+  storage_image_reference {
     publisher = "MicrosoftWindowsServer"
     offer     = "WindowsServer"
     sku       = "2016-Datacenter"
+
     // sku       = "2016-Datacenter-Server-Core-smalldisk"
-    version   = "latest"
-}
+    version = "latest"
+  }
+
   storage_os_disk {
-    name              = "server-os"
+    name              = "server-os-${count.index}"
     caching           = "ReadWrite"
     create_option     = "FromImage"
     managed_disk_type = "Standard_LRS"
@@ -134,37 +134,34 @@ resource "azurerm_virtual_machine" "winmad" {
   }
 
   os_profile {
-    computer_name  = "winmad-0"
+    computer_name  = "winmad-os-${count.index}"
     admin_username = "${var.admin_username}"
     admin_password = "${var.admin_password}"
   }
 
-  os_profile_windows_config {  //Here defined autoupdate config and also vm agent config
-    enable_automatic_upgrades = true  
-    provision_vm_agent        = true  
-  
-    winrm = {  //Here defined WinRM connectivity config
-      protocol = "http"  
-    } 
+  os_profile_windows_config {
+    enable_automatic_upgrades = true //Here defined autoupdate config and also vm agent config
+    provision_vm_agent        = true
 
+    winrm = {
+      protocol = "http" //Here defined WinRM connectivity config
+    }
 
     additional_unattend_config {
-            pass = "oobeSystem"
-            component = "Microsoft-Windows-Shell-Setup"
-            setting_name = "AutoLogon"
-            content = "<AutoLogon><Password><Value>${var.admin_password}</Value></Password><Enabled>true</Enabled><LogonCount>1</LogonCount><Username>${var.admin_username}</Username></AutoLogon>"
-        }
+      pass         = "oobeSystem"
+      component    = "Microsoft-Windows-Shell-Setup"
+      setting_name = "AutoLogon"
+      content      = "<AutoLogon><Password><Value>${var.admin_password}</Value></Password><Enabled>true</Enabled><LogonCount>1</LogonCount><Username>${var.admin_username}</Username></AutoLogon>"
+    }
 
-         #Unattend config is to enable basic auth in WinRM, required for the provisioner stage.
-        additional_unattend_config {
-            pass = "oobeSystem"
-            component = "Microsoft-Windows-Shell-Setup"
-            setting_name = "FirstLogonCommands"
-            content = "${file("${path.module}/templates/winmad/FirstLogonCommands.xml")}"
-        }
-
-        
-} 
+    #Unattend config is to enable basic auth in WinRM, required for the provisioner stage.
+    additional_unattend_config {
+      pass         = "oobeSystem"
+      component    = "Microsoft-Windows-Shell-Setup"
+      setting_name = "FirstLogonCommands"
+      content      = "${file("${path.module}/templates/winmad/FirstLogonCommands.xml")}"
+    }
+  }
 
   # Install Binaries Script
   provisioner "file" {
@@ -178,12 +175,12 @@ resource "azurerm_virtual_machine" "winmad" {
       user     = "${var.admin_username}"
       password = "${var.admin_password}"
       host     = "${element(azurerm_public_ip.winmad-pip.*.ip_address, count.index)}"
+
       # host     = "${element(azurerm_public_ip.winmad-pip.*.fqdn, count.index)}"
-      
     }
   }
 
-# Consul config
+  # Consul config
   provisioner "file" {
     content     = "${element(data.template_file.consulconfig.*.rendered, count.index)}"
     destination = "C:\\Hashicorp\\Consul\\config.json"
@@ -195,11 +192,12 @@ resource "azurerm_virtual_machine" "winmad" {
       user     = "${var.admin_username}"
       password = "${var.admin_password}"
       host     = "${element(azurerm_public_ip.winmad-pip.*.ip_address, count.index)}"
+
       # host     = "${element(azurerm_public_ip.winmad-pip.*.fqdn, count.index)}"
     }
   }
 
-# Nomad Config
+  # Nomad Config
   provisioner "file" {
     content     = "${element(data.template_file.nomadconfig.*.rendered, count.index)}"
     destination = "C:\\Hashicorp\\Nomad\\config.json"
@@ -211,14 +209,15 @@ resource "azurerm_virtual_machine" "winmad" {
       user     = "${var.admin_username}"
       password = "${var.admin_password}"
       host     = "${element(azurerm_public_ip.winmad-pip.*.ip_address, count.index)}"
+
       # host     = "${element(azurerm_public_ip.winmad-pip.*.fqdn, count.index)}"
     }
   }
 
-# tls key
+  # tls key
   provisioner "file" {
     content     = "${element(tls_private_key.servers.*.private_key_pem, count.index)}"
-    destination = "C:\\Hashicorp\\Consul\\me.key"
+    destination = "C:\\Hashicorp\\certs\\me.key"
 
     connection {
       type     = "winrm"
@@ -227,14 +226,15 @@ resource "azurerm_virtual_machine" "winmad" {
       user     = "${var.admin_username}"
       password = "${var.admin_password}"
       host     = "${element(azurerm_public_ip.winmad-pip.*.ip_address, count.index)}"
+
       # host     = "${element(azurerm_public_ip.winmad-pip.*.fqdn, count.index)}"
     }
   }
 
-# tls crt
+  # tls crt
   provisioner "file" {
     content     = "${element(tls_locally_signed_cert.servers.*.cert_pem, count.index)}"
-    destination = "C:\\Hashicorp\\Consul\\me.crt"
+    destination = "C:\\Hashicorp\\certs\\me.crt"
 
     connection {
       type     = "winrm"
@@ -243,14 +243,15 @@ resource "azurerm_virtual_machine" "winmad" {
       user     = "${var.admin_username}"
       password = "${var.admin_password}"
       host     = "${element(azurerm_public_ip.winmad-pip.*.ip_address, count.index)}"
+
       # host     = "${element(azurerm_public_ip.winmad-pip.*.fqdn, count.index)}"
     }
   }
 
-# tls ca cert
+  # tls ca cert
   provisioner "file" {
     content     = "${var.ca_cert_pem}"
-    destination = "C:\\Hashicorp\\Consul\\01-me.crt"
+    destination = "C:\\Hashicorp\\certs\\01-me.crt"
 
     connection {
       type     = "winrm"
@@ -262,3 +263,25 @@ resource "azurerm_virtual_machine" "winmad" {
     }
   }
 }
+
+/*
+resource "azurerm_virtual_machine_extension" "winmad" {
+  count                 = "${var.servers}"
+  name                 = "winmad-${var.servers}"
+  location                  = "${var.location}"
+  resource_group_name       = "${azurerm_resource_group.demostack.name}"
+  virtual_machine_name = "${azurerm_virtual_machine.web_server.name}"
+  publisher            = "Microsoft.Compute"
+  type                 = "CustomScriptExtension"
+  type_handler_version = "1.9"
+  depends_on           = ["azurerm_virtual_machine.web_server"]
+
+  settings = <<SETTINGS
+    {
+        "fileUris": ["https://raw.githubusercontent.com/nehrman/terraform-azure-windows/master/scripts/InstallHashicorp.ps1"],
+        "commandToExecute": "powershell -ExecutionPolicy Unrestricted -file InstallHashicorp.ps1"
+    }
+SETTINGS
+}
+*/
+

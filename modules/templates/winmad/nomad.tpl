@@ -1,5 +1,5 @@
 name         = "${node_name}"
-data_dir     = "C:\Hashicorp\Nomad\data\"
+data_dir     = "C:\\Hashicorp\\Nomad\\data"
 enable_debug = true
 
 "bind_addr" = "0.0.0.0"
@@ -14,11 +14,6 @@ advertise {
   rpc  = "${public_ip}:4647"
   serf = "${public_ip}:4648"
 }
-server {
-  enabled          = true
-  bootstrap_expect = ${nomad_servers}
-  encrypt          = "${nomad_gossip_key}"
-}
 
 client {
   enabled = true
@@ -30,9 +25,9 @@ client {
 tls {
   rpc  = true
   http = true
-  key_file = "C:\HashiCorp\certs\me.key"
-  cert_file = "C:\HashiCorp\certs\me.crt"
-  ca_file = "C:\HashiCorp\certs\01-me.crt"
+  key_file = "C:\\HashiCorp\\certs\\me.key"
+  cert_file = "C:\\HashiCorp\\certs\\me.crt"
+  ca_file = "C:\\HashiCorp\\certs\\01-me.crt"
 
   verify_server_hostname = false
 }
@@ -40,9 +35,9 @@ tls {
 vault {
   enabled          = true
   address          = "https://active.vault.service.consul:8200"
-  key_file = "C:\HashiCorp\certs\me.key"
-  cert_file = "C:\HashiCorp\certs\me.crt"
-  ca_file = "C:\HashiCorp\certs\01-me.crt"
+  key_file = "C:\\HashiCorp\\certs\\me.key"
+  cert_file = "C:\\HashiCorp\\certs\\me.crt"
+  ca_file = "C:\\HashiCorp\\certs\\01-me.crt"
   create_from_role = "nomad-cluster"
 }
 
