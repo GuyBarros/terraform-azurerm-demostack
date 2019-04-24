@@ -292,13 +292,13 @@ resource "azurerm_virtual_machine_extension" "winmad" {
   virtual_machine_name = "${element(azurerm_virtual_machine.winmad.*.name, count.index)}"
   publisher            = "Microsoft.Compute"
   type                 = "CustomScriptExtension"
-  type_handler_version = "1.9"
+   type_handler_version = "1.9"
   depends_on           = ["azurerm_virtual_machine.servers","azurerm_virtual_machine.winmad"]
 
   settings = <<SETTINGS
     {
         "fileUris": ["https://raw.githubusercontent.com/GuyBarros/terraform-azurerm-demostack/Windows_nodes/modules/templates/winmad/InstallHashicorp.ps1"],
-        "commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted -file InstallHashicorp.ps1"
+        "commandToExecute": "powershell -ExecutionPolicy Unrestricted -file InstallHashicorp.ps1"
     }
 SETTINGS
 }

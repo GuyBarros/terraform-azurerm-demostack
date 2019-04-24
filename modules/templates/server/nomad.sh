@@ -71,6 +71,7 @@ vault {
   cert_file        = "/etc/ssl/certs/me.crt"
   key_file         = "/etc/ssl/certs/me.key"
   create_from_role = "nomad-cluster"
+  tls_skip_verify  = "true"
 }
 
 autopilot {
