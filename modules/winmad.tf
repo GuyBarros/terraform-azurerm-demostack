@@ -76,7 +76,7 @@ resource "azurerm_network_interface" "winmad-nic" {
   location                  = "${var.location}"
   resource_group_name       = "${azurerm_resource_group.demostack.name}"
   network_security_group_id = "${azurerm_network_security_group.demostack-sg.id}"
-  dns_servers               =  ["127.0.0.1","1.1.1.1","8.8.8.8"]
+  dns_servers               = ["127.0.0.1", "1.1.1.1", "8.8.8.8"]
 
   ip_configuration {
     name                          = "${var.demo_prefix}-${count.index}-winpconfig"
@@ -103,6 +103,7 @@ resource "azurerm_subnet" "winmad" {
 resource "azurerm_virtual_machine" "winmad" {
   count               = "${var.servers}"
   name                = "winmad-${count.index}"
+  depends_on          = ["azurerm_virtual_machine.servers"]
   location            = "${var.location}"
   resource_group_name = "${azurerm_resource_group.demostack.name}"
   vm_size             = "Standard_B2s"
@@ -262,26 +263,42 @@ resource "azurerm_virtual_machine" "winmad" {
       host     = "${element(azurerm_public_ip.winmad-pip.*.fqdn, count.index)}"
     }
   }
+
+  /*
+   provisioner "remote-exec" {
+     connection {
+      type     = "winrm"
+      https    = false
+      insecure = true
+      user     = "${var.admin_username}"
+      password = "${var.admin_password}"
+      host     = "${element(azurerm_public_ip.winmad-pip.*.fqdn, count.index)}"
+    }
+   
+    inline = [
+      "powershell -ExecutionPolicy Unrestricted -File C:\\Hashicorp\\InstallHashicorp.ps1  -Schedule",
+    ]
+
+  }
+  */
 }
 
-/*
 resource "azurerm_virtual_machine_extension" "winmad" {
-  count                 = "${var.servers}"
-  name                 = "winmad-${var.servers}"
-  location                  = "${var.location}"
-  resource_group_name       = "${azurerm_resource_group.demostack.name}"
-  virtual_machine_name = "${azurerm_virtual_machine.web_server.name}"
+  count               = "${var.servers}"
+  name                = "winmad-ext-${count.index}"
+  location            = "${var.location}"
+  resource_group_name = "${azurerm_resource_group.demostack.name}"
+
+  virtual_machine_name = "${element(azurerm_virtual_machine.winmad.*.name, count.index)}"
   publisher            = "Microsoft.Compute"
   type                 = "CustomScriptExtension"
   type_handler_version = "1.9"
-  depends_on           = ["azurerm_virtual_machine.web_server"]
+  depends_on           = ["azurerm_virtual_machine.servers","azurerm_virtual_machine.winmad"]
 
   settings = <<SETTINGS
     {
-        "fileUris": ["https://raw.githubusercontent.com/nehrman/terraform-azure-windows/master/scripts/InstallHashicorp.ps1"],
-        "commandToExecute": "powershell -ExecutionPolicy Unrestricted -file InstallHashicorp.ps1"
+        "fileUris": ["https://raw.githubusercontent.com/GuyBarros/terraform-azurerm-demostack/Windows_nodes/modules/templates/winmad/InstallHashicorp.ps1"],
+        "commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted -file InstallHashicorp.ps1"
     }
 SETTINGS
 }
-*/
-
