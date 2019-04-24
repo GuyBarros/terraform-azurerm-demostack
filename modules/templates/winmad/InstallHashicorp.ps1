@@ -7,8 +7,15 @@ New-NetFirewallRule -Name "NomadTCP" -DisplayName "Nomad TCP ports (4000-5000)" 
 New-NetFirewallRule -Name "NomadUDP" -DisplayName "Nomad UDP ports (4000-5000)" -Profile Domain,Private,Public -Enabled True -Protocol UDP -LocalPort 4000-5000 -Action Allow 
 write-host "Downloading Hashicorp Binaries"
 Import-Module BitsTransfer
-Start-BitsTransfer -Source https://releases.hashicorp.com/consul/1.4.4+ent/consul_1.4.4+ent_windows_amd64.zip -Destination C:\Hashicorp_packages\consul_1.4.4+ent_windows_amd64.zip
-Start-BitsTransfer -Source https://releases.hashicorp.com/nomad/0.9.0/nomad_0.9.0_windows_amd64.zip -Destination C:\Hashicorp_packages\nomad_0.9.0_windows_amd64.zip
+Start-Job -Name WebReq -ScriptBlock { 
+    write-host "starting download"
+    Start-BitsTransfer -Source https://releases.hashicorp.com/consul/1.4.4+ent/consul_1.4.4+ent_windows_amd64.zip -Destination C:\Hashicorp_packages\consul_1.4.4+ent_windows_amd64.zip
+    Start-BitsTransfer -Source https://releases.hashicorp.com/nomad/0.9.0/nomad_0.9.0_windows_amd64.zip -Destination C:\Hashicorp_packages\nomad_0.9.0_windows_amd64.zip
+    
+     }
+    
+    Wait-Job -Name WebReq
+    write-host "Download continuing script"
 write-host "Expanding Hashicorp Binaries"
 Expand-Archive C:\Hashicorp_packages\consul_1.4.4+ent_windows_amd64.zip -DestinationPath C:\Hashicorp\Consul\
 Expand-Archive C:\Hashicorp_packages\nomad_0.9.0_windows_amd64.zip -DestinationPath C:\Hashicorp\Nomad\
