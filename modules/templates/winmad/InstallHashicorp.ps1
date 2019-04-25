@@ -23,10 +23,9 @@ write-host "Creating Consul Service"
 sc.exe create "Hashicorp Consul" binPath= "C:\Hashicorp\Consul\consul.exe agent -config-file=C:\Hashicorp\Consul\config.json" start= auto
 write-host "Creating Nomad Service"
 sc.exe create "Hashicorp Nomad" binPath= "C:\Hashicorp\Nomad\nomad.exe agent -config=C:\Hashicorp\Nomad\config.json" start= auto
-write-host "waiting for 45 seconds while the downloads finish"
-Start-Sleep -Seconds 45
-write-host "Starting Consul Service"
-sc.exe start "Consul" 
 
 write-host "Starting Consul Service"
-sc.exe start "Nomad" 
+sc.exe start "Hashicorp Consul" 
+
+write-host "Starting Nomad Service"
+sc.exe start "Hashicorp Nomad" 
