@@ -18,11 +18,11 @@ data "template_file" "workers" {
 
 
 
-  vars {
+  vars = {
     location = "${var.location}"
     hostname      = "${var.hostname}-workers-${count.index}"
-    private_ip    = "${element(azurerm_network_interface.workers-nic.*.private_ip_address, count.index)}"
-    public_ip     = "${element(azurerm_public_ip.workers-pip.*.ip_address, count.index)}"
+    private_ip    = "${azurerm_network_interface.workers-nic[count.index].private_ip_address}"
+    public_ip     = "${azurerm_public_ip.workers-pip[count.index].ip_address}"
     demo_username = "${var.demo_username}"
     demo_password = "${var.demo_password}"
 
@@ -34,11 +34,11 @@ data "template_file" "workers" {
     tenant_id       = "${var.tenant_id}"
     client_id       = "${var.client_id}"
     client_secret   = "${var.client_secret}"
-    fqdn            = "${element(azurerm_public_ip.workers-pip.*.fqdn, count.index)}"
+    fqdn            = "${azurerm_public_ip.workers-pip[count.index].fqdn}"
     node_name       = "${var.hostname}-workers-${count.index}"
     me_ca           = "${var.ca_cert_pem}"
-    me_cert         = "${element(tls_locally_signed_cert.workers.*.cert_pem, count.index)}"
-    me_key          = "${element(tls_private_key.workers.*.private_key_pem, count.index)}"
+    me_cert         = "${tls_locally_signed_cert.workers[count.index].cert_pem}"
+    me_key          = "${tls_private_key.workers[count.index].private_key_pem}"
 
     # Consul
     consul_url            = "${var.consul_url}"
@@ -86,7 +86,7 @@ data "template_cloudinit_config" "workers" {
 
   part {
     content_type = "text/x-shellscript"
-    content      = "${element(data.template_file.workers.*.rendered, count.index)}"
+    content      = "${data.template_file.workers[count.index].rendered}"
   }
 }
 
@@ -110,9 +110,9 @@ resource "azurerm_network_interface" "workers-nic" {
     name                          = "${var.demo_prefix}-${count.index}-ipconfig"
     subnet_id                     = "${azurerm_subnet.workers.id}"
     private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = "${element(azurerm_public_ip.workers-pip.*.id, count.index)}"
+    public_ip_address_id          = "${azurerm_public_ip.workers-pip[count.index].id}"
   }
-  tags {
+  tags = {
     name      = "Guy Barros"
     ttl       = "13"
     owner     = "guy@hashicorp.com"
@@ -134,7 +134,7 @@ resource "azurerm_public_ip" "workers-pip" {
   sku                 = "Standard"
 
   
-    tags {
+    tags = {
     name  = "Guy Barros"
     ttl   = "13"
     owner = "guy@hashicorp.com"
@@ -156,7 +156,7 @@ resource "azurerm_virtual_machine" "workers" {
   resource_group_name = "${azurerm_resource_group.demostack.name}"
   vm_size             = "${var.vm_size}"
 
-  network_interface_ids         = ["${element(azurerm_network_interface.workers-nic.*.id, count.index)}"]
+  network_interface_ids         = ["${azurerm_network_interface.workers-nic[count.index].id}"]
   delete_os_disk_on_termination = "true"
 
   storage_image_reference {
@@ -178,14 +178,14 @@ resource "azurerm_virtual_machine" "workers" {
     computer_name  = "${var.hostname}-workers-${count.index}"
     admin_username = "${var.admin_username}"
     admin_password = "${var.admin_password}"
-    custom_data    = "${element(data.template_cloudinit_config.workers.*.rendered, count.index)}"
+    custom_data    = "${data.template_cloudinit_config.workers[count.index].rendered}"
   }
 
   os_profile_linux_config {
     disable_password_authentication = false
   }
 
-  tags {
+  tags = {
     name      = "Guy Barros"
     ttl       = "13"
     owner     = "guy@hashicorp.com"

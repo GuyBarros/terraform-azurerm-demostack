@@ -18,7 +18,7 @@ resource "azurerm_key_vault" "demostack" {
     name = "standard"
   }
 
-  tags {
+  tags = {
     name      = "Guy Barros"
     ttl       = "13"
     owner     = "guy@hashicorp.com"
@@ -91,7 +91,7 @@ resource "azurerm_key_vault_key" "demostack" {
     "wrapKey",
   ]
 
-  tags {
+  tags = {
     name      = "Guy Barros"
     ttl       = "13"
     owner     = "guy@hashicorp.com"

@@ -170,6 +170,7 @@ variable "primarynamespace" {
 The primary namespace 
 EOH
 
+
   default = "primaryconnectdemo"
 }
 
@@ -178,110 +179,105 @@ variable "secondarynamespace" {
 The secondary namespace
 EOH
 
-  default = "secondaryconnectdemo"
+
+default = "secondaryconnectdemo"
 }
 
 variable "owner" {
-  description = "IAM user responsible for lifecycle of cloud resources used for training"
+description = "IAM user responsible for lifecycle of cloud resources used for training"
 }
 
 variable "created-by" {
-  description = "Tag used to identify resources created programmatically by Terraform"
-  default     = "Terraform"
+description = "Tag used to identify resources created programmatically by Terraform"
+default     = "Terraform"
 }
 
 variable "sleep-at-night" {
-  description = "Tag used by reaper to identify resources that can be shutdown at night"
-  default     = true
+description = "Tag used by reaper to identify resources that can be shutdown at night"
+default     = true
 }
 
-variable "TTL" {
-  description = "Hours after which resource expires, used by reaper. Do not use any unit. -1 is infinite."
-  default     = "240"
+variable "Ttl" {
+description = "Hours after which resource expires, used by reaper. Do not use any unit. -1 is infinite."
+default     = "240"
 }
 
 variable "demo_username" {
-  description = "The username to attach to the user demo login as."
-  default     = "demo"
+description = "The username to attach to the user demo login as."
+default     = "demo"
 }
 
 variable "demo_password" {
-  description = "The password to attach to the user demo login as."
-  default     = "demo"
+description = "The password to attach to the user demo login as."
+default     = "demo"
 }
 
-variable "public_key" {
-  description = "The contents of the SSH public key to use for connecting to the cluster."
-}
 
 variable "enterprise" {
-  description = "do you want to use the enterprise version of the binaries"
-  default     = false
+description = "do you want to use the enterprise version of the binaries"
+default     = false
 }
 
 variable "subscription_id" {
-  description = "your subscription ID for Vault KMS Auto Unseal"
+description = "your subscription ID for Vault KMS Auto Unseal"
 }
 
 variable "tenant_id" {
-  description = "your tenant ID for Vault KMS Auto Unseal"
+description = "your tenant ID for Vault KMS Auto Unseal"
 }
 
 variable "client_id" {
-  description = "your client ID for Vault KMS Auto Unseal"
+description = "your client ID for Vault KMS Auto Unseal"
 }
 
 variable "client_secret" {
-  description = "your client ID for Vault KMS Auto Unseal"
+description = "your client ID for Vault KMS Auto Unseal"
 }
 
 variable "vaultlicense" {
-  description = "Enterprise License for Vault"
-  default     = ""
+description = "Enterprise License for Vault"
+default     = ""
 }
 
 variable "consullicense" {
-  description = "Enterprise License for Consul"
-  default     = ""
+description = "Enterprise License for Consul"
+default     = ""
 }
 
 variable "namespace" {
-  description = "Enterprise License for Consul"
-  default     = "demostack"
+description = "Enterprise License for Consul"
+default     = "demostack"
 }
 
 variable "ca_key_algorithm" {
-  default = ""
+default = ""
 }
 
 variable "ca_private_key_pem" {
-  default = ""
+default = ""
 }
 
 variable "ca_cert_pem" {
-  default = ""
+default = ""
 }
 
-variable "consul_gossip_key"{
-  default = ""
+variable "consul_gossip_key" {
+default = ""
 }
 
-variable "consul_master_token"{
-  default = ""
+variable "consul_master_token" {
+default = ""
 }
 
-variable "consul_join_tag_value"{
-  default = ""
+variable "consul_join_tag_value" {
+default = ""
 }
 
-
-variable "nomad_gossip_key"{
-  default = ""
+variable "nomad_gossip_key" {
+default = ""
 }
 
-
-variable "run_nomad_jobs"{
-  default = 1
+variable "run_nomad_jobs" {
+default = 1
 }
-
 

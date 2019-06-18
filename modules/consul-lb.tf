@@ -9,7 +9,7 @@ resource "azurerm_public_ip" "consul-lb-pip" {
   domain_name_label   = "${var.hostname}-consul-lb"
   sku                 = "Standard"
 
-  tags {
+  tags = {
     name      = "Guy Barros"
     ttl       = "13"
     owner     = "guy@hashicorp.com"
@@ -30,7 +30,7 @@ resource "azurerm_lb" "consul-lb" {
     public_ip_address_id = "${azurerm_public_ip.consul-lb-pip.id}"
   }
 
-  tags {
+  tags = {
     name      = "Guy Barros"
     ttl       = "13"
     owner     = "guy@hashicorp.com"
@@ -95,7 +95,7 @@ resource "azurerm_lb_backend_address_pool" "consul-lb-pool" {
 
 resource "azurerm_network_interface_backend_address_pool_association" "consul-lb-servers" {
   count                   = "${var.servers}"
-  network_interface_id    = "${element(azurerm_network_interface.servers-nic.*.id, count.index)}"
+  network_interface_id    = "${azurerm_network_interface.servers-nic[count.index].id}"
   ip_configuration_name   = "${var.demo_prefix}-${count.index}-ipconfig"
   backend_address_pool_id = "${azurerm_lb_backend_address_pool.consul-lb-pool.id }"
 }
@@ -103,7 +103,7 @@ resource "azurerm_network_interface_backend_address_pool_association" "consul-lb
 
 resource "azurerm_network_interface_backend_address_pool_association" "consul-lb-workers" {
   count                   = "${var.workers}"
-  network_interface_id    = "${element(azurerm_network_interface.workers-nic.*.id, count.index)}"
+  network_interface_id    = "${azurerm_network_interface.workers-nic[count.index].id}"
   ip_configuration_name   = "${var.demo_prefix}-${count.index}-ipconfig"
   backend_address_pool_id = "${azurerm_lb_backend_address_pool.consul-lb-pool.id }"
 }

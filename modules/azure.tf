@@ -11,7 +11,7 @@ resource "azurerm_resource_group" "demostack" {
   name     = "${var.resource_group}"
   location = "${var.location}"
 
-  tags {
+  tags = {
     name      = "Guy Barros"
     ttl       = "13"
     owner     = "guy@hashicorp.com"
@@ -28,7 +28,7 @@ resource "azurerm_availability_set" "vm" {
   platform_update_domain_count = 2
   managed                      = true
 
-  tags {
+  tags = {
     name      = "Guy Barros"
     ttl       = "13"
     owner     = "guy@hashicorp.com"
@@ -45,7 +45,7 @@ resource "azurerm_virtual_network" "awg" {
   address_space       = ["${var.address_space}"]
   resource_group_name = "${azurerm_resource_group.demostack.name}"
 
-  tags {
+  tags = {
     name      = "Guy Barros"
     ttl       = "13"
     owner     = "guy@hashicorp.com"
@@ -58,7 +58,7 @@ resource "azurerm_network_security_group" "demostack-sg" {
   location            = "${var.location}"
   resource_group_name = "${azurerm_resource_group.demostack.name}"
 
-  tags {
+  tags = {
     name      = "Guy Barros"
     ttl       = "13"
     owner     = "guy@hashicorp.com"

@@ -1,3 +1,4 @@
+
 data "template_file" "servers" {
   depends_on = ["azurerm_public_ip.servers-pip", "azurerm_key_vault.demostack"]
   count      = "${var.servers}"
@@ -33,11 +34,11 @@ template = "${join("\n", list(
   }
 */
 
-  vars {
+  vars = {
     location = "${var.location}"
     hostname      = "${var.hostname}-servers-${count.index}"
-    private_ip    = "${element(azurerm_network_interface.servers-nic.*.private_ip_address, count.index)}"
-    public_ip     = "${element(azurerm_public_ip.servers-pip.*.ip_address, count.index)}"
+    private_ip    = "${azurerm_network_interface.servers-nic[count.index].private_ip_address}"
+    public_ip     = "${azurerm_public_ip.servers-pip[count.index].ip_address}"
     demo_username = "${var.demo_username}"
     demo_password = "${var.demo_password}"
     enterprise    = "${var.enterprise}"
@@ -50,11 +51,11 @@ template = "${join("\n", list(
     client_id     = "${var.client_id}"
     client_secret = "${var.client_secret}"
     object_id     = "${azurerm_user_assigned_identity.demostack.principal_id}"
-    fqdn          = "${element(azurerm_public_ip.servers-pip.*.fqdn, count.index)}"
+    fqdn          = "${azurerm_public_ip.servers-pip[count.index].fqdn}"
     node_name     = "${var.hostname}-servers-${count.index}"
     me_ca         = "${var.ca_cert_pem}"
-    me_cert       = "${element(tls_locally_signed_cert.servers.*.cert_pem, count.index)}"
-    me_key        = "${element(tls_private_key.servers.*.private_key_pem, count.index)}"
+    me_cert       = "${tls_locally_signed_cert.servers[count.index].cert_pem}"
+    me_key        = "${tls_private_key.servers[count.index].private_key_pem}"
 
     # Consul
     consul_url            = "${var.consul_url}"
@@ -93,7 +94,9 @@ data "template_cloudinit_config" "servers" {
 
   part {
     content_type = "text/x-shellscript"
-    content      = "${element(data.template_file.servers.*.rendered, count.index)}"
+    content      = "${data.template_file.servers[count.index].rendered}"
+    //content      = "${element(template_file.servers.*.rendered, count.index)}"
+
   }
 }
 
@@ -108,11 +111,11 @@ resource "azurerm_network_interface" "servers-nic" {
     name                          = "${var.demo_prefix}-${count.index}-ipconfig"
     subnet_id                     = "${azurerm_subnet.servers.id}"
     private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = "${element(azurerm_public_ip.servers-pip.*.id, count.index)}"
+    public_ip_address_id          = "${azurerm_public_ip.servers-pip[count.index].id}"
 
     }
 
-  tags {
+  tags = {
     name      = "Guy Barros"
     ttl       = "13"
     owner     = "guy@hashicorp.com"
@@ -147,7 +150,7 @@ resource "azurerm_public_ip" "servers-pip" {
   domain_name_label   = "${var.hostname}-servers-${count.index}"
   sku                 = "Standard"
 
-  tags {
+  tags = {
     name      = "Guy Barros"
     ttl       = "13"
     owner     = "guy@hashicorp.com"
@@ -155,10 +158,6 @@ resource "azurerm_public_ip" "servers-pip" {
   }
 }
 
-# And finally we build our demostack servers. This is a standard Ubuntu instance.
-# We use the shell provisioner to run a Bash script that configures demostack for 
-# the demo environment. Terraform supports several different types of 
-# provisioners including Bash, Powershell and Chef.
 resource "azurerm_virtual_machine" "servers" {
   count               = "${var.servers}"
   name                = "${var.hostname}-servers-${count.index}"
@@ -167,7 +166,7 @@ resource "azurerm_virtual_machine" "servers" {
   vm_size             = "${var.vm_size}"
   availability_set_id = "${azurerm_availability_set.vm.id}"
 
-  network_interface_ids         = ["${element(azurerm_network_interface.servers-nic.*.id, count.index)}"]
+  network_interface_ids         = ["${azurerm_network_interface.servers-nic[count.index].id}"]
   delete_os_disk_on_termination = "true"
 
   storage_image_reference {
@@ -189,14 +188,14 @@ resource "azurerm_virtual_machine" "servers" {
     computer_name  = "${var.hostname}-servers-${count.index}"
     admin_username = "${var.admin_username}"
     admin_password = "${var.admin_password}"
-    custom_data    = "${element(data.template_cloudinit_config.servers.*.rendered, count.index)}"
+    custom_data    = "${data.template_cloudinit_config.servers[count.index].rendered}"
   }
 
   os_profile_linux_config {
     disable_password_authentication = false
   }
 
-  tags {
+  tags = {
     name      = "Guy Barros"
     ttl       = "13"
     owner     = "guy@hashicorp.com"

@@ -210,9 +210,6 @@ variable "demo_password" {
   default     = "demo"
 }
 
-variable "public_key" {
-  description = "The contents of the SSH public key to use for connecting to the cluster."
-}
 
 variable "enterprise" {
   description = "do you want to use the enterprise version of the binaries"

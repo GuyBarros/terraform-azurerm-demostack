@@ -1,7 +1,7 @@
 
 resource "azurerm_network_interface_application_gateway_backend_address_pool_association" "vault-servers-awg" {
   count                   = "${var.servers}"
-  network_interface_id    = "${element(azurerm_network_interface.servers-nic.*.id, count.index)}"
+  network_interface_id    = "${azurerm_network_interface.servers-nic[count.index].id}"
   ip_configuration_name   = "${var.demo_prefix}-${count.index}-ipconfig"
   backend_address_pool_id = "${azurerm_application_gateway.vault-awg.backend_address_pool.0.id }"
 }
@@ -23,7 +23,7 @@ resource "azurerm_public_ip" "vault-awg" {
   domain_name_label   = "${var.hostname}-vault-awg-${count.index}"
   sku                 = "Basic"
 
-  tags {
+  tags = {
     name      = "Guy Barros"
     ttl       = "13"
     owner     = "guy@hashicorp.com"
@@ -55,7 +55,7 @@ resource "azurerm_application_gateway" "vault-awg" {
 
   frontend_ip_configuration {
     name                 = "vault-frontend-ip"
-    public_ip_address_id = "${azurerm_public_ip.vault-awg.id}"
+    public_ip_address_id = "azurerm_public_ip.vault-awg[count.index]"
     
   }
 
@@ -83,15 +83,15 @@ resource "azurerm_application_gateway" "vault-awg" {
 
 authentication_certificate{
  name = "server-0"
- data = "${tls_locally_signed_cert.servers.0.cert_pem}"
+ data = "${tls_locally_signed_cert.servers[0].cert_pem}"
 }
 authentication_certificate{
  name = "server-1"
- data = "${tls_locally_signed_cert.servers.1.cert_pem}"
+ data = "${tls_locally_signed_cert.servers[1].cert_pem}"
 }
 authentication_certificate{
  name = "server-2"
- data = "${tls_locally_signed_cert.servers.2.cert_pem}"
+ data = "${tls_locally_signed_cert.servers[2].cert_pem}"
 }
 
   backend_http_settings {
