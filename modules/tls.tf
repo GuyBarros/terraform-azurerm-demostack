@@ -7,9 +7,10 @@ resource "tls_private_key" "servers" {
 
 # servers signing request
 resource "tls_cert_request" "servers" {
-  count           = "${var.servers}"
-  key_algorithm   = "tls_private_key.servers[count.index].algorithm"
-  private_key_pem = "tls_private_key.servers[count.index].private_key_pem"
+ count           = "${var.servers}"
+  key_algorithm   = "${tls_private_key.workers[count.index].algorithm}"
+  private_key_pem = "${tls_private_key.workers[count.index].private_key_pem}"
+ 
 
   subject {
     common_name  = "${var.hostname}-servers-${count.index}.node.consul"

@@ -15,27 +15,9 @@ data "template_file" "servers" {
     file("${path.module}/templates/shared/cleanup.sh"),
   ))}"
 
-  /**
-template = "${join("\n", list(
-    file("https://raw.githubusercontent.com/GuyBarros/demostack-cloud-scripts/master/azure/shared/base.sh"),
-    file("https://raw.githubusercontent.com/GuyBarros/demostack-cloud-scripts/master/azure/shared/docker.sh"),
-    file("https://raw.githubusercontent.com/GuyBarros/demostack-cloud-scripts/master/azure/server/consul.sh"),
-    file("https://raw.githubusercontent.com/GuyBarros/demostack-cloud-scripts/master/azure/server/vault.sh"),
-    file("https://raw.githubusercontent.com/GuyBarros/demostack-cloud-scripts/master/azure/server/nomad.sh"),
-    file("https://raw.githubusercontent.com/GuyBarros/demostack-cloud-scripts/master/azure/server/nomad-jobs.sh"),
-
-    file("https://raw.githubusercontent.com/GuyBarros/demostack-cloud-scripts/master/azure/shared/cleanup.sh"),
-  ))}"
-
-  settings = <<SETTINGS
-  { 
-    "fileUris": ["https://raw.githubusercontent.com/nehrman/terraform-azure-demo/master/modules/azure-instance/user-data.sh"],
-  "commandToExecute": "sudo sh user-data.sh" 
-  }
-*/
-
+  
   vars = {
-    location = "${var.location}"
+    location      = "${var.location}"
     hostname      = "${var.hostname}-servers-${count.index}"
     private_ip    = "${azurerm_network_interface.servers-nic[count.index].private_ip_address}"
     public_ip     = "${azurerm_public_ip.servers-pip[count.index].ip_address}"
@@ -85,20 +67,21 @@ template = "${join("\n", list(
   }
 }
 
+
 # Gzip cloud-init config
 data "template_cloudinit_config" "servers" {
-  count = "${var.servers}"
+  count      = "${var.servers}"
 
   gzip          = true
   base64_encode = true
 
   part {
     content_type = "text/x-shellscript"
-    content      = "${data.template_file.servers[count.index].rendered}"
-    //content      = "${element(template_file.servers.*.rendered, count.index)}"
-
+    content      = element(data.template_file.servers[*].rendered, count.index)
   }
+
 }
+
 
 resource "azurerm_network_interface" "servers-nic" {
   count                     = "${var.servers}"
@@ -188,8 +171,18 @@ resource "azurerm_virtual_machine" "servers" {
     computer_name  = "${var.hostname}-servers-${count.index}"
     admin_username = "${var.admin_username}"
     admin_password = "${var.admin_password}"
-    custom_data    = "${data.template_cloudinit_config.servers[count.index].rendered}"
+    custom_data    =  element(
+    data.template_cloudinit_config.servers.*.rendered,
+    count.index,
+  )
   }
+
+/*
+   user_data = element(
+    data.template_cloudinit_config.servers.*.rendered,
+    count.index,
+  )
+  */
 
   os_profile_linux_config {
     disable_password_authentication = false

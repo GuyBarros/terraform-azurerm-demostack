@@ -76,20 +76,21 @@ data "template_file" "workers" {
 
   }
 }
-
+/*
 # Gzip cloud-init config
 data "template_cloudinit_config" "workers" {
-  count = "${var.workers}"
+  count      = "${var.workers}"
 
   gzip          = true
   base64_encode = true
 
   part {
     content_type = "text/x-shellscript"
-    content      = "${data.template_file.workers[count.index].rendered}"
+    content      = data.template_file.workers[count.index]
+    //content      = data.template_file.workers.rendered[count.index]
   }
 }
-
+*/
 resource "azurerm_subnet" "workers" {
   name                 = "${var.demo_prefix}-workers"
   virtual_network_name = "${azurerm_virtual_network.awg.name}"
@@ -178,7 +179,7 @@ resource "azurerm_virtual_machine" "workers" {
     computer_name  = "${var.hostname}-workers-${count.index}"
     admin_username = "${var.admin_username}"
     admin_password = "${var.admin_password}"
-    custom_data    = "${data.template_cloudinit_config.workers[count.index].rendered}"
+ //   custom_data    = data.template_cloudinit_config.workers.rendered[count.index]
   }
 
   os_profile_linux_config {
