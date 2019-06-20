@@ -4,8 +4,8 @@
 resource "azurerm_public_ip" "consul-lb-pip" {
   name                = "${var.resource_group}-consul-lb-pip"
   resource_group_name = "${azurerm_resource_group.demostack.name}"
-  location            = "${var.location}"
-  allocation_method   = "Static"
+  location            = var.location
+ allocation_method   = "Static"
   domain_name_label   = "${var.hostname}-consul-lb"
   sku                 = "Standard"
 
@@ -13,8 +13,8 @@ resource "azurerm_public_ip" "consul-lb-pip" {
     name      = "Guy Barros"
     ttl       = "13"
     owner     = "guy@hashicorp.com"
-    demostack = "${var.consul_join_tag_value}"
-  }
+    demostack = var.consul_join_tag_value
+ }
 }
 
 # create and configure Azure Load Balancer
@@ -22,8 +22,8 @@ resource "azurerm_public_ip" "consul-lb-pip" {
 resource "azurerm_lb" "consul-lb" {
   name                = "${var.resource_group}-consul-lb"
   resource_group_name = "${azurerm_resource_group.demostack.name}"
-  location            = "${var.location}"
-  sku                 = "Standard"
+  location            = var.location
+ sku                 = "Standard"
 
   frontend_ip_configuration {
     name                 = "${var.resource_group}-consulpip"
@@ -34,8 +34,8 @@ resource "azurerm_lb" "consul-lb" {
     name      = "Guy Barros"
     ttl       = "13"
     owner     = "guy@hashicorp.com"
-    demostack = "${var.consul_join_tag_value}"
-  }
+    demostack = var.consul_join_tag_value
+ }
 }
 
 resource "azurerm_lb_probe" "consul-lb-probe" {
@@ -94,16 +94,16 @@ resource "azurerm_lb_backend_address_pool" "consul-lb-pool" {
 }
 
 resource "azurerm_network_interface_backend_address_pool_association" "consul-lb-servers" {
-  count                   = "${var.servers}"
-  network_interface_id    = "${azurerm_network_interface.servers-nic[count.index].id}"
+  count                   = var.servers
+ network_interface_id    = "${azurerm_network_interface.servers-nic[count.index].id}"
   ip_configuration_name   = "${var.demo_prefix}-${count.index}-ipconfig"
   backend_address_pool_id = "${azurerm_lb_backend_address_pool.consul-lb-pool.id }"
 }
 
 
 resource "azurerm_network_interface_backend_address_pool_association" "consul-lb-workers" {
-  count                   = "${var.workers}"
-  network_interface_id    = "${azurerm_network_interface.workers-nic[count.index].id}"
+  count                   = var.workers
+ network_interface_id    = "${azurerm_network_interface.workers-nic[count.index].id}"
   ip_configuration_name   = "${var.demo_prefix}-${count.index}-ipconfig"
   backend_address_pool_id = "${azurerm_lb_backend_address_pool.consul-lb-pool.id }"
 }

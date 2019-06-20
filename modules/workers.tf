@@ -97,10 +97,10 @@ resource "azurerm_subnet" "workers" {
 }
 
 resource "azurerm_network_interface" "workers-nic" {
-  count                     = "${var.workers}"
-  name                      = "${var.demo_prefix}workers-nic-${count.index}"
-  location                  = "${var.location}"
-  resource_group_name       = "${azurerm_resource_group.demostack.name}"
+  count                     = var.workers
+ name                      = "${var.demo_prefix}workers-nic-${count.index}"
+  location                  = var.location
+ resource_group_name       = "${azurerm_resource_group.demostack.name}"
   network_security_group_id = "${azurerm_network_security_group.demostack-sg.id}"
 
   # network_security_group_id = "${azurerm_network_security_group.demostack-sg.id}"
@@ -115,8 +115,8 @@ resource "azurerm_network_interface" "workers-nic" {
     name      = "Guy Barros"
     ttl       = "13"
     owner     = "guy@hashicorp.com"
-    demostack = "${var.consul_join_tag_value}"
-  }
+    demostack = var.consul_join_tag_value
+ }
 }
 
 
@@ -124,10 +124,10 @@ resource "azurerm_network_interface" "workers-nic" {
 # optionally add a public IP address for Internet-facing applications and 
 # demo environments like this one.
 resource "azurerm_public_ip" "workers-pip" {
-  count               = "${var.workers}"
-  name                = "${var.demo_prefix}-workers-ip-${count.index}"
-  location            = "${var.location}"
-  resource_group_name = "${azurerm_resource_group.demostack.name}"
+  count               = var.workers
+ name                = "${var.demo_prefix}-workers-ip-${count.index}"
+  location            = var.location
+ resource_group_name = "${azurerm_resource_group.demostack.name}"
   allocation_method   = "Static"
   domain_name_label   = "${var.hostname}-workers-${count.index}"
   sku                 = "Standard"
@@ -137,8 +137,8 @@ resource "azurerm_public_ip" "workers-pip" {
     name  = "Guy Barros"
     ttl   = "13"
     owner = "guy@hashicorp.com"
-    demostack = "${var.consul_join_tag_value}"
-  }
+    demostack = var.consul_join_tag_value
+ }
 
 }
 
@@ -149,35 +149,35 @@ resource "azurerm_public_ip" "workers-pip" {
 # the demo environment. Terraform supports several different types of 
 # provisioners including Bash, Powershell and Chef.
 resource "azurerm_virtual_machine" "workers" {
-  count               = "${var.workers}"
-  name                = "${var.hostname}-workers-${count.index}"
-  location            = "${var.location}"
-  resource_group_name = "${azurerm_resource_group.demostack.name}"
+  count               = var.workers
+ name                = "${var.hostname}-workers-${count.index}"
+  location            = var.location
+ resource_group_name = "${azurerm_resource_group.demostack.name}"
   vm_size             = "${var.vm_size}"
 
   network_interface_ids         = ["${azurerm_network_interface.workers-nic[count.index].id}"]
   delete_os_disk_on_termination = "true"
 
   storage_image_reference {
-    publisher = "${var.image_publisher}"
-    offer     = "${var.image_offer}"
-    sku       = "${var.image_sku}"
-    version   = "${var.image_version}"
-  }
+    publisher = var.image_publisher
+   offer     =  var.image_offer
+   sku       =  var.image_sku
+   version   =  var.image_version
+ }
 
   storage_os_disk {
     name              = "${var.hostname}-worker-osdisk-${count.index}"
     managed_disk_type = "Standard_LRS"
     caching           = "ReadWrite"
     create_option     = "FromImage"
-    disk_size_gb      = "${var.storage_disk_size}"
-  }
+    disk_size_gb      = var.storage_disk_size
+ }
 
   os_profile {
     computer_name  = "${var.hostname}-workers-${count.index}"
-    admin_username = "${var.admin_username}"
-    admin_password = "${var.admin_password}"
- //custom_data =  "${element(data.template_cloudinit_config.workers[*].rendered,    count.index  )}"
+    admin_username = var.admin_username
+   admin_password = var.admin_password
+//custom_data =  "${element(data.template_cloudinit_config.workers[*].rendered,    count.index  )}"
   }
 
   os_profile_linux_config {
@@ -188,6 +188,6 @@ resource "azurerm_virtual_machine" "workers" {
     name      = "Guy Barros"
     ttl       = "13"
     owner     = "guy@hashicorp.com"
-    demostack = "${var.consul_join_tag_value}"
-  }
+    demostack = var.consul_join_tag_value
+ }
 }

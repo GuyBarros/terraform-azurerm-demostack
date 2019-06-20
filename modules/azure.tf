@@ -1,29 +1,29 @@
 provider "azurerm" {
-  subscription_id        = "${var.subscription_id}"
-  tenant_id              = "${var.tenant_id}"
-  client_id           = "${var.client_id}"
-  client_secret       = "${var.client_secret}"
+  subscription_id        = var.subscription_id
+ tenant_id              = var.tenant_id
+ client_id           = var.client_id
+ client_secret       = "${var.client_secret}"
 }
 
 data "azurerm_client_config" "current" {}
 
 resource "azurerm_resource_group" "demostack" {
-  name     = "${var.resource_group}"
-  location = "${var.location}"
+  name     = var.resource_group
+ location = "${var.location}"
 
   tags = {
     name      = "Guy Barros"
     ttl       = "13"
     owner     = "guy@hashicorp.com"
-    demostack = "${var.consul_join_tag_value}"
-  }
+    demostack = var.consul_join_tag_value
+ }
 }
 
 resource "azurerm_availability_set" "vm" {
-  # count                          = "${var.servers}"
-  name                         = "${var.demo_prefix}-aval-set"
-  location                     = "${var.location}"
-  resource_group_name          = "${azurerm_resource_group.demostack.name}"
+  # count                          = var.servers
+ name                         = "${var.demo_prefix}-aval-set"
+  location                     = var.location
+ resource_group_name          = "${azurerm_resource_group.demostack.name}"
   platform_fault_domain_count  = 2
   platform_update_domain_count = 2
   managed                      = true
@@ -32,8 +32,8 @@ resource "azurerm_availability_set" "vm" {
     name      = "Guy Barros"
     ttl       = "13"
     owner     = "guy@hashicorp.com"
-    demostack = "${var.consul_join_tag_value}"
-  }
+    demostack = var.consul_join_tag_value
+ }
 }
 
 
@@ -49,21 +49,21 @@ resource "azurerm_virtual_network" "awg" {
     name      = "Guy Barros"
     ttl       = "13"
     owner     = "guy@hashicorp.com"
-    demostack = "${var.consul_join_tag_value}"
-  }
+    demostack = var.consul_join_tag_value
+ }
 }
 
 resource "azurerm_network_security_group" "demostack-sg" {
   name                = "${var.demo_prefix}-sg"
-  location            = "${var.location}"
-  resource_group_name = "${azurerm_resource_group.demostack.name}"
+  location            = var.location
+ resource_group_name = "${azurerm_resource_group.demostack.name}"
 
   tags = {
     name      = "Guy Barros"
     ttl       = "13"
     owner     = "guy@hashicorp.com"
-    demostack = "${var.consul_join_tag_value}"
-  }
+    demostack = var.consul_join_tag_value
+ }
 
   security_rule {
     name                       = "demostack-https"

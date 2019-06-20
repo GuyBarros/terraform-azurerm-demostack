@@ -1,14 +1,14 @@
 resource "azurerm_network_interface_application_gateway_backend_address_pool_association" "nomad-servers-awg" {
-  count                   = "${var.servers}"
-  network_interface_id    = "${azurerm_network_interface.servers-nic[count.index].id}"
+  count                   = var.servers
+ network_interface_id    = "${azurerm_network_interface.servers-nic[count.index].id}"
   ip_configuration_name   = "${var.demo_prefix}-${count.index}-ipconfig"
   backend_address_pool_id = "${azurerm_application_gateway.nomad-awg.backend_address_pool.0.id }"
 }
 
 
 resource "azurerm_network_interface_application_gateway_backend_address_pool_association" "nomad-workers-awg" {
-  count                   = "${var.workers}"
-  network_interface_id    = "${azurerm_network_interface.workers-nic[count.index].id}"
+  count                   = var.workers
+ network_interface_id    = "${azurerm_network_interface.workers-nic[count.index].id}"
   ip_configuration_name   = "${var.demo_prefix}-${count.index}-ipconfig"
   backend_address_pool_id = "${azurerm_application_gateway.nomad-awg.backend_address_pool.0.id }"
 }
@@ -24,8 +24,8 @@ resource "azurerm_subnet" "nomad-awg" {
 resource "azurerm_public_ip" "nomad-awg" {
   name                = "${var.resource_group}-nomad-awg"
   resource_group_name = "${azurerm_resource_group.demostack.name}"
-  location            = "${var.location}"
-  allocation_method   = "Dynamic"
+  location            = var.location
+ allocation_method   = "Dynamic"
   domain_name_label   = "${var.hostname}-nomad-awg-pip"
   sku                 = "Basic"
 
@@ -33,8 +33,8 @@ resource "azurerm_public_ip" "nomad-awg" {
     name      = "Guy Barros"
     ttl       = "13"
     owner     = "guy@hashicorp.com"
-    demostack = "${var.consul_join_tag_value}"
-  }
+    demostack = var.consul_join_tag_value
+ }
 }
 
 resource "azurerm_application_gateway" "nomad-awg" {

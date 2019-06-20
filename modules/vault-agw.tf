@@ -27,8 +27,8 @@ resource "azurerm_public_ip" "vault-awg" {
     name      = "Guy Barros"
     ttl       = "13"
     owner     = "guy@hashicorp.com"
-    demostack = "${var.consul_join_tag_value}"
-  }
+    demostack = var.consul_join_tag_value
+ }
 }
 
 

@@ -40,31 +40,31 @@ data "template_file" "servers" {
     me_key        = tls_private_key.servers[count.index].private_key_pem
 
     # Consul
-    consul_url            = "${var.consul_url}"
-    consul_ent_url        = "${var.consul_ent_url}"
-    consul_gossip_key     = "${var.consul_gossip_key}"
-    consul_join_tag_key   = "ConsulJoin"
+    consul_url            = var.consul_url
+   consul_ent_url        = var.consul_ent_url
+   consul_gossip_key     = var.consul_gossip_key
+   consul_join_tag_key   = "ConsulJoin"
     consul_join_tag_name  = "demostack"
-    consul_join_tag_value = "${var.consul_join_tag_value}"
-    consul_master_token   = "${var.consul_master_token}"
-    consul_servers        = "${var.servers}"
+    consul_join_tag_value = var.consul_join_tag_value
+   consul_master_token   =  var.consul_master_token
+   consul_servers        = "${var.servers}"
 
     # Nomad
-    nomad_url        = "${var.nomad_url}"
-    nomad_gossip_key = "${var.nomad_gossip_key}"
-    nomad_servers    = "${var.servers}"
+    nomad_url        = var.nomad_url
+   nomad_gossip_key =  var.nomad_gossip_key
+   nomad_servers    = "${var.servers}"
 
     # Nomad jobs
-    fabio_url   = "${var.fabio_url}"
-    hashiui_url = "${var.hashiui_url}"
-    run_nomad_jobs = "${var.run_nomad_jobs}"
+    fabio_url   = var.fabio_url
+   hashiui_url =  var.hashiui_url
+   run_nomad_jobs = "${var.run_nomad_jobs}"
 
     # Vault
-    vault_url        = "${var.vault_url}"
-    vault_ent_url    = "${var.vault_ent_url}"
-    vault_root_token = "${random_id.vault-root-token.hex}"
-    vault_servers    = "${var.servers}"
-  }
+    vault_url        = var.vault_url
+   vault_ent_url    =  var.vault_ent_url
+   vault_root_token = "${random_id.vault-root-token.hex}"
+    vault_servers    = var.servers
+ }
 }
 
 
@@ -85,10 +85,10 @@ data "template_cloudinit_config" "servers" {
 
 
 resource "azurerm_network_interface" "servers-nic" {
-  count                     = "${var.servers}"
-  name                      = "${var.demo_prefix}servers-nic-${count.index}"
-  location                  = "${var.location}"
-  resource_group_name       = "${azurerm_resource_group.demostack.name}"
+  count                     = var.servers
+ name                      = "${var.demo_prefix}servers-nic-${count.index}"
+  location                  = var.location
+ resource_group_name       = "${azurerm_resource_group.demostack.name}"
   network_security_group_id = "${azurerm_network_security_group.demostack-sg.id}"
 
   ip_configuration {
@@ -103,8 +103,8 @@ resource "azurerm_network_interface" "servers-nic" {
     name      = "Guy Barros"
     ttl       = "13"
     owner     = "guy@hashicorp.com"
-    demostack = "${var.consul_join_tag_value}"
-  }
+    demostack = var.consul_join_tag_value
+ }
 }
 
 resource "azurerm_subnet" "servers" {
@@ -126,10 +126,10 @@ resource "azurerm_subnet" "servers" {
 # optionally add a public IP address for Internet-facing applications and 
 # demo environments like this one.
 resource "azurerm_public_ip" "servers-pip" {
-  count               = "${var.servers}"
-  name                = "${var.demo_prefix}-servers-ip-${count.index}"
-  location            = "${var.location}"
-  resource_group_name = "${azurerm_resource_group.demostack.name}"
+  count               = var.servers
+ name                = "${var.demo_prefix}-servers-ip-${count.index}"
+  location            = var.location
+ resource_group_name = "${azurerm_resource_group.demostack.name}"
   allocation_method   = "Static"
   domain_name_label   = "${var.hostname}-servers-${count.index}"
   sku                 = "Standard"
@@ -138,28 +138,28 @@ resource "azurerm_public_ip" "servers-pip" {
     name      = "Guy Barros"
     ttl       = "13"
     owner     = "guy@hashicorp.com"
-    demostack = "${var.consul_join_tag_value}"
-  }
+    demostack = var.consul_join_tag_value
+ }
 }
 
 resource "azurerm_virtual_machine" "servers" {
   depends_on = ["data.template_file.servers","data.template_cloudinit_config.servers"]
-  count               = "${var.servers}"
-  name                = "${var.hostname}-servers-${count.index}"
-  location            = "${var.location}"
-  resource_group_name = "${azurerm_resource_group.demostack.name}"
-  vm_size             = "${var.vm_size}"
-  availability_set_id = "${azurerm_availability_set.vm.id}"
+  count               = var.servers
+ name                = "${var.hostname}-servers-${count.index}"
+  location            = var.location
+ resource_group_name = "${azurerm_resource_group.demostack.name}"
+  vm_size             = var.vm_size
+ availability_set_id = "${azurerm_availability_set.vm.id}"
 
   network_interface_ids         = ["${azurerm_network_interface.servers-nic[count.index].id}"]
   delete_os_disk_on_termination = "true"
 
   storage_image_reference {
-    publisher = "${var.image_publisher}"
-    offer     = "${var.image_offer}"
-    sku       = "${var.image_sku}"
-    version   = "${var.image_version}"
-  }
+    publisher = var.image_publisher
+   offer     =  var.image_offer
+   sku       =  var.image_sku
+   version   =  var.image_version
+ }
 
   storage_os_disk {
     name              = "${var.hostname}-sever-osdisk-${count.index}"
@@ -173,8 +173,9 @@ resource "azurerm_virtual_machine" "servers" {
     computer_name  = "${var.hostname}-servers-${count.index}"
     admin_username = var.admin_username
     admin_password = var.admin_password
-   //custom_data =  "${data.template_cloudinit_config.servers[2].rendered}"
-     custom_data = element(data.template_cloudinit_config.servers, count.index)
+    // custom_data =  "${data.template_cloudinit_config.servers[count.index].rendered}" //this doesnt pass plan
+   // custom_data =  data.template_cloudinit_config.servers[0].rendered  // this passes plan
+     custom_data = "${element(data.template_cloudinit_config.servers[*].rendered, 0)}" // this doesnt pass plan
   
   }
 
@@ -187,6 +188,6 @@ resource "azurerm_virtual_machine" "servers" {
     name      = "Guy Barros"
     ttl       = "13"
     owner     = "guy@hashicorp.com"
-    demostack = "${var.consul_join_tag_value}"
-  }
+    demostack = var.consul_join_tag_value
+ }
 }

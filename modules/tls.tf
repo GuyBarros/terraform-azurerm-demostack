@@ -1,14 +1,14 @@
 # servers private key
 resource "tls_private_key" "servers" {
-  count       = "${var.servers}"
-  algorithm   = "ECDSA"
+  count       = var.servers
+ algorithm   = "ECDSA"
   ecdsa_curve = "P521"
 }
 
 # servers signing request
 resource "tls_cert_request" "servers" {
- count           = "${var.servers}"
-  key_algorithm   = "${tls_private_key.workers[count.index].algorithm}"
+ count           = var.servers
+ key_algorithm   = "${tls_private_key.workers[count.index].algorithm}"
   private_key_pem = "${tls_private_key.workers[count.index].private_key_pem}"
  
 
@@ -42,11 +42,11 @@ resource "tls_cert_request" "servers" {
 
 # servers certificate
 resource "tls_locally_signed_cert" "servers" {
-  count              = "${var.servers}"
-  cert_request_pem   = "${tls_cert_request.servers[count.index].cert_request_pem}"
-  ca_key_algorithm   = "${var.ca_key_algorithm}"
-  ca_private_key_pem = "${var.ca_private_key_pem}"
-  ca_cert_pem        = "${var.ca_cert_pem}"
+  count              = var.servers
+ cert_request_pem   = "${tls_cert_request.servers[count.index].cert_request_pem}"
+  ca_key_algorithm   = var.ca_key_algorithm
+ ca_private_key_pem =  var.ca_private_key_pem
+ ca_cert_pem        = "${var.ca_cert_pem}"
 
   validity_period_hours = 720 # 30 days
 
@@ -69,16 +69,16 @@ resource "random_id" "vault-root-token" {
 
 # Client private key
 resource "tls_private_key" "workers" {
-  count       = "${var.workers}"
-  algorithm   = "ECDSA"
+  count       = var.workers
+ algorithm   = "ECDSA"
   ecdsa_curve = "P521"
 }
 
 
 # Client signing request
 resource "tls_cert_request" "workers" {
-  count           = "${var.workers}"
-  key_algorithm   = "${tls_private_key.workers[count.index].algorithm}"
+  count           = var.workers
+ key_algorithm   = "${tls_private_key.workers[count.index].algorithm}"
   private_key_pem = "${tls_private_key.workers[count.index].private_key_pem}"
 
   subject {
@@ -110,11 +110,11 @@ resource "tls_cert_request" "workers" {
 # Client certificate
 
 resource "tls_locally_signed_cert" "workers" {
-  count              = "${var.workers}"
-  cert_request_pem   = "${tls_cert_request.workers[count.index].cert_request_pem}"
-  ca_key_algorithm   = "${var.ca_key_algorithm}"
-  ca_private_key_pem = "${var.ca_private_key_pem}"
-  ca_cert_pem        = "${var.ca_cert_pem}"
+  count              = var.workers
+ cert_request_pem   = "${tls_cert_request.workers[count.index].cert_request_pem}"
+  ca_key_algorithm   = var.ca_key_algorithm
+ ca_private_key_pem =  var.ca_private_key_pem
+ ca_cert_pem        = "${var.ca_cert_pem}"
 
   validity_period_hours = 720 # 30 days
 
