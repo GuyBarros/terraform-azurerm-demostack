@@ -28,3 +28,7 @@ output "servers" {
 output "workers" {
   value = module.primarycluster.workers
 }
+
+output "cloudscript" {
+  value = module.primarycluster.cloudscript
+}

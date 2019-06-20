@@ -17,27 +17,27 @@ data "template_file" "servers" {
 
   
   vars = {
-    location      = "${var.location}"
+    location      = var.location
     hostname      = "${var.hostname}-servers-${count.index}"
-    private_ip    = "${azurerm_network_interface.servers-nic[count.index].private_ip_address}"
-    public_ip     = "${azurerm_public_ip.servers-pip[count.index].ip_address}"
-    demo_username = "${var.demo_username}"
-    demo_password = "${var.demo_password}"
-    enterprise    = "${var.enterprise}"
-    vaultlicense  = "${var.vaultlicense}"
-    consullicense = "${var.consullicense}"
-    kmsvaultname  = "${azurerm_key_vault.demostack.name}"
-    kmskeyname    = "${azurerm_key_vault_key.demostack.name}"
-    subscription_id = "${var.subscription_id}"
-    tenant_id     = "${var.tenant_id}"
-    client_id     = "${var.client_id}"
-    client_secret = "${var.client_secret}"
-    object_id     = "${azurerm_user_assigned_identity.demostack.principal_id}"
-    fqdn          = "${azurerm_public_ip.servers-pip[count.index].fqdn}"
+    private_ip    = azurerm_network_interface.servers-nic[count.index].private_ip_address
+    public_ip     = azurerm_public_ip.servers-pip[count.index].ip_address
+    demo_username = var.demo_username
+    demo_password = var.demo_password
+    enterprise    = var.enterprise
+    vaultlicense  = var.vaultlicense
+    consullicense = var.consullicense
+    kmsvaultname  = azurerm_key_vault.demostack.name
+    kmskeyname    = azurerm_key_vault_key.demostack.name
+    subscription_id = var.subscription_id
+    tenant_id     = var.tenant_id
+    client_id     = var.client_id
+    client_secret = var.client_secret
+    object_id     = azurerm_user_assigned_identity.demostack.principal_id
+    fqdn          = azurerm_public_ip.servers-pip[count.index].fqdn
     node_name     = "${var.hostname}-servers-${count.index}"
-    me_ca         = "${var.ca_cert_pem}"
-    me_cert       = "${tls_locally_signed_cert.servers[count.index].cert_pem}"
-    me_key        = "${tls_private_key.servers[count.index].private_key_pem}"
+    me_ca         = var.ca_cert_pem
+    me_cert       = tls_locally_signed_cert.servers[count.index].cert_pem
+    me_key        = tls_private_key.servers[count.index].private_key_pem
 
     # Consul
     consul_url            = "${var.consul_url}"
@@ -70,6 +70,7 @@ data "template_file" "servers" {
 
 # Gzip cloud-init config
 data "template_cloudinit_config" "servers" {
+  depends_on = ["data.template_file.servers"]
   count      = "${var.servers}"
 
   gzip          = true
@@ -77,7 +78,7 @@ data "template_cloudinit_config" "servers" {
 
   part {
     content_type = "text/x-shellscript"
-    content      = element(data.template_file.servers[*].rendered, count.index)
+    content      = data.template_file.servers[count.index].rendered
   }
 
 }
@@ -142,6 +143,7 @@ resource "azurerm_public_ip" "servers-pip" {
 }
 
 resource "azurerm_virtual_machine" "servers" {
+  depends_on = ["data.template_file.servers","data.template_cloudinit_config.servers"]
   count               = "${var.servers}"
   name                = "${var.hostname}-servers-${count.index}"
   location            = "${var.location}"
@@ -164,25 +166,18 @@ resource "azurerm_virtual_machine" "servers" {
     managed_disk_type = "Standard_LRS"
     caching           = "ReadWrite"
     create_option     = "FromImage"
-    disk_size_gb      = "${var.storage_disk_size}"
+    disk_size_gb      = var.storage_disk_size
   }
 
   os_profile {
     computer_name  = "${var.hostname}-servers-${count.index}"
-    admin_username = "${var.admin_username}"
-    admin_password = "${var.admin_password}"
-    custom_data    =  element(
-    data.template_cloudinit_config.servers.*.rendered,
-    count.index,
-  )
+    admin_username = var.admin_username
+    admin_password = var.admin_password
+   //custom_data =  "${data.template_cloudinit_config.servers[2].rendered}"
+     custom_data = element(data.template_cloudinit_config.servers, count.index)
+  
   }
 
-/*
-   user_data = element(
-    data.template_cloudinit_config.servers.*.rendered,
-    count.index,
-  )
-  */
 
   os_profile_linux_config {
     disable_password_authentication = false

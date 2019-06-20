@@ -19,59 +19,58 @@ data "template_file" "workers" {
 
 
   vars = {
-    location = "${var.location}"
+    location = var.location
     hostname      = "${var.hostname}-workers-${count.index}"
-    private_ip    = "${azurerm_network_interface.workers-nic[count.index].private_ip_address}"
-    public_ip     = "${azurerm_public_ip.workers-pip[count.index].ip_address}"
-    demo_username = "${var.demo_username}"
-    demo_password = "${var.demo_password}"
-
-    enterprise      = "${var.enterprise}"
-    vaultlicense    = "${var.vaultlicense}"
-    consullicense   = "${var.consullicense}"
-    kmskey          = "${azurerm_key_vault.demostack.id}"
-    subscription_id = "${var.subscription_id}"
-    tenant_id       = "${var.tenant_id}"
-    client_id       = "${var.client_id}"
-    client_secret   = "${var.client_secret}"
-    fqdn            = "${azurerm_public_ip.workers-pip[count.index].fqdn}"
+    private_ip    = azurerm_network_interface.workers-nic[count.index].private_ip_address
+    public_ip     = azurerm_public_ip.workers-pip[count.index].ip_address
+    demo_username = var.demo_username
+    demo_password = var.demo_password
+    enterprise      = var.enterprise
+    vaultlicense    = var.vaultlicense
+    consullicense   = var.consullicense
+    kmskey          = azurerm_key_vault.demostack.id
+    subscription_id = var.subscription_id
+    tenant_id       = var.tenant_id
+    client_id       = var.client_id
+    client_secret   = var.client_secret
+    fqdn            = azurerm_public_ip.workers-pip[count.index].fqdn
     node_name       = "${var.hostname}-workers-${count.index}"
-    me_ca           = "${var.ca_cert_pem}"
-    me_cert         = "${tls_locally_signed_cert.workers[count.index].cert_pem}"
-    me_key          = "${tls_private_key.workers[count.index].private_key_pem}"
+    me_ca           = var.ca_cert_pem
+    me_cert         = tls_locally_signed_cert.workers[count.index].cert_pem
+    me_key          = tls_private_key.workers[count.index].private_key_pem
 
     # Consul
-    consul_url            = "${var.consul_url}"
-    consul_ent_url        = "${var.consul_ent_url}"
-    consul_gossip_key     = "${var.consul_gossip_key}"
+    consul_url            = var.consul_url
+    consul_ent_url        = var.consul_ent_url
+    consul_gossip_key     = var.consul_gossip_key
     consul_join_tag_key   = "ConsulJoin"
     consul_join_tag_name  = "demostack"
-    consul_join_tag_value = "${var.consul_join_tag_value}"
-    consul_master_token   = "${var.consul_master_token}"
-    consul_servers        = "${var.workers}"
+    consul_join_tag_value = var.consul_join_tag_value
+    consul_master_token   = var.consul_master_token
+    consul_servers        = var.workers
 
     # Nomad
-    nomad_url        = "${var.nomad_url}"
-    nomad_gossip_key = "${var.nomad_gossip_key}"
-    nomad_servers    = "${var.workers}"
+    nomad_url        = var.nomad_url
+    nomad_gossip_key = var.nomad_gossip_key
+    nomad_servers    = var.workers
 
     # Nomad jobs
-    fabio_url   = "${var.fabio_url}"
-    hashiui_url = "${var.hashiui_url}"
-     run_nomad_jobs = "${var.run_nomad_jobs}"
+    fabio_url   = var.fabio_url
+    hashiui_url = var.hashiui_url
+     run_nomad_jobs = var.run_nomad_jobs
 
     # Vault
-    vault_url        = "${var.vault_url}"
-    vault_ent_url    = "${var.vault_ent_url}"
-    vault_root_token = "${random_id.vault-root-token.hex}"
-    vault_servers    = "${var.workers}"
+    vault_url        = var.vault_url
+    vault_ent_url    = var.vault_ent_url
+    vault_root_token = random_id.vault-root-token.hex
+    vault_servers    = var.workers
 
 
     # Tools
-    consul_template_url = "${var.consul_template_url}"
-    envconsul_url       = "${var.envconsul_url}"
-    packer_url          = "${var.packer_url}"
-    sentinel_url        = "${var.sentinel_url}"
+    consul_template_url = var.consul_template_url
+    envconsul_url       = var.envconsul_url
+    packer_url          = var.packer_url
+    sentinel_url        = var.sentinel_url
 
 
   }
@@ -86,8 +85,7 @@ data "template_cloudinit_config" "workers" {
 
   part {
     content_type = "text/x-shellscript"
-    content      = data.template_file.workers[count.index]
-    //content      = data.template_file.workers.rendered[count.index]
+    content      = data.template_file.workers[count.index].rendered
   }
 }
 */
@@ -179,7 +177,7 @@ resource "azurerm_virtual_machine" "workers" {
     computer_name  = "${var.hostname}-workers-${count.index}"
     admin_username = "${var.admin_username}"
     admin_password = "${var.admin_password}"
- //   custom_data    = data.template_cloudinit_config.workers.rendered[count.index]
+ //custom_data =  "${element(data.template_cloudinit_config.workers[*].rendered,    count.index  )}"
   }
 
   os_profile_linux_config {
