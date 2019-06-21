@@ -1,4 +1,3 @@
-
 data "template_file" "servers" {
   depends_on = ["azurerm_public_ip.servers-pip", "azurerm_key_vault.demostack"]
   count      = "${var.servers}"
@@ -117,11 +116,6 @@ resource "azurerm_subnet" "servers" {
 
 
 
-
-
-
-
-
 # Every Azure Virtual Machine comes with a private IP address. You can also 
 # optionally add a public IP address for Internet-facing applications and 
 # demo environments like this one.
@@ -173,11 +167,12 @@ resource "azurerm_virtual_machine" "servers" {
     computer_name  = "${var.hostname}-servers-${count.index}"
     admin_username = var.admin_username
     admin_password = var.admin_password
-    // custom_data =  "${data.template_cloudinit_config.servers[count.index].rendered}" //this doesnt pass plan
-   // custom_data =  data.template_cloudinit_config.servers[0].rendered  // this passes plan
-     custom_data = "${element(data.template_cloudinit_config.servers[*].rendered, 0)}" // this doesnt pass plan
-  
-  }
+    ////////////////////////////////////////// 
+       
+        custom_data = "${element(data.template_cloudinit_config.servers[*].rendered, count.index)}" // this doesnt pass plan
+       
+    //////////////////////////////////////////     
+    }
 
 
   os_profile_linux_config {
