@@ -36,17 +36,6 @@ module "primarycluster" {
   TTL                 = var.Ttl
   run_nomad_jobs      = var.run_nomad_jobs
 
-  /*
-  # EMEA-SE-PLAYGROUND
-  ca_key_algorithm      = var.ca_key_algorithm
-  ca_private_key_pem    = var.ca_private_key_pem
-  ca_cert_pem           = var.ca_cert_pem
-  consul_join_tag_value = "${var.namespace}-${var.consul_join_tag_value}"
-  consul_gossip_key     = var.consul_gossip_key
-  consul_master_token   = var.consul_master_token
-  nomad_gossip_key      = var.nomad_gossip_key
-  */
-  
 ca_key_algorithm      = var.ca_key_algorithm
   ca_private_key_pem    = var.ca_private_key_pem
   ca_cert_pem           = var.ca_cert_pem

@@ -36,8 +36,8 @@ data "template_file" "workers" {
     fqdn            = azurerm_public_ip.workers-pip[count.index].fqdn
     node_name       = "${var.hostname}-workers-${count.index}"
     me_ca           = var.ca_cert_pem
-    me_cert         = tls_locally_signed_cert.workers[count.index].cert_pem
-    me_key          = tls_private_key.workers[count.index].private_key_pem
+    me_cert       = "${element(tls_locally_signed_cert.workers[*].cert_pem, count.index)}"
+    me_key = "${element(tls_private_key.workers[*].private_key_pem, count.index)}"
 
     # Consul
     consul_url            = var.consul_url
