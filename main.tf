@@ -33,7 +33,7 @@ module "primarycluster" {
   vault_ent_url       = var.vault_ent_url
   created-by          = var.created-by
   sleep-at-night      = var.sleep-at-night
-  TTL                 = var.Ttl
+  TTL                 = var.TTL
   run_nomad_jobs      = var.run_nomad_jobs
 
 ca_key_algorithm      = var.ca_key_algorithm

@@ -20,8 +20,8 @@ resource "azurerm_key_vault" "demostack" {
 
   tags = {
     name      = "Guy Barros"
-    ttl       = "13"
-    owner     = "guy@hashicorp.com"
+    TTL       = var.TTL
+    owner     = var.owner
     demostack =var.consul_join_tag_value
  }
 }
@@ -93,8 +93,8 @@ resource "azurerm_key_vault_key" "demostack" {
 
   tags = {
     name      = "Guy Barros"
-    ttl       = "13"
-    owner     = "guy@hashicorp.com"
+    TTL       = var.TTL
+    owner     = var.owner
     demostack = var.consul_join_tag_value
 }
 }

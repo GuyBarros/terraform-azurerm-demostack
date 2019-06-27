@@ -100,8 +100,8 @@ resource "azurerm_network_interface" "servers-nic" {
 
   tags = {
     name      = "Guy Barros"
-    ttl       = "13"
-    owner     = "guy@hashicorp.com"
+    TTL       = var.TTL
+    owner     = var.owner
     demostack = var.consul_join_tag_value
  }
 }
@@ -130,8 +130,8 @@ resource "azurerm_public_ip" "servers-pip" {
 
   tags = {
     name      = "Guy Barros"
-    ttl       = "13"
-    owner     = "guy@hashicorp.com"
+    TTL       = var.TTL
+    owner     = var.owner
     demostack = var.consul_join_tag_value
  }
 }
@@ -181,8 +181,8 @@ resource "azurerm_virtual_machine" "servers" {
 
   tags = {
     name      = "Guy Barros"
-    ttl       = "13"
-    owner     = "guy@hashicorp.com"
+    TTL       = var.TTL
+    owner     = var.owner
     demostack = var.consul_join_tag_value
  }
 }

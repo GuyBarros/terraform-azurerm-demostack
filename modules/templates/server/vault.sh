@@ -191,7 +191,7 @@ EOR
     renewable=true \
     orphan=false \
     disallowed_policies=nomad-server \
-    explicit_max_ttl=0
+    explicit_max_TTL=0
  
  echo "--> Mount KV in Vault"
  {
@@ -213,7 +213,7 @@ vault write pki/root/generate/internal common_name=service.consul &&
 
 vault write pki/roles/consul-service generate_lease=true allowed_domains="service.consul" allow_subdomains="true"  &&
 
-vault write pki/issue/consul-service  common_name=nginx.service.consul  ttl=720h  &&
+vault write pki/issue/consul-service  common_name=nginx.service.consul  TTL=720h  &&
 
 vault policy write superuser - <<EOR
 path "*" { 

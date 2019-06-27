@@ -197,7 +197,7 @@ description = "Tag used by reaper to identify resources that can be shutdown at 
 default     = true
 }
 
-variable "Ttl" {
+variable "TTL" {
 description = "Hours after which resource expires, used by reaper. Do not use any unit. -1 is infinite."
 default     = "240"
 }
