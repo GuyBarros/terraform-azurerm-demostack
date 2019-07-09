@@ -36,8 +36,8 @@ data "template_file" "workers" {
     fqdn            = azurerm_public_ip.workers-pip[count.index].fqdn
     node_name       = "${var.hostname}-workers-${count.index}"
     me_ca           = var.ca_cert_pem
-    me_cert         = tls_locally_signed_cert.workers[count.index].cert_pem
-    me_key          = tls_private_key.workers[count.index].private_key_pem
+    me_cert         = "${element(tls_locally_signed_cert.workers[*].cert_pem, count.index)}"
+    me_key          = "${element(tls_private_key.workers[*].private_key_pem, count.index)}"
 
     # Consul
     consul_url            = var.consul_url
@@ -75,9 +75,10 @@ data "template_file" "workers" {
 
   }
 }
-/*
+
 # Gzip cloud-init config
 data "template_cloudinit_config" "workers" {
+  depends_on = ["data.template_file.workers"]
   count      = "${var.workers}"
 
   gzip          = true
@@ -88,7 +89,7 @@ data "template_cloudinit_config" "workers" {
     content      = data.template_file.workers[count.index].rendered
   }
 }
-*/
+
 resource "azurerm_subnet" "workers" {
   name                 = "${var.demo_prefix}-workers"
   virtual_network_name = "${azurerm_virtual_network.awg.name}"
@@ -113,8 +114,8 @@ resource "azurerm_network_interface" "workers-nic" {
   }
   tags = {
     name      = "Guy Barros"
-    ttl       = "13"
-    owner     = "guy@hashicorp.com"
+    TTL       = var.TTL
+    owner     = var.owner
     demostack = var.consul_join_tag_value
  }
 }
@@ -135,8 +136,8 @@ resource "azurerm_public_ip" "workers-pip" {
   
     tags = {
     name  = "Guy Barros"
-    ttl   = "13"
-    owner = "guy@hashicorp.com"
+    TTL   = var.TTL
+    owner = var.owner
     demostack = var.consul_join_tag_value
  }
 
@@ -177,7 +178,9 @@ resource "azurerm_virtual_machine" "workers" {
     computer_name  = "${var.hostname}-workers-${count.index}"
     admin_username = var.admin_username
    admin_password = var.admin_password
-//custom_data =  "${element(data.template_cloudinit_config.workers[*].rendered,    count.index  )}"
+    custom_data =  "${element(data.template_cloudinit_config.workers[*].rendered,    count.index  )}"
+
+
   }
 
   os_profile_linux_config {
@@ -186,8 +189,8 @@ resource "azurerm_virtual_machine" "workers" {
 
   tags = {
     name      = "Guy Barros"
-    ttl       = "13"
-    owner     = "guy@hashicorp.com"
+    TTL       = var.TTL
+    owner     = var.owner
     demostack = var.consul_join_tag_value
  }
 }

@@ -13,8 +13,8 @@ resource "azurerm_resource_group" "demostack" {
 
   tags = {
     name      = "Guy Barros"
-    ttl       = "13"
-    owner     = "guy@hashicorp.com"
+    TTL       = var.TTL
+    owner     = var.owner
     demostack = var.consul_join_tag_value
  }
 }
@@ -30,8 +30,8 @@ resource "azurerm_availability_set" "vm" {
 
   tags = {
     name      = "Guy Barros"
-    ttl       = "13"
-    owner     = "guy@hashicorp.com"
+    TTL       = var.TTL
+    owner     = var.owner
     demostack = var.consul_join_tag_value
  }
 }
@@ -47,8 +47,8 @@ resource "azurerm_virtual_network" "awg" {
 
   tags = {
     name      = "Guy Barros"
-    ttl       = "13"
-    owner     = "guy@hashicorp.com"
+    TTL       = var.TTL
+    owner     = var.owner
     demostack = var.consul_join_tag_value
  }
 }
@@ -60,8 +60,8 @@ resource "azurerm_network_security_group" "demostack-sg" {
 
   tags = {
     name      = "Guy Barros"
-    ttl       = "13"
-    owner     = "guy@hashicorp.com"
+    TTL       = var.TTL
+    owner     = var.owner
     demostack = var.consul_join_tag_value
  }
 

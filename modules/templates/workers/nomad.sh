@@ -50,6 +50,7 @@ vault {
   ca_file   = "/usr/local/share/ca-certificates/01-me.crt"
   cert_file = "/etc/ssl/certs/me.crt"
   key_file  = "/etc/ssl/certs/me.key"
+  tls_skip_verify = "true"
 }
 
 

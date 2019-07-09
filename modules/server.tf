@@ -35,8 +35,8 @@ data "template_file" "servers" {
     fqdn          = azurerm_public_ip.servers-pip[count.index].fqdn
     node_name     = "${var.hostname}-servers-${count.index}"
     me_ca         = var.ca_cert_pem
-    me_cert       = tls_locally_signed_cert.servers[count.index].cert_pem
-    me_key        = tls_private_key.servers[count.index].private_key_pem
+    me_cert       = "${element(tls_locally_signed_cert.servers[*].cert_pem, count.index)}"
+    me_key        = "${element(tls_private_key.servers[*].private_key_pem, count.index)}"
 
     # Consul
     consul_url            = var.consul_url
@@ -100,8 +100,8 @@ resource "azurerm_network_interface" "servers-nic" {
 
   tags = {
     name      = "Guy Barros"
-    ttl       = "13"
-    owner     = "guy@hashicorp.com"
+    TTL       = var.TTL
+    owner     = var.owner
     demostack = var.consul_join_tag_value
  }
 }
@@ -130,8 +130,8 @@ resource "azurerm_public_ip" "servers-pip" {
 
   tags = {
     name      = "Guy Barros"
-    ttl       = "13"
-    owner     = "guy@hashicorp.com"
+    TTL       = var.TTL
+    owner     = var.owner
     demostack = var.consul_join_tag_value
  }
 }
@@ -163,6 +163,15 @@ resource "azurerm_virtual_machine" "servers" {
     disk_size_gb      = var.storage_disk_size
   }
 
+   storage_data_disk {
+    name = "${var.hostname}-sever-datadisk-${count.index}"
+    caching = "ReadWrite"
+    create_option = "Empty"
+    disk_size_gb = 100
+    lun = "10"
+    managed_disk_type =  "Standard_LRS"
+  }
+
   os_profile {
     computer_name  = "${var.hostname}-servers-${count.index}"
     admin_username = var.admin_username
@@ -181,8 +190,8 @@ resource "azurerm_virtual_machine" "servers" {
 
   tags = {
     name      = "Guy Barros"
-    ttl       = "13"
-    owner     = "guy@hashicorp.com"
+    TTL       = var.TTL
+    owner     = var.owner
     demostack = var.consul_join_tag_value
  }
 }

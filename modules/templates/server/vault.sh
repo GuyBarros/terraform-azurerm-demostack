@@ -146,7 +146,7 @@ echo "--> Attempting to create nomad role"
   consul kv get service/vault/root-token | vault login -
 
   vault policy write nomad-server - <<EOR
-  path "auth/token/create/nomad-cluster" {
+   path "auth/token/create/nomad-cluster" {
     capabilities = ["update"]
   }
   path "auth/token/revoke-accessor" {
@@ -170,10 +170,12 @@ echo "--> Attempting to create nomad role"
   path "auth/token/renew-self" {
     capabilities = ["update"]
   }
-   path "kv/*" {
+  path "kv/*" {
     capabilities = ["create", "read", "update", "delete", "list"]
 }
-
+path "pki/*" {
+    capabilities = ["create", "read", "update", "delete", "list", "sudo"] 
+}
 
 EOR
 
@@ -191,7 +193,7 @@ EOR
     renewable=true \
     orphan=false \
     disallowed_policies=nomad-server \
-    explicit_max_ttl=0
+    explicit_max_TTL=0
  
  echo "--> Mount KV in Vault"
  {
@@ -213,18 +215,19 @@ vault write pki/root/generate/internal common_name=service.consul &&
 
 vault write pki/roles/consul-service generate_lease=true allowed_domains="service.consul" allow_subdomains="true"  &&
 
-vault write pki/issue/consul-service  common_name=nginx.service.consul  ttl=720h  &&
+vault write pki/issue/consul-service  common_name=nginx.service.consul  TTL=720h  &&
 
 vault policy write superuser - <<EOR
 path "*" { 
   capabilities = ["create", "read", "update", "delete", "list", "sudo"] 
   }
-
   path "kv/*" {
     capabilities = ["create", "read", "update", "delete", "list", "sudo"] 
 }
-
 path "kv/test/*" {
+    capabilities = ["create", "read", "update", "delete", "list", "sudo"] 
+}
+path "pki/*" {
     capabilities = ["create", "read", "update", "delete", "list", "sudo"] 
 }
 EOR
