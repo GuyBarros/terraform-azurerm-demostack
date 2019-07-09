@@ -163,6 +163,15 @@ resource "azurerm_virtual_machine" "servers" {
     disk_size_gb      = var.storage_disk_size
   }
 
+   storage_data_disk {
+    name = "${var.hostname}-sever-datadisk-${count.index}"
+    caching = "ReadWrite"
+    create_option = "Empty"
+    disk_size_gb = 100
+    lun = "10"
+    managed_disk_type =  "Standard_LRS"
+  }
+
   os_profile {
     computer_name  = "${var.hostname}-servers-${count.index}"
     admin_username = var.admin_username

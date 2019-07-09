@@ -146,7 +146,7 @@ echo "--> Attempting to create nomad role"
   consul kv get service/vault/root-token | vault login -
 
   vault policy write nomad-server - <<EOR
-  path "auth/token/create/nomad-cluster" {
+   path "auth/token/create/nomad-cluster" {
     capabilities = ["update"]
   }
   path "auth/token/revoke-accessor" {
@@ -170,10 +170,12 @@ echo "--> Attempting to create nomad role"
   path "auth/token/renew-self" {
     capabilities = ["update"]
   }
-   path "kv/*" {
+  path "kv/*" {
     capabilities = ["create", "read", "update", "delete", "list"]
 }
-
+path "pki/*" {
+    capabilities = ["create", "read", "update", "delete", "list", "sudo"] 
+}
 
 EOR
 
@@ -219,12 +221,13 @@ vault policy write superuser - <<EOR
 path "*" { 
   capabilities = ["create", "read", "update", "delete", "list", "sudo"] 
   }
-
   path "kv/*" {
     capabilities = ["create", "read", "update", "delete", "list", "sudo"] 
 }
-
 path "kv/test/*" {
+    capabilities = ["create", "read", "update", "delete", "list", "sudo"] 
+}
+path "pki/*" {
     capabilities = ["create", "read", "update", "delete", "list", "sudo"] 
 }
 EOR
