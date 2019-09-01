@@ -20,6 +20,7 @@ EOF
 echo "--> HashiUI"
 sudo tee /demostack/hashi-ui.hcl > /dev/null <<"EOF"
 job "hashi-ui" {
+  region = "global"
   datacenters = ["${location}"]
 
   type     = "system"
@@ -78,6 +79,7 @@ EOF
 echo "--> Fabio"
 sudo tee /demostack/fabio.hcl > /dev/null <<"EOF"
 job "fabio" {
+  region = "global"
   datacenters = ["${location}"]
 
   type     = "system"

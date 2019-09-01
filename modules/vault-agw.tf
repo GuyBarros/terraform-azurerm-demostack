@@ -24,7 +24,7 @@ resource "azurerm_public_ip" "vault-awg" {
   sku                 = "Basic"
 
   tags = {
-    name      = "Guy Barros"
+    name      =var.owner
     TTL       = var.TTL
     owner     = var.owner
     demostack = var.consul_join_tag_value

@@ -12,7 +12,7 @@ resource "azurerm_resource_group" "demostack" {
  location = "${var.location}"
 
   tags = {
-    name      = "Guy Barros"
+    name      =var.owner
     TTL       = var.TTL
     owner     = var.owner
     demostack = var.consul_join_tag_value
@@ -29,7 +29,7 @@ resource "azurerm_availability_set" "vm" {
   managed                      = true
 
   tags = {
-    name      = "Guy Barros"
+    name      =var.owner
     TTL       = var.TTL
     owner     = var.owner
     demostack = var.consul_join_tag_value
@@ -46,7 +46,7 @@ resource "azurerm_virtual_network" "awg" {
   resource_group_name = "${azurerm_resource_group.demostack.name}"
 
   tags = {
-    name      = "Guy Barros"
+    name      =var.owner
     TTL       = var.TTL
     owner     = var.owner
     demostack = var.consul_join_tag_value
@@ -59,7 +59,7 @@ resource "azurerm_network_security_group" "demostack-sg" {
  resource_group_name = "${azurerm_resource_group.demostack.name}"
 
   tags = {
-    name      = "Guy Barros"
+    name      =var.owner
     TTL       = var.TTL
     owner     = var.owner
     demostack = var.consul_join_tag_value
@@ -82,7 +82,7 @@ resource "azurerm_network_security_group" "demostack-sg" {
     name                       = "demostack-ssh"
     priority                   = 102
     direction                  = "Inbound"
-    access                     = "Allow"
+    access                     = "Deny"
     protocol                   = "Tcp"
     source_port_range          = "*"
     destination_port_range     = "22"

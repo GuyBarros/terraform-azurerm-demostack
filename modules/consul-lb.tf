@@ -10,7 +10,7 @@ resource "azurerm_public_ip" "consul-lb-pip" {
   sku                 = "Standard"
 
   tags = {
-    name      = "Guy Barros"
+    name      =var.owner
     TTL       = var.TTL
     owner     = var.owner
     demostack = var.consul_join_tag_value
@@ -31,7 +31,7 @@ resource "azurerm_lb" "consul-lb" {
   }
 
   tags = {
-    name      = "Guy Barros"
+    name      =var.owner
     TTL       = var.TTL
     owner     = var.owner
     demostack = var.consul_join_tag_value

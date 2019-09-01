@@ -10,8 +10,6 @@ data "template_file" "servers" {
     file("${path.module}/templates/server/vault.sh"),
     file("${path.module}/templates/server/nomad.sh"),
     file("${path.module}/templates/server/nomad-jobs.sh"),
-    
-    file("${path.module}/templates/shared/cleanup.sh"),
   ))}"
 
   
@@ -20,8 +18,6 @@ data "template_file" "servers" {
     hostname      = "${var.hostname}-servers-${count.index}"
     private_ip    = azurerm_network_interface.servers-nic[count.index].private_ip_address
     public_ip     = azurerm_public_ip.servers-pip[count.index].ip_address
-    demo_username = var.demo_username
-    demo_password = var.demo_password
     enterprise    = var.enterprise
     vaultlicense  = var.vaultlicense
     consullicense = var.consullicense
@@ -43,25 +39,25 @@ data "template_file" "servers" {
    consul_ent_url        = var.consul_ent_url
    consul_gossip_key     = var.consul_gossip_key
    consul_join_tag_key   = "ConsulJoin"
-    consul_join_tag_name  = "demostack"
+    consul_join_tag_name  = var.consul_join_tag_name
     consul_join_tag_value = var.consul_join_tag_value
    consul_master_token   =  var.consul_master_token
-   consul_servers        = "${var.servers}"
+   consul_servers        = var.servers
 
     # Nomad
     nomad_url        = var.nomad_url
    nomad_gossip_key =  var.nomad_gossip_key
-   nomad_servers    = "${var.servers}"
+   nomad_servers    = var.servers
 
     # Nomad jobs
     fabio_url   = var.fabio_url
    hashiui_url =  var.hashiui_url
-   run_nomad_jobs = "${var.run_nomad_jobs}"
+   run_nomad_jobs = var.run_nomad_jobs
 
     # Vault
     vault_url        = var.vault_url
    vault_ent_url    =  var.vault_ent_url
-   vault_root_token = "${random_id.vault-root-token.hex}"
+   vault_root_token = random_id.vault-root-token.hex
     vault_servers    = var.servers
  }
 }
@@ -70,7 +66,7 @@ data "template_file" "servers" {
 # Gzip cloud-init config
 data "template_cloudinit_config" "servers" {
   depends_on = ["data.template_file.servers"]
-  count      = "${var.servers}"
+  count      = var.servers
 
   gzip          = true
   base64_encode = true
@@ -87,19 +83,19 @@ resource "azurerm_network_interface" "servers-nic" {
   count                     = var.servers
  name                      = "${var.demo_prefix}servers-nic-${count.index}"
   location                  = var.location
- resource_group_name       = "${azurerm_resource_group.demostack.name}"
-  network_security_group_id = "${azurerm_network_security_group.demostack-sg.id}"
+ resource_group_name       = azurerm_resource_group.demostack.name
+  network_security_group_id = azurerm_network_security_group.demostack-sg.id
 
   ip_configuration {
     name                          = "${var.demo_prefix}-${count.index}-ipconfig"
-    subnet_id                     = "${azurerm_subnet.servers.id}"
+    subnet_id                     = azurerm_subnet.servers.id
     private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = "${azurerm_public_ip.servers-pip[count.index].id}"
+    public_ip_address_id          = azurerm_public_ip.servers-pip[count.index].id
 
     }
 
   tags = {
-    name      = "Guy Barros"
+    name      =var.owner
     TTL       = var.TTL
     owner     = var.owner
     demostack = var.consul_join_tag_value
@@ -108,8 +104,8 @@ resource "azurerm_network_interface" "servers-nic" {
 
 resource "azurerm_subnet" "servers" {
   name                 = "${var.demo_prefix}-servers"
-  virtual_network_name = "${azurerm_virtual_network.awg.name}"
-  resource_group_name  = "${azurerm_resource_group.demostack.name}"
+  virtual_network_name = azurerm_virtual_network.awg.name
+  resource_group_name  = azurerm_resource_group.demostack.name
   address_prefix       = "10.0.30.0/24"
 }
 
@@ -123,13 +119,13 @@ resource "azurerm_public_ip" "servers-pip" {
   count               = var.servers
  name                = "${var.demo_prefix}-servers-ip-${count.index}"
   location            = var.location
- resource_group_name = "${azurerm_resource_group.demostack.name}"
+ resource_group_name = azurerm_resource_group.demostack.name
   allocation_method   = "Static"
   domain_name_label   = "${var.hostname}-servers-${count.index}"
   sku                 = "Standard"
 
   tags = {
-    name      = "Guy Barros"
+    name      =var.owner
     TTL       = var.TTL
     owner     = var.owner
     demostack = var.consul_join_tag_value
@@ -141,12 +137,13 @@ resource "azurerm_virtual_machine" "servers" {
   count               = var.servers
  name                = "${var.hostname}-servers-${count.index}"
   location            = var.location
- resource_group_name = "${azurerm_resource_group.demostack.name}"
+ resource_group_name = azurerm_resource_group.demostack.name
   vm_size             = var.vm_size
- availability_set_id = "${azurerm_availability_set.vm.id}"
+ availability_set_id = azurerm_availability_set.vm.id
 
-  network_interface_ids         = ["${azurerm_network_interface.servers-nic[count.index].id}"]
+  network_interface_ids         = [azurerm_network_interface.servers-nic[count.index].id]
   delete_os_disk_on_termination = "true"
+  delete_data_disks_on_termination = "true"
 
   storage_image_reference {
     publisher = var.image_publisher
@@ -167,7 +164,7 @@ resource "azurerm_virtual_machine" "servers" {
     name = "${var.hostname}-sever-datadisk-${count.index}"
     caching = "ReadWrite"
     create_option = "Empty"
-    disk_size_gb = 100
+    disk_size_gb = 120
     lun = "10"
     managed_disk_type =  "Standard_LRS"
   }
@@ -189,7 +186,7 @@ resource "azurerm_virtual_machine" "servers" {
   }
 
   tags = {
-    name      = "Guy Barros"
+    name      =var.owner
     TTL       = var.TTL
     owner     = var.owner
     demostack = var.consul_join_tag_value

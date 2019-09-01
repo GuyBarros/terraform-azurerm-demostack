@@ -181,7 +181,42 @@ EOR
 
   vault policy write test - <<EOR
   path "kv/*" {
-    capabilities = ["create", "read", "update", "delete", "list"]
+    capabilities = ["list"] 
+}
+
+path "kv/test" {
+    capabilities = ["create", "read", "update", "delete", "list", "sudo"] 
+}
+
+path "kv/data/test" {
+    capabilities = ["create", "read", "update", "delete", "list", "sudo"] 
+}
+
+path "pki/*" {
+    capabilities = ["create", "read", "update", "delete", "list", "sudo"] 
+}
+
+path "kv/data/cgtest" {
+    capabilities = ["create", "read", "update", "delete", "list", "sudo"] 
+    control_group = {
+        factor "approvers" {
+            identity {
+                group_names = ["approvers"]
+                approvals = 1
+            }
+        }
+    }
+}
+
+
+# To approve the request
+path "sys/control-group/authorize" {
+    capabilities = ["create", "read", "update", "delete", "list", "sudo"] 
+}
+
+# To check control group request status
+path "sys/control-group/request" {
+   capabilities = ["create", "read", "update", "delete", "list", "sudo"] 
 }
 EOR
 
@@ -193,7 +228,7 @@ EOR
     renewable=true \
     orphan=false \
     disallowed_policies=nomad-server \
-    explicit_max_TTL=0
+    explicit_max_ttl=0
  
  echo "--> Mount KV in Vault"
  {
@@ -207,34 +242,82 @@ EOR
  echo "--> Creating Initial secret for Nomad KV"
   vault kv put kv/test message='Hello world'
 
+
  echo "--> nomad nginx-vault-pki demo prep"
 {
-vault secrets enable pki &&
+vault secrets enable pki
+ }||
+{
+  echo "--> pki already enabled, moving on"
+}
 
-vault write pki/root/generate/internal common_name=service.consul &&
+ {
+vault write pki/root/generate/internal common_name=service.consul
+}||
+{
+  echo "--> pki generate internal already configured, moving on"
+}
+{
+vault write pki/roles/consul-service generate_lease=true allowed_domains="service.consul" allow_subdomains="true" 
+}||
+{
+  echo "--> pki role already configured, moving on"
+}
 
-vault write pki/roles/consul-service generate_lease=true allowed_domains="service.consul" allow_subdomains="true"  &&
-
-vault write pki/issue/consul-service  common_name=nginx.service.consul  TTL=720h  &&
-
+{
 vault policy write superuser - <<EOR
 path "*" { 
   capabilities = ["create", "read", "update", "delete", "list", "sudo"] 
   }
+
   path "kv/*" {
     capabilities = ["create", "read", "update", "delete", "list", "sudo"] 
 }
+
 path "kv/test/*" {
     capabilities = ["create", "read", "update", "delete", "list", "sudo"] 
 }
+
+
 path "pki/*" {
     capabilities = ["create", "read", "update", "delete", "list", "sudo"] 
 }
 EOR
-  
 } ||
 {
-  echo "--> pki demo already configured, moving on"
+  echo "--> superuser role already configured, moving on"
 }
- 
+
+echo "--> Setting up Github auth"
+ {
+ vault auth enable github &&
+ vault write auth/github/config organization=hashicorp &&
+ vault write auth/github/map/teams/team-se  value=default,test
+  echo "--> github auth done"
+ } ||
+ {
+   echo "--> github auth mounted, moving on"
+ }
+
+ echo "--> Setting up vault prepared query"
+ {
+ curl http://localhost:8500/v1/query \
+    --request POST \
+    --data \
+'{
+  "Name": "vault",
+  "Service": {
+    "Service": "vault",
+    "Tags":  ["active"],
+    "Failover": {
+      "NearestN": 2
+    }
+  }
+}'
+  echo "--> consul query done"
+ } ||
+ {
+   echo "-->consul query already done, moving on"
+ }
+
 echo "==> Vault is done!"

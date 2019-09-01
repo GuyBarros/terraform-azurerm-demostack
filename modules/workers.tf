@@ -1,19 +1,14 @@
 data "template_file" "workers" {
   depends_on = ["azurerm_public_ip.workers-pip","azurerm_public_ip.consul-lb-pip"]
-  count      = "${var.workers}"
+  count      = var.workers
 
   template = "${join("\n", list(
     file("${path.module}/templates/shared/base.sh"),
     file("${path.module}/templates/shared/docker.sh"),
     file("${path.module}/templates/shared/run-proxy.sh"),
-    
-    file("${path.module}/templates/workers/user.sh"),
     file("${path.module}/templates/workers/consul.sh"),
     file("${path.module}/templates/workers/vault.sh"),
-    
-    file("${path.module}/templates/workers/tools.sh"),
     file("${path.module}/templates/workers/nomad.sh"),
-    file("${path.module}/templates/workers/connectdemo.sh"),    
   ))}"
 
 
@@ -23,8 +18,6 @@ data "template_file" "workers" {
     hostname      = "${var.hostname}-workers-${count.index}"
     private_ip    = azurerm_network_interface.workers-nic[count.index].private_ip_address
     public_ip     = azurerm_public_ip.workers-pip[count.index].ip_address
-    demo_username = var.demo_username
-    demo_password = var.demo_password
     enterprise      = var.enterprise
     vaultlicense    = var.vaultlicense
     consullicense   = var.consullicense
@@ -38,7 +31,7 @@ data "template_file" "workers" {
     me_ca           = var.ca_cert_pem
     me_cert         = "${element(tls_locally_signed_cert.workers[*].cert_pem, count.index)}"
     me_key          = "${element(tls_private_key.workers[*].private_key_pem, count.index)}"
-
+    
     # Consul
     consul_url            = var.consul_url
     consul_ent_url        = var.consul_ent_url
@@ -64,22 +57,13 @@ data "template_file" "workers" {
     vault_ent_url    = var.vault_ent_url
     vault_root_token = random_id.vault-root-token.hex
     vault_servers    = var.workers
-
-
-    # Tools
-    consul_template_url = var.consul_template_url
-    envconsul_url       = var.envconsul_url
-    packer_url          = var.packer_url
-    sentinel_url        = var.sentinel_url
-
-
   }
 }
 
 # Gzip cloud-init config
 data "template_cloudinit_config" "workers" {
   depends_on = ["data.template_file.workers"]
-  count      = "${var.workers}"
+  count      = var.workers
 
   gzip          = true
   base64_encode = true
@@ -92,8 +76,8 @@ data "template_cloudinit_config" "workers" {
 
 resource "azurerm_subnet" "workers" {
   name                 = "${var.demo_prefix}-workers"
-  virtual_network_name = "${azurerm_virtual_network.awg.name}"
-  resource_group_name  = "${azurerm_resource_group.demostack.name}"
+  virtual_network_name = azurerm_virtual_network.awg.name
+  resource_group_name  = azurerm_resource_group.demostack.name
   address_prefix       = "10.0.40.0/24"
 }
 
@@ -101,19 +85,18 @@ resource "azurerm_network_interface" "workers-nic" {
   count                     = var.workers
  name                      = "${var.demo_prefix}workers-nic-${count.index}"
   location                  = var.location
- resource_group_name       = "${azurerm_resource_group.demostack.name}"
-  network_security_group_id = "${azurerm_network_security_group.demostack-sg.id}"
-
-  # network_security_group_id = "${azurerm_network_security_group.demostack-sg.id}"
+ resource_group_name       = azurerm_resource_group.demostack.name
+  network_security_group_id = azurerm_network_security_group.demostack-sg.id
+  
 
   ip_configuration {
     name                          = "${var.demo_prefix}-${count.index}-ipconfig"
-    subnet_id                     = "${azurerm_subnet.workers.id}"
+    subnet_id                     = azurerm_subnet.workers.id
     private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = "${azurerm_public_ip.workers-pip[count.index].id}"
+    public_ip_address_id          = azurerm_public_ip.workers-pip[count.index].id
   }
   tags = {
-    name      = "Guy Barros"
+    name      =var.owner
     TTL       = var.TTL
     owner     = var.owner
     demostack = var.consul_join_tag_value
@@ -128,14 +111,14 @@ resource "azurerm_public_ip" "workers-pip" {
   count               = var.workers
  name                = "${var.demo_prefix}-workers-ip-${count.index}"
   location            = var.location
- resource_group_name = "${azurerm_resource_group.demostack.name}"
+ resource_group_name = azurerm_resource_group.demostack.name
   allocation_method   = "Static"
   domain_name_label   = "${var.hostname}-workers-${count.index}"
   sku                 = "Standard"
 
   
     tags = {
-    name  = "Guy Barros"
+    name  =var.owner
     TTL   = var.TTL
     owner = var.owner
     demostack = var.consul_join_tag_value
@@ -150,11 +133,12 @@ resource "azurerm_public_ip" "workers-pip" {
 # the demo environment. Terraform supports several different types of 
 # provisioners including Bash, Powershell and Chef.
 resource "azurerm_virtual_machine" "workers" {
+    depends_on = ["data.template_file.workers","data.template_cloudinit_config.workers"]
   count               = var.workers
  name                = "${var.hostname}-workers-${count.index}"
   location            = var.location
- resource_group_name = "${azurerm_resource_group.demostack.name}"
-  vm_size             = "${var.vm_size}"
+ resource_group_name = azurerm_resource_group.demostack.name
+  vm_size             = var.vm_size
 
   network_interface_ids         = ["${azurerm_network_interface.workers-nic[count.index].id}"]
   delete_os_disk_on_termination = "true"
@@ -188,7 +172,7 @@ resource "azurerm_virtual_machine" "workers" {
   }
 
   tags = {
-    name      = "Guy Barros"
+    name      =var.owner
     TTL       = var.TTL
     owner     = var.owner
     demostack = var.consul_join_tag_value
