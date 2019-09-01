@@ -1,15 +1,15 @@
 
 resource "azurerm_network_interface_application_gateway_backend_address_pool_association" "vault-servers-awg" {
-  count                   = "${var.servers}"
-  network_interface_id    = "${element(azurerm_network_interface.servers-nic.*.id, count.index)}"
+  count                   = var.servers
+    network_interface_id    = azurerm_network_interface.servers-nic[count.index].id
   ip_configuration_name   = "${var.demo_prefix}-${count.index}-ipconfig"
-  backend_address_pool_id = "${azurerm_application_gateway.vault-awg.backend_address_pool.0.id }"
+  backend_address_pool_id = azurerm_application_gateway.vault-awg.backend_address_pool[0].id
 }
 
 resource "azurerm_subnet" "vault-awg" {
   name                 = "${var.demo_prefix}-vault-awg"
-  virtual_network_name = "${azurerm_virtual_network.awg.name}"
-  resource_group_name  = "${azurerm_resource_group.demostack.name}"
+  virtual_network_name = azurerm_virtual_network.awg.name
+  resource_group_name  = azurerm_resource_group.demostack.name
   address_prefix       = "10.0.10.0/24"
 }
 
@@ -17,25 +17,25 @@ resource "azurerm_subnet" "vault-awg" {
 resource "azurerm_public_ip" "vault-awg" {
   count               = 1
   name                = "${var.resource_group}-vault-awg"
-  resource_group_name = "${azurerm_resource_group.demostack.name}"
-  location            = "${var.location}"
+  resource_group_name = azurerm_resource_group.demostack.name
+  location            = var.location
   allocation_method   = "Dynamic"
   domain_name_label   = "${var.hostname}-vault-awg-${count.index}"
   sku                 = "Basic"
 
-  tags {
-    name      = "Guy Barros"
-    ttl       = "13"
-    owner     = "guy@hashicorp.com"
-    demostack = "${var.consul_join_tag_value}"
-  }
+  tags = {
+    name      =var.owner
+    TTL       = var.TTL
+    owner     = var.owner
+    demostack = var.consul_join_tag_value
+ }
 }
 
 
 resource "azurerm_application_gateway" "vault-awg" {
   name                = "${var.resource_group}vault-awg"
-  resource_group_name = "${azurerm_resource_group.demostack.name}"
-  location            = "${var.location}"
+  resource_group_name = azurerm_resource_group.demostack.name
+  location            = var.location
 
   sku {
     name     = "Standard_Medium"
@@ -45,6 +45,7 @@ resource "azurerm_application_gateway" "vault-awg" {
 
   gateway_ip_configuration {
     name      = "vault-gateway-ip"
+    // subnet_id = "${azurerm_virtual_network.awg.id}/subnets/${azurerm_subnet.vault-awg.name}"
     subnet_id = "${azurerm_virtual_network.awg.id}/subnets/${azurerm_subnet.vault-awg.name}"
   }
 
@@ -55,7 +56,7 @@ resource "azurerm_application_gateway" "vault-awg" {
 
   frontend_ip_configuration {
     name                 = "vault-frontend-ip"
-    public_ip_address_id = "${azurerm_public_ip.vault-awg.id}"
+    public_ip_address_id = azurerm_public_ip.vault-awg[0].id
     
   }
 
@@ -83,15 +84,15 @@ resource "azurerm_application_gateway" "vault-awg" {
 
 authentication_certificate{
  name = "server-0"
- data = "${tls_locally_signed_cert.servers.0.cert_pem}"
+ data = "${tls_locally_signed_cert.servers[0].cert_pem}"
 }
 authentication_certificate{
  name = "server-1"
- data = "${tls_locally_signed_cert.servers.1.cert_pem}"
+ data = "${tls_locally_signed_cert.servers[1].cert_pem}"
 }
 authentication_certificate{
  name = "server-2"
- data = "${tls_locally_signed_cert.servers.2.cert_pem}"
+ data = "${tls_locally_signed_cert.servers[2].cert_pem}"
 }
 
   backend_http_settings {

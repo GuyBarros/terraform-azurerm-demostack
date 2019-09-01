@@ -26,25 +26,32 @@ sudo tee /etc/consul.d/config.json > /dev/null <<EOF
 
   "addresses": {
     "http": "0.0.0.0",
-    "https": "0.0.0.0"
+    "https": "0.0.0.0",
+    "gRPC": "0.0.0.0"
   },
   "ports": {
     "http": 8500,
-    "https": 8533
+    "https": 8501,
+    "gRPC": 8502
   },
   "key_file": "/etc/ssl/certs/me.key",
   "cert_file": "/etc/ssl/certs/me.crt",
   "ca_file": "/usr/local/share/ca-certificates/01-me.crt",
+   "auto_encrypt": {
+    "tls": false
+  },
   "verify_server_hostname": false,
   "verify_incoming": false,
   "verify_outgoing": false,
    "ui": true,
  "connect":{
   "enabled": true,
-      "proxy": {  "allow_managed_root": true  }
+  "ca_provider":"consul"
+
       }
 }
 EOF
+
 
 echo "--> Writing profile"
 sudo tee /etc/profile.d/consul.sh > /dev/null <<"EOF"

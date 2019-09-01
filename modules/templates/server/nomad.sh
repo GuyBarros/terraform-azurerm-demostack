@@ -14,11 +14,11 @@ sleep 10
 echo "--> Generating Vault token..."
 export VAULT_TOKEN="$(consul kv get service/vault/root-token)"
   NOMAD_VAULT_TOKEN="$(VAULT_TOKEN="$VAULT_TOKEN" \
-  VAULT_ADDR="https://active.vault.service.consul:8200" \
+  VAULT_ADDR="https://vault.query.consul:8200" \
   VAULT_SKIP_VERIFY=true \
-  vault token create -field=token -policy=superuser -policy=nomad-server -period=72h)"
+  vault token create -field=token -policy=superuser -policy=nomad-server -display-name=${node_name} -id=${node_name} -period=72h)"
 
-consul kv put service/vault/nomad-token $NOMAD_VAULT_TOKEN
+consul kv put service/vault/${node_name}-token $NOMAD_VAULT_TOKEN
 
 echo "--> Writing configuration"
 sudo mkdir -p /mnt/nomad
@@ -33,7 +33,7 @@ enable_debug = true
 
 datacenter = "${location}"
 
-region = "azure"
+region = "global"
 
 advertise {
   http = "${public_ip}:4646"
@@ -50,6 +50,10 @@ client {
   enabled = true
    options {
     "driver.raw_exec.enable" = "1"
+  }
+   meta {
+    "type" = "server"
+    "name" = "${node_name}"
   }
 }
 
@@ -71,6 +75,7 @@ vault {
   cert_file        = "/etc/ssl/certs/me.crt"
   key_file         = "/etc/ssl/certs/me.key"
   create_from_role = "nomad-cluster"
+  tls_skip_verify = "true"
 }
 
 autopilot {

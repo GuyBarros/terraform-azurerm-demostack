@@ -1,6 +1,6 @@
 
 output "vault_ui" {
-  value = "http://${azurerm_public_ip.vault-awg.fqdn}:8200/"
+  value = "http://${azurerm_public_ip.vault-awg[0].fqdn}:8200/"
   }
 
 output "nomad_ui" {
@@ -18,13 +18,12 @@ output "fabio_lb" {
   }
 
 output "servers" {
-  value = "${formatlist("ssh %s@%s", var.admin_username, azurerm_public_ip.servers-pip.*.fqdn,)}"
+  value = [azurerm_public_ip.servers-pip.*.fqdn]
 }
 
 output "workers" {
-  value = "${formatlist("ssh %s@%s", var.demo_username, azurerm_public_ip.workers-pip.*.fqdn,)}"
+  value = [azurerm_public_ip.workers-pip.*.fqdn]
 }
-
 
 output "hashi_ui" {
   value = "http://${azurerm_public_ip.workers-pip.0.fqdn}:3000"

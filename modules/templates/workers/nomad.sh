@@ -16,7 +16,7 @@ enable_debug = true
 
 datacenter = "${location}"
 
-region = "azure"
+region = "global"
 
 "bind_addr" = "0.0.0.0"
 advertise {
@@ -50,6 +50,7 @@ vault {
   ca_file   = "/usr/local/share/ca-certificates/01-me.crt"
   cert_file = "/etc/ssl/certs/me.crt"
   key_file  = "/etc/ssl/certs/me.key"
+  tls_skip_verify = "true"
 }
 
 
@@ -91,11 +92,38 @@ sudo systemctl enable nomad
 sudo systemctl start nomad
 
 
+echo "--> Creating workspace"
+sudo mkdir -p /workstation/nomad
+cd /workstation/nomad
+sudo git clone https://github.com/GuyBarros/nomad_jobs
+cd nomad_jobs
 
-echo "--> Waiting for all Nomad servers"
-while [ "$(nomad server members 2>&1 | grep "alive" | wc -l)" -lt "3" ]; do
+if [ ${run_nomad_jobs} == 0 ]
+then
+echo "--> not running Nomad Jobs"
+
+else
+
+echo "--> Waiting for Vault leader"
+while ! host active.vault.service.consul &> /dev/null; do
   sleep 5
 done
 
+echo "--> Waiting for Nomad leader"
+while [ -z "$(curl -s http://localhost:4646/v1/status/leader)" ]; do
+  sleep 5
+done  
 
-echo "==> Nomad is done!"
+sleep 180
+
+
+echo "--> Running  Nomad Job"
+
+ nomad run hashibo.nomad
+ nomad run catalogue-with-connect.nomad
+ nomad run nginx-pki.nomad
+
+fi
+
+echo "==> Run Nomad is Done!"
+

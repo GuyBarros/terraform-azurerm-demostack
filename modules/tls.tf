@@ -1,15 +1,16 @@
 # servers private key
 resource "tls_private_key" "servers" {
-  count       = "${var.servers}"
-  algorithm   = "ECDSA"
+  count       = var.servers
+ algorithm   = "ECDSA"
   ecdsa_curve = "P521"
 }
 
 # servers signing request
 resource "tls_cert_request" "servers" {
-  count           = "${var.servers}"
-  key_algorithm   = "${element(tls_private_key.servers.*.algorithm, count.index)}"
-  private_key_pem = "${element(tls_private_key.servers.*.private_key_pem, count.index)}"
+ count           = var.servers
+ key_algorithm   = tls_private_key.servers[count.index].algorithm
+  private_key_pem = tls_private_key.servers[count.index].private_key_pem
+ 
 
   subject {
     common_name  = "${var.hostname}-servers-${count.index}.node.consul"
@@ -37,25 +38,15 @@ resource "tls_cert_request" "servers" {
     "localhost",
   ]
 
-  # Vault
-  #"${element(azurerm_public_ip.demostack-pip.*.fqdn, count.index)}",
-
-  #"${var.namespace}-servers-${count.index}.node.consul",
-
-  /*
-  ip_addresses = [
-    "127.0.0.1",
-  ]
-  */
 }
 
 # servers certificate
 resource "tls_locally_signed_cert" "servers" {
-  count              = "${var.servers}"
-  cert_request_pem   = "${element(tls_cert_request.servers.*.cert_request_pem, count.index)}"
-  ca_key_algorithm   = "${var.ca_key_algorithm}"
-  ca_private_key_pem = "${var.ca_private_key_pem}"
-  ca_cert_pem        = "${var.ca_cert_pem}"
+  count              = var.servers
+ cert_request_pem   = tls_cert_request.servers[count.index].cert_request_pem
+  ca_key_algorithm   = var.ca_key_algorithm
+ ca_private_key_pem =  var.ca_private_key_pem
+ ca_cert_pem        = var.ca_cert_pem
 
   validity_period_hours = 720 # 30 days
 
@@ -78,17 +69,17 @@ resource "random_id" "vault-root-token" {
 
 # Client private key
 resource "tls_private_key" "workers" {
-  count       = "${var.workers}"
-  algorithm   = "ECDSA"
+  count       = var.workers
+ algorithm   = "ECDSA"
   ecdsa_curve = "P521"
 }
 
 
 # Client signing request
 resource "tls_cert_request" "workers" {
-  count           = "${var.workers}"
-  key_algorithm   = "${element(tls_private_key.workers.*.algorithm, count.index)}"
-  private_key_pem = "${element(tls_private_key.workers.*.private_key_pem, count.index)}"
+  count           = var.workers
+ key_algorithm   =  tls_private_key.workers[count.index].algorithm
+  private_key_pem = tls_private_key.workers[count.index].private_key_pem
 
   subject {
     common_name  = "${var.hostname}-workers-${count.index}.node.consul"
@@ -101,7 +92,6 @@ resource "tls_cert_request" "workers" {
 
     # Nomad
     "nomad.service.consul",
-
     "client.global.nomad",
 
     # Common
@@ -119,11 +109,11 @@ resource "tls_cert_request" "workers" {
 # Client certificate
 
 resource "tls_locally_signed_cert" "workers" {
-  count              = "${var.workers}"
-  cert_request_pem   = "${element(tls_cert_request.workers.*.cert_request_pem, count.index)}"
-  ca_key_algorithm   = "${var.ca_key_algorithm}"
-  ca_private_key_pem = "${var.ca_private_key_pem}"
-  ca_cert_pem        = "${var.ca_cert_pem}"
+ count              = var.workers
+ cert_request_pem   = tls_cert_request.workers[count.index].cert_request_pem
+ ca_key_algorithm   = var.ca_key_algorithm
+ ca_private_key_pem = var.ca_private_key_pem
+ ca_cert_pem        = var.ca_cert_pem
 
   validity_period_hours = 720 # 30 days
 
@@ -135,25 +125,3 @@ resource "tls_locally_signed_cert" "workers" {
     "server_auth",
   ]
 }
-
-/*
-# Consul gossip encryption key
-resource "random_id" "consul_gossip_key" {
-  byte_length = 16
-}
-
-# Consul master token
-resource "random_id" "consul_master_token" {
-  byte_length = 16
-}
-
-# Consul join key
-resource "random_id" "consul_join_tag_value" {
-  byte_length = 16
-}
-
-# Nomad gossip encryption key
-resource "random_id" "nomad_gossip_key" {
-  byte_length = 16
-}
-*/

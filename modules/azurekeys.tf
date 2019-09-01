@@ -14,16 +14,15 @@ resource "azurerm_key_vault" "demostack" {
   enabled_for_disk_encryption = true
   tenant_id                   = "${var.tenant_id}"
 
-  sku {
-    name = "standard"
-  }
+  sku_name  = "standard"
+  
 
-  tags {
-    name      = "Guy Barros"
-    ttl       = "13"
-    owner     = "guy@hashicorp.com"
-    demostack = "${var.consul_join_tag_value}"
-  }
+  tags = {
+    name      =var.owner
+    TTL       = var.TTL
+    owner     = var.owner
+    demostack =var.consul_join_tag_value
+ }
 }
 
 resource "azurerm_user_assigned_identity" "demostack" {
@@ -35,17 +34,8 @@ resource "azurerm_user_assigned_identity" "demostack" {
 
 resource "azurerm_key_vault_access_policy" "demostack_vm" {
   key_vault_id          = "${azurerm_key_vault.demostack.id}"
-  # resource_group_name = "${azurerm_key_vault.demostack.resource_group_name}"
-
-  # tenant_id = "${var.tenant}"
-  #  object_id = "${azurerm_user_assigned_identity.demostack.principal_id}"
   tenant_id = "${data.azurerm_client_config.current.tenant_id}"
-
   object_id = "${data.azurerm_client_config.current.service_principal_object_id}"
-
-  # object_id = "${var.client_id}"
-  # application_id = "${var.client_id}"
-
   certificate_permissions = [
     "get",
     "list",
@@ -91,10 +81,10 @@ resource "azurerm_key_vault_key" "demostack" {
     "wrapKey",
   ]
 
-  tags {
-    name      = "Guy Barros"
-    ttl       = "13"
-    owner     = "guy@hashicorp.com"
-    demostack = "${var.consul_join_tag_value}"
-  }
+  tags = {
+    name      = var.owner
+    TTL       = var.TTL
+    owner     = var.owner
+    demostack = var.consul_join_tag_value
+}
 }
