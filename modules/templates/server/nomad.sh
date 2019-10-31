@@ -56,8 +56,6 @@ client {
     "type" = "server"
     "name" = "${node_name}"
   }
-}
-
   host_volume "mysql_mount" {
     path      = "/opt/mysql/data/"
     read_only = false
