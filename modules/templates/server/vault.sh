@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -e
+
 
 echo "==> Vault (server)"
 # Vault expects the key to be concatenated with the CA
@@ -31,6 +31,7 @@ cluster_name = "${hostname}-demostack"
 
 storage "consul" {
   path = "vault/"
+   service = "vault"
 }
 
 listener "tcp" {
@@ -278,10 +279,21 @@ path "kv/test/*" {
     capabilities = ["create", "read", "update", "delete", "list", "sudo"] 
 }
 
-
 path "pki/*" {
     capabilities = ["create", "read", "update", "delete", "list", "sudo"] 
 }
+
+
+path "sys/control-group/authorize" {
+    capabilities = ["create", "update"]
+}
+
+# To check control group request status
+path "sys/control-group/request" {
+    capabilities = ["create", "update"]
+}
+
+
 EOR
 } ||
 {

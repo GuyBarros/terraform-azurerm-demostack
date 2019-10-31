@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -e
+
 
 echo "==> Base"
 
@@ -53,9 +53,13 @@ sudo tee /etc/ssl/certs/me.key > /dev/null <<EOF
 ${me_key}
 EOF
 
+echo "--> updated version of Nodejs"
+curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
+
 echo "--> Installing common dependencies"
 ssh-apt install \
   build-essential \
+  nodejs \
   curl \
   emacs \
   git \
@@ -65,10 +69,15 @@ ssh-apt install \
   vim \
   wget \
   tree \
+  nfs-kernel-server \
+  nfs-common \
   python3-pip \
   ruby-full \
-  npm \
-  &>/dev/null
+  apt-transport-https \
+  ca-certificates \
+  curl \
+  gnupg-agent \
+  software-properties-common
 
 echo "--> Installing git secrets"
 git clone https://github.com/awslabs/git-secrets
@@ -97,6 +106,15 @@ EOF
 echo "--> Installing dnsmasq"
 sudo apt-get install -y -q dnsmasq
 
+
+echo "--> Install Envoy"
+curl -sL 'https://getenvoy.io/gpg' | sudo apt-key add -
+sudo add-apt-repository \
+"deb [arch=amd64] https://dl.bintray.com/tetrate/getenvoy-deb \
+$(lsb_release -cs) \
+stable"
+sudo apt-get update && sudo apt-get install -y getenvoy-envoy
+envoy --version
 
 
 echo "==> Base is done!"

@@ -64,35 +64,22 @@ resource "azurerm_network_security_group" "demostack-sg" {
     owner     = var.owner
     demostack = var.consul_join_tag_value
  }
-
+# SSH
   security_rule {
-    name                       = "demostack-https"
+    name                       = "demostack-ssh"
     priority                   = 100
     direction                  = "Inbound"
     access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "443"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
-
-  
-  security_rule {
-    name                       = "demostack-ssh"
-    priority                   = 102
-    direction                  = "Inbound"
-    access                     = "Deny"
     protocol                   = "Tcp"
     source_port_range          = "*"
     destination_port_range     = "22"
     source_address_prefix      = "*"
     destination_address_prefix = "*"
   }
-
+# HTTP
   security_rule {
     name                       = "demostack-http"
-    priority                   = 103
+    priority                   = 102
     direction                  = "Inbound"
     access                     = "Allow"
     protocol                   = "Tcp"
@@ -102,21 +89,73 @@ resource "azurerm_network_security_group" "demostack-sg" {
     destination_address_prefix = "*"
   }
 
+# HTTPS
   security_rule {
-    name                       = "demostack-consulandvault"
+    name                       = "demostack-https"
+    priority                   = 103
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "443"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+
+#LDAP
+  security_rule {
+    name                       = "demostack-LDAP"
     priority                   = 104
     direction                  = "Inbound"
     access                     = "Allow"
     protocol                   = "Tcp"
     source_port_range          = "*"
-    destination_port_range     = "8000-8999"
+    destination_port_range     = "389"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+
+#Grafana
+  security_rule {
+    name                       = "demostack-grafana"
+    priority                   = 105
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "3000"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+
+  #Postgres + pgadmin
+  security_rule {
+    name                       = "demostack-chat"
+    priority                   = 106
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "5000 - 5500"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+
+  security_rule {
+    name                       = "demostack-consulandvault"
+    priority                   = 107
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "8000-9200"
     source_address_prefix      = "*"
     destination_address_prefix = "*"
   }
 
   security_rule {
     name                       = "demostack-fabio"
-    priority                   = 105
+    priority                   = 108
     direction                  = "Inbound"
     access                     = "Allow"
     protocol                   = "Tcp"
@@ -128,12 +167,24 @@ resource "azurerm_network_security_group" "demostack-sg" {
 
   security_rule {
     name                       = "demostack-nomad"
-    priority                   = 106
+    priority                   = 109
     direction                  = "Inbound"
     access                     = "Allow"
     protocol                   = "Tcp"
     source_port_range          = "*"
     destination_port_range     = "3000-4999"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+
+  security_rule {
+    name                       = "demostack-envoy"
+    priority                   = 110
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "19000-39999"
     source_address_prefix      = "*"
     destination_address_prefix = "*"
   }

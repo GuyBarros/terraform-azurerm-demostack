@@ -1,57 +1,53 @@
 #!/usr/bin/env bash
-set -e
-
 echo "==> Consul (client)"
 
-echo "--> Fetching"
+echo "==> Consul (server)"
+if [ ${enterprise} == 0 ]
+then
+echo "--> Fetching OSS binaries"
 install_from_url "consul" "${consul_url}"
-
+else
+echo "--> Fetching enterprise binaries"
+install_from_url "consul" "${consul_ent_url}"
+fi
 echo "--> Writing configuration"
 sudo mkdir -p /mnt/consul
 sudo mkdir -p /etc/consul.d
 sudo tee /etc/consul.d/config.json > /dev/null <<EOF
 {
   "datacenter": "${location}",
-  "advertise_addr": "$(private_ip)",
+  "advertise_addr": "${private_ip}",
   "advertise_addr_wan": "${public_ip}",
   "bind_addr": "0.0.0.0",
+  "client_addr": "0.0.0.0",
   "data_dir": "/mnt/consul",
   "disable_update_check": true,
   "encrypt": "${consul_gossip_key}",
-  
   "leave_on_terminate": true,
   "node_name": "${node_name}",
-  "raft_protocol": 3,
   "retry_join": ["provider=azure tag_name=${consul_join_tag_name}  tag_value=${consul_join_tag_value} tenant_id=${tenant_id} client_id=${client_id} subscription_id=${subscription_id} secret_access_key=${client_secret} "],
-
-  "addresses": {
-    "http": "0.0.0.0",
-    "https": "0.0.0.0",
-    "gRPC": "0.0.0.0"
-  },
   "ports": {
     "http": 8500,
     "https": 8501,
     "gRPC": 8502
   },
-  "key_file": "/etc/ssl/certs/me.key",
-  "cert_file": "/etc/ssl/certs/me.crt",
-  "ca_file": "/usr/local/share/ca-certificates/01-me.crt",
-   "auto_encrypt": {
-    "tls": false
+  "ui": true,
+  "connect":{
+    "enabled": true
   },
-  "verify_server_hostname": false,
-  "verify_incoming": false,
-  "verify_outgoing": false,
-   "ui": true,
- "connect":{
-  "enabled": true,
-  "ca_provider":"consul"
-
-      }
+  "autopilot": {
+    "cleanup_dead_servers": true,
+    "last_contact_threshold": "200ms",
+    "max_trailing_logs": 250,
+    "server_stabilization_time": "10s",
+    "disable_upgrade_migration": false
+  },
+  "telemetry": {
+    "disable_hostname": true,
+    "prometheus_retention_time": "30s"
+  }
 }
 EOF
-
 
 echo "--> Writing profile"
 sudo tee /etc/profile.d/consul.sh > /dev/null <<"EOF"
@@ -59,10 +55,6 @@ alias conslu="consul"
 alias ocnsul="consul"
 EOF
 source /etc/profile.d/consul.sh
-
-
-
-
 
 echo "--> Making consul.d world-writable..."
 sudo chmod 0777 /etc/consul.d/

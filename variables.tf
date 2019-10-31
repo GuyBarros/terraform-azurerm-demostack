@@ -116,11 +116,6 @@ variable "fabio_url" {
   default     = "https://github.com/fabiolb/fabio/releases/download/v1.5.7/fabio-1.5.7-go1.9.2-linux_amd64"
 }
 
-variable "hashiui_url" {
-  description = "The url to download hashi-ui."
-  default     = "https://github.com/jippi/hashi-ui/releases/download/v0.26.1/hashi-ui-linux-amd64"
-}
-
 variable "nomad_url" {
   description = "The url to download nomad."
   default     = "https://releases.hashicorp.com/nomad/0.8.6/nomad_0.8.6_linux_amd64.zip"
@@ -211,5 +206,17 @@ default = ""
 
 variable "run_nomad_jobs" {
 default = 1
+}
+
+
+variable "cni_plugin_url" {
+  description = "The url to download teh CNI plugin for nomad."
+  default     = "https://github.com/containernetworking/plugins/releases/download/v0.8.2/cni-plugins-linux-amd64-v0.8.2.tgz"
+}
+
+
+variable "primary_datacenter"{
+  description = "the primary datacenter for mesh gateways"
+  default = ""
 }
 

@@ -1,10 +1,20 @@
 #!/usr/bin/env bash
-set -e
-
 echo "==> Nomad (client)"
 
 echo "--> Fetching"
 install_from_url "nomad" "${nomad_url}"
+
+
+echo "--> Create a Directory to Use as a Mount Target"
+sudo mkdir -p /opt/mysql/data/
+sudo mkdir -p /opt/mongodb/data/
+sudo mkdir -p /opt/prometheus/data/
+
+
+echo "--> Installing CNI plugin"
+sudo mkdir -p /opt/cni/bin/
+wget -O cni.tgz ${cni_plugin_url}
+sudo tar -xzf cni.tgz -C /opt/cni/bin/
 
 echo "--> Installing"
 sudo mkdir -p /mnt/nomad
@@ -13,37 +23,46 @@ sudo tee /etc/nomad.d/config.hcl > /dev/null <<EOF
 name         = "${node_name}"
 data_dir     = "/mnt/nomad"
 enable_debug = true
-
 datacenter = "${location}"
-
 region = "global"
-
 "bind_addr" = "0.0.0.0"
 advertise {
   http = "${public_ip}:4646"
   rpc  = "${public_ip}:4647"
   serf = "${public_ip}:4648"
 }
-
-
 client {
   enabled = true
-     options = {
+   options {
     "driver.raw_exec.enable" = "1"
+     "docker.privileged.enabled" = "true"
   }
 }
-
+meta {
+    "type" = "worker",
+    "name" = "${node_name}"
+  }
+  host_volume "mysql_mount" {
+    path      = "/opt/mysql/data"
+    read_only = false
+  }
+  host_volume "mongodb_mount" {
+    path      = "/opt/mongodb/data"
+    read_only = false
+  }
+  host_volume "prometheus_mount" {
+    path      = "/opt/prometheus/data/"
+    read_only = false
+  }
+}
 tls {
   rpc  = true
   http = true
-
   ca_file   = "/usr/local/share/ca-certificates/01-me.crt"
   cert_file = "/etc/ssl/certs/me.crt"
   key_file  = "/etc/ssl/certs/me.key"
-
   verify_server_hostname = false
 }
-
 vault {
   enabled   = true
   address   = "https://active.vault.service.consul:8200"
@@ -52,8 +71,6 @@ vault {
   key_file  = "/etc/ssl/certs/me.key"
   tls_skip_verify = "true"
 }
-
-
 EOF
 
 echo "--> Writing profile"

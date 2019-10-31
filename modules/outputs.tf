@@ -25,6 +25,10 @@ output "workers" {
   value = [azurerm_public_ip.workers-pip.*.fqdn]
 }
 
-output "hashi_ui" {
-  value = "http://${azurerm_public_ip.workers-pip.0.fqdn}:3000"
+output "nomad_tag_workers"{
+  value = data.template_file.workers.*.vars.node_name
+}
+
+output "nomad_tag_servers"{
+  value = data.template_file.servers.*.vars.node_name
 }

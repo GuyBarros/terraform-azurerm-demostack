@@ -49,13 +49,13 @@ module "primarycluster" {
   consul_url          = var.consul_url
   consul_ent_url      = var.consul_ent_url
   fabio_url           = var.fabio_url
-  hashiui_url         = var.hashiui_url
   nomad_url           = var.nomad_url
   nomad_ent_url       = var.nomad_ent_url
   vault_url           = var.vault_url
   vault_ent_url       = var.vault_ent_url
   TTL                 = var.TTL
-
+  cni_plugin_url       = var.cni_plugin_url
+  
   # ca_key_algorithm      = var.ca_key_algorithm
   # ca_private_key_pem    = var.ca_private_key_pem
   # ca_cert_pem           = var.ca_cert_pem
