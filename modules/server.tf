@@ -1,6 +1,6 @@
 data "template_file" "servers" {
-  depends_on = ["azurerm_public_ip.servers-pip", "azurerm_key_vault.demostack"]
-  count      = "${var.servers}"
+  depends_on = [azurerm_public_ip.servers-pip,azurerm_key_vault.demostack]
+  count      = var.servers
 
   template = "${join("\n", list(
      file("${path.module}/templates/shared/base.sh"),
@@ -31,8 +31,8 @@ data "template_file" "servers" {
     fqdn          = azurerm_public_ip.servers-pip[count.index].fqdn
     node_name     = "${var.hostname}-servers-${count.index}"
     me_ca         = var.ca_cert_pem
-    me_cert       = "${element(tls_locally_signed_cert.servers[*].cert_pem, count.index)}"
-    me_key        = "${element(tls_private_key.servers[*].private_key_pem, count.index)}"
+    me_cert       = "${element(tls_locally_signed_cert.servers.*.cert_pem, count.index)}"
+    me_key        = "${element(tls_private_key.servers.*.private_key_pem, count.index)}"
 
     # Consul
     primary_datacenter    = var.primary_datacenter
@@ -65,7 +65,7 @@ data "template_file" "servers" {
 
 # Gzip cloud-init config
 data "template_cloudinit_config" "servers" {
-  depends_on = ["data.template_file.servers"]
+  depends_on = [data.template_file.servers]
   count      = var.servers
 
   gzip          = true
@@ -133,7 +133,7 @@ resource "azurerm_public_ip" "servers-pip" {
 }
 
 resource "azurerm_virtual_machine" "servers" {
-  depends_on = ["data.template_file.servers","data.template_cloudinit_config.servers"]
+  depends_on = [data.template_file.servers,data.template_cloudinit_config.servers]
   count               = var.servers
  name                = "${var.hostname}-servers-${count.index}"
   location            = var.location
@@ -175,7 +175,7 @@ resource "azurerm_virtual_machine" "servers" {
     admin_password = var.admin_password
     ////////////////////////////////////////// 
        
-        custom_data = "${element(data.template_cloudinit_config.servers[*].rendered, count.index)}" // this doesnt pass plan
+        custom_data = element(data.template_cloudinit_config.servers.*.rendered, count.index)
        
     //////////////////////////////////////////     
     }

@@ -1,4 +1,4 @@
-/**
+
 //--------------------------EMEA-SE_PLAYGROUND-2019-----------------------------------------
 # Using a single workspace:
 terraform {
@@ -14,8 +14,6 @@ terraform {
 
 
 //--------------------------------------------------------------------
-
-**/
 // Workspace Data
 data "terraform_remote_state" "emea_se_playground_tls_root_certificate" {
   backend = "remote"

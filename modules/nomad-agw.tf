@@ -1,8 +1,8 @@
 resource "azurerm_network_interface_application_gateway_backend_address_pool_association" "nomad-servers-awg" {
   count                   = var.servers
- network_interface_id    = "${azurerm_network_interface.servers-nic[count.index].id}"
+ network_interface_id    =  "${azurerm_network_interface.servers-nic[count.index].id}"
   ip_configuration_name   = "${var.demo_prefix}-${count.index}-ipconfig"
-  backend_address_pool_id = "${azurerm_application_gateway.nomad-awg.backend_address_pool.0.id }"
+  backend_address_pool_id = azurerm_application_gateway.nomad-awg.backend_address_pool.0.id
 }
 
 
@@ -10,20 +10,20 @@ resource "azurerm_network_interface_application_gateway_backend_address_pool_ass
   count                   = var.workers
  network_interface_id    = "${azurerm_network_interface.workers-nic[count.index].id}"
   ip_configuration_name   = "${var.demo_prefix}-${count.index}-ipconfig"
-  backend_address_pool_id = "${azurerm_application_gateway.nomad-awg.backend_address_pool.0.id }"
+  backend_address_pool_id = azurerm_application_gateway.nomad-awg.backend_address_pool.0.id
 }
 
 
 resource "azurerm_subnet" "nomad-awg" {
   name                 = "${var.demo_prefix}-nomad-awg"
-  virtual_network_name = "${azurerm_virtual_network.awg.name}"
-  resource_group_name  = "${azurerm_resource_group.demostack.name}"
+  virtual_network_name = azurerm_virtual_network.awg.name
+  resource_group_name  = azurerm_resource_group.demostack.name
   address_prefix       = "10.0.50.0/24"
 }
 
 resource "azurerm_public_ip" "nomad-awg" {
   name                = "${var.resource_group}-nomad-awg"
-  resource_group_name = "${azurerm_resource_group.demostack.name}"
+  resource_group_name = azurerm_resource_group.demostack.name
   location            = var.location
  allocation_method   = "Dynamic"
   domain_name_label   = "${var.hostname}-nomad-awg-pip"
@@ -39,8 +39,8 @@ resource "azurerm_public_ip" "nomad-awg" {
 
 resource "azurerm_application_gateway" "nomad-awg" {
   name                = "${var.resource_group}nomad-awg"
-  resource_group_name = "${azurerm_resource_group.demostack.name}"
-  location            = "${var.location}"
+  resource_group_name = azurerm_resource_group.demostack.name
+  location            = var.location
 
   sku {
     name     = "Standard_Medium"
@@ -60,7 +60,7 @@ resource "azurerm_application_gateway" "nomad-awg" {
 
   frontend_ip_configuration {
     name                 = "nomad-frontend-ip"
-    public_ip_address_id = "${azurerm_public_ip.nomad-awg.id}"
+    public_ip_address_id = azurerm_public_ip.nomad-awg.id
     
   }
 
@@ -88,27 +88,27 @@ resource "azurerm_application_gateway" "nomad-awg" {
 
 authentication_certificate{
  name = "server-0"
- data = "${tls_locally_signed_cert.servers[0].cert_pem}"
+ data = tls_locally_signed_cert.servers.0.cert_pem
 }
 authentication_certificate{
  name = "server-1"
- data = "${tls_locally_signed_cert.servers[1].cert_pem}"
-}
+ data = tls_locally_signed_cert.servers.1.cert_pem
+ }
 authentication_certificate{
  name = "server-2"
- data = "${tls_locally_signed_cert.servers[2].cert_pem}"
+ data = tls_locally_signed_cert.servers.2.cert_pem
 }
 authentication_certificate{
  name = "worker-0"
- data = "${tls_locally_signed_cert.workers[0].cert_pem}"
+ data = tls_locally_signed_cert.workers.0.cert_pem
 }
 authentication_certificate{
  name = "worker-1"
- data = "${tls_locally_signed_cert.workers[1].cert_pem}"
+ data = tls_locally_signed_cert.workers.1.cert_pem
 }
 authentication_certificate{
  name = "worker-2"
- data = "${tls_locally_signed_cert.workers[2].cert_pem}"
+ data = tls_locally_signed_cert.workers.2.cert_pem
 }
 
   backend_http_settings {

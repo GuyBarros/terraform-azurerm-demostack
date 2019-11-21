@@ -45,7 +45,6 @@ resource "azurerm_application_gateway" "vault-awg" {
 
   gateway_ip_configuration {
     name      = "vault-gateway-ip"
-    // subnet_id = "${azurerm_virtual_network.awg.id}/subnets/${azurerm_subnet.vault-awg.name}"
     subnet_id = "${azurerm_virtual_network.awg.id}/subnets/${azurerm_subnet.vault-awg.name}"
   }
 
@@ -84,15 +83,15 @@ resource "azurerm_application_gateway" "vault-awg" {
 
 authentication_certificate{
  name = "server-0"
- data = "${tls_locally_signed_cert.servers[0].cert_pem}"
+ data = tls_locally_signed_cert.servers.0.cert_pem
 }
 authentication_certificate{
  name = "server-1"
- data = "${tls_locally_signed_cert.servers[1].cert_pem}"
+ data = tls_locally_signed_cert.servers.1.cert_pem
 }
 authentication_certificate{
  name = "server-2"
- data = "${tls_locally_signed_cert.servers[2].cert_pem}"
+ data = tls_locally_signed_cert.servers.2.cert_pem
 }
 
   backend_http_settings {

@@ -1,5 +1,5 @@
 data "template_file" "workers" {
-  depends_on = ["azurerm_public_ip.workers-pip","azurerm_public_ip.consul-lb-pip"]
+  depends_on = [azurerm_public_ip.workers-pip,azurerm_public_ip.consul-lb-pip]
   count      = var.workers
 
   template = "${join("\n", list(
@@ -29,8 +29,8 @@ data "template_file" "workers" {
     fqdn            = azurerm_public_ip.workers-pip[count.index].fqdn
     node_name       = "${var.hostname}-workers-${count.index}"
     me_ca           = var.ca_cert_pem
-    me_cert         = "${element(tls_locally_signed_cert.workers[*].cert_pem, count.index)}"
-    me_key          = "${element(tls_private_key.workers[*].private_key_pem, count.index)}"
+    me_cert         = "${element(tls_locally_signed_cert.workers.*.cert_pem, count.index)}"
+    me_key          = "${element(tls_private_key.workers.*.private_key_pem, count.index)}"
     
     # Consul
     consul_url            = var.consul_url
@@ -62,7 +62,7 @@ data "template_file" "workers" {
 
 # Gzip cloud-init config
 data "template_cloudinit_config" "workers" {
-  depends_on = ["data.template_file.workers"]
+  depends_on = [data.template_file.workers]
   count      = var.workers
 
   gzip          = true
@@ -133,7 +133,7 @@ resource "azurerm_public_ip" "workers-pip" {
 # the demo environment. Terraform supports several different types of 
 # provisioners including Bash, Powershell and Chef.
 resource "azurerm_virtual_machine" "workers" {
-    depends_on = ["data.template_file.workers","data.template_cloudinit_config.workers"]
+    depends_on = [data.template_file.workers,data.template_cloudinit_config.workers]
   count               = var.workers
  name                = "${var.hostname}-workers-${count.index}"
   location            = var.location
@@ -162,7 +162,7 @@ resource "azurerm_virtual_machine" "workers" {
     computer_name  = "${var.hostname}-workers-${count.index}"
     admin_username = var.admin_username
    admin_password = var.admin_password
-    custom_data =  "${element(data.template_cloudinit_config.workers[*].rendered,    count.index  )}"
+    custom_data =  element(data.template_cloudinit_config.workers.*.rendered,  count.index  )
 
 
   }

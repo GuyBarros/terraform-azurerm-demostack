@@ -38,19 +38,19 @@ SHELLCOMMANDS
 
 // Primary
 
-output "Consul" {
+output "Primary_Consul" {
   value = module.primarycluster.consul_lb
 }
 
-output "Nomad" {
+output "Primary_Nomad" {
   value = module.primarycluster.nomad_ui
 }
 
-output "Vault" {
+output "Primary_Vault" {
   value = module.primarycluster.vault_ui
 }
 
-output "Fabio" {
+output "Primary_Fabio" {
   value = module.primarycluster.fabio_lb
 }
 
