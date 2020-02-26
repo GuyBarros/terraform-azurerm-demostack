@@ -62,31 +62,6 @@ resource "azurerm_lb_rule" "consul-lb-rule" {
 }
 ################################################
 
-resource "azurerm_lb_probe" "fabio-lb-probe" {
-  name                = "${var.resource_group}-fabio-lb-probe"
-  resource_group_name = azurerm_resource_group.demostack.name
-  loadbalancer_id     = azurerm_lb.consul-lb.id
-  protocol            = "http"
-  port                = "9998"
-  request_path        = "/health"
-  number_of_probes    = "1"
-}
-
-resource "azurerm_lb_rule" "fabio-lb-rule" {
-  name                           = "${var.resource_group}-fabio-lb-rule"
-  resource_group_name            = azurerm_resource_group.demostack.name
-  loadbalancer_id                = azurerm_lb.consul-lb.id
-  protocol                       = "Tcp"
-  frontend_port                  = "9999"
-  backend_port                   = "9999"
-  frontend_ip_configuration_name = azurerm_lb.consul-lb.frontend_ip_configuration.0.name
-  probe_id                       = azurerm_lb_probe.consul-lb-probe.id
-  backend_address_pool_id        = azurerm_lb_backend_address_pool.consul-lb-pool.id
-  depends_on                     = [azurerm_public_ip.consul-lb-pip,azurerm_lb_probe.consul-lb-probe,azurerm_lb_backend_address_pool.consul-lb-pool]
-}
-########################
-
-
 resource "azurerm_lb_backend_address_pool" "consul-lb-pool" {
   name                = "${var.resource_group}-consul-lb-pool"
   resource_group_name = azurerm_resource_group.demostack.name

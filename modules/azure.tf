@@ -190,3 +190,4 @@ resource "azurerm_network_security_group" "demostack-sg" {
     destination_address_prefix = "*"
   }
 }
+

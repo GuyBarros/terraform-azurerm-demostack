@@ -99,6 +99,10 @@ resource "azurerm_subnet" "servers" {
 }
 
 
+resource "azurerm_subnet_network_security_group_association" "servers" {
+  subnet_id                 = azurerm_subnet.servers.id
+  network_security_group_id = azurerm_network_security_group.demostack-sg.id
+}
 
 
 # Every Azure Virtual Machine comes with a private IP address. You can also 
