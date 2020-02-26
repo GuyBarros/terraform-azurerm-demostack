@@ -42,18 +42,9 @@ output "Primary_Consul" {
   value = module.primarycluster.consul_lb
 }
 
-output "Primary_Nomad" {
-  value = module.primarycluster.nomad_ui
-}
-
 output "Primary_Vault" {
   value = module.primarycluster.vault_ui
 }
-
-output "Primary_Fabio" {
-  value = module.primarycluster.fabio_lb
-}
-
 
 output "Primary_servers_nodes" {
   value = module.primarycluster.servers
@@ -62,12 +53,4 @@ output "Primary_servers_nodes" {
 
 output "Primary_workers_Nodes" {
   value = module.primarycluster.workers
-}
-
-output "Primary_nomad_tag_workers"{
-  value = module.primarycluster.nomad_tag_workers
-}
-
-output "Primary_nomad_tag_servers"{
-  value = module.primarycluster.nomad_tag_servers
 }

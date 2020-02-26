@@ -25,11 +25,6 @@ resource "tls_cert_request" "servers" {
     "consul.service.consul",
     "servers.dc1.consul",
 
-    # Nomad
-    "nomad.service.consul",
-
-    "client.global.nomad",
-    "servers.global.nomad",
     "vault.service.consul",
     "active.vault.service.consul",
     "standby.vault.service.consul",
@@ -90,10 +85,7 @@ resource "tls_cert_request" "workers" {
     # Consul
     "${var.hostname}-workers-${count.index}.node.consul",
 
-    # Nomad
-    "nomad.service.consul",
-    "client.global.nomad",
-
+   
     # Common
     "localhost",
   ]

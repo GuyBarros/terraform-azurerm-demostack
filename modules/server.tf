@@ -8,8 +8,6 @@ data "template_file" "servers" {
     file("${path.module}/templates/shared/run-proxy.sh"),
     file("${path.module}/templates/server/consul.sh"),
     file("${path.module}/templates/server/vault.sh"),
-    file("${path.module}/templates/server/nomad.sh"),
-    file("${path.module}/templates/server/nomad-jobs.sh"),
   ))}"
 
   
@@ -45,15 +43,6 @@ data "template_file" "servers" {
     consul_master_token   =  var.consul_master_token
     consul_servers        = var.servers
 
-    # Nomad
-    nomad_url        = var.nomad_url
-    nomad_gossip_key =  var.nomad_gossip_key
-    nomad_servers    = var.servers
-    cni_plugin_url = var.cni_plugin_url
-
-    # Nomad jobs
-    fabio_url   = var.fabio_url
-
     # Vault
     vault_url        = var.vault_url
     vault_ent_url    =  var.vault_ent_url
@@ -84,7 +73,7 @@ resource "azurerm_network_interface" "servers-nic" {
  name                      = "${var.demo_prefix}servers-nic-${count.index}"
   location                  = var.location
  resource_group_name       = azurerm_resource_group.demostack.name
-  network_security_group_id = azurerm_network_security_group.demostack-sg.id
+ # network_security_group_id = azurerm_network_security_group.demostack-sg.id
 
   ip_configuration {
     name                          = "${var.demo_prefix}-${count.index}-ipconfig"
