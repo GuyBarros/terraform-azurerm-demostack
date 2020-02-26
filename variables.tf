@@ -137,75 +137,75 @@ variable "vault_ent_url" {
 }
 
 variable "owner" {
-description = "IAM user responsible for lifecycle of cloud resources used for training"
+  description = "IAM user responsible for lifecycle of cloud resources used for training"
 }
 
 variable "TTL" {
-description = "Hours after which resource expires, used by reaper. Do not use any unit. -1 is infinite."
-default     = "240"
+  description = "Hours after which resource expires, used by reaper. Do not use any unit. -1 is infinite."
+  default     = "240"
 }
 
 variable "enterprise" {
-description = "do you want to use the enterprise version of the binaries"
-default     = false
+  description = "do you want to use the enterprise version of the binaries"
+  default     = false
 }
 
 variable "subscription_id" {
-description = "your subscription ID for Vault KMS Auto Unseal"
+  description = "your subscription ID for Vault KMS Auto Unseal"
 }
 
 variable "tenant_id" {
-description = "your tenant ID for Vault KMS Auto Unseal"
+  description = "your tenant ID for Vault KMS Auto Unseal"
 }
 
 variable "client_id" {
-description = "your client ID for Vault KMS Auto Unseal"
+  description = "your client ID for Vault KMS Auto Unseal"
 }
 
 variable "client_secret" {
-description = "your client ID for Vault KMS Auto Unseal"
+  description = "your client ID for Vault KMS Auto Unseal"
 }
 
 variable "vaultlicense" {
-description = "Enterprise License for Vault"
-default     = ""
+  description = "Enterprise License for Vault"
+  default     = ""
 }
 
 variable "consullicense" {
-description = "Enterprise License for Consul"
-default     = ""
+  description = "Enterprise License for Consul"
+  default     = ""
 }
 
 variable "ca_key_algorithm" {
-default = ""
+  default = ""
 }
 
 variable "ca_private_key_pem" {
-default = ""
+  default = ""
 }
 
 variable "ca_cert_pem" {
-default = ""
+  default = ""
 }
 
 variable "consul_gossip_key" {
-default = ""
+  default = ""
 }
 
 variable "consul_master_token" {
-default = ""
+  default = ""
 }
 
 variable "consul_join_tag_value" {
-default = ""
+  default = ""
 }
 
 variable "nomad_gossip_key" {
-default = ""
+  default = ""
 }
 
 variable "run_nomad_jobs" {
-default = 1
+  default = 1
 }
 
 
@@ -215,8 +215,8 @@ variable "cni_plugin_url" {
 }
 
 
-variable "primary_datacenter"{
+variable "primary_datacenter" {
   description = "the primary datacenter for mesh gateways"
-  default = ""
+  default     = ""
 }
 

@@ -84,8 +84,7 @@ resource "azurerm_network_interface" "servers-nic" {
  name                      = "${var.demo_prefix}servers-nic-${count.index}"
   location                  = var.location
  resource_group_name       = azurerm_resource_group.demostack.name
-  network_security_group_id = azurerm_network_security_group.demostack-sg.id
-
+ 
   ip_configuration {
     name                          = "${var.demo_prefix}-${count.index}-ipconfig"
     subnet_id                     = azurerm_subnet.servers.id
@@ -109,6 +108,11 @@ resource "azurerm_subnet" "servers" {
   address_prefix       = "10.0.30.0/24"
 }
 
+
+resource "azurerm_subnet_network_security_group_association" "servers" {
+  subnet_id                 = azurerm_subnet.servers.id
+  network_security_group_id = azurerm_network_security_group.demostack-sg.id
+}
 
 
 

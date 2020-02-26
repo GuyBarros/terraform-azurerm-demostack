@@ -1,6 +1,6 @@
 resource "azurerm_network_interface_application_gateway_backend_address_pool_association" "nomad-servers-awg" {
   count                   = var.servers
- network_interface_id    =  "${azurerm_network_interface.servers-nic[count.index].id}"
+ network_interface_id    =  azurerm_network_interface.servers-nic[count.index].id
   ip_configuration_name   = "${var.demo_prefix}-${count.index}-ipconfig"
   backend_address_pool_id = azurerm_application_gateway.nomad-awg.backend_address_pool.0.id
 }
@@ -8,7 +8,7 @@ resource "azurerm_network_interface_application_gateway_backend_address_pool_ass
 
 resource "azurerm_network_interface_application_gateway_backend_address_pool_association" "nomad-workers-awg" {
   count                   = var.workers
- network_interface_id    = "${azurerm_network_interface.workers-nic[count.index].id}"
+ network_interface_id    = azurerm_network_interface.workers-nic[count.index].id
   ip_configuration_name   = "${var.demo_prefix}-${count.index}-ipconfig"
   backend_address_pool_id = azurerm_application_gateway.nomad-awg.backend_address_pool.0.id
 }
@@ -20,6 +20,13 @@ resource "azurerm_subnet" "nomad-awg" {
   resource_group_name  = azurerm_resource_group.demostack.name
   address_prefix       = "10.0.50.0/24"
 }
+
+
+resource "azurerm_subnet_network_security_group_association" "nomad-awg" {
+  subnet_id                 = azurerm_subnet.nomad-awg.id
+  network_security_group_id = azurerm_network_security_group.demostack-sg.id
+}
+
 
 resource "azurerm_public_ip" "nomad-awg" {
   name                = "${var.resource_group}-nomad-awg"

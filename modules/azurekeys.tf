@@ -35,7 +35,7 @@ resource "azurerm_user_assigned_identity" "demostack" {
 resource "azurerm_key_vault_access_policy" "demostack_vm" {
   key_vault_id          = azurerm_key_vault.demostack.id
   tenant_id = data.azurerm_client_config.current.tenant_id
-  object_id = data.azurerm_client_config.current.service_principal_object_id
+  object_id = data.azurerm_client_config.current.object_id
   certificate_permissions = [
     "get",
     "list",

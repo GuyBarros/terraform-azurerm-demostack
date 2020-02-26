@@ -14,6 +14,13 @@ resource "azurerm_subnet" "vault-awg" {
 }
 
 
+resource "azurerm_subnet_network_security_group_association" "vault-awg" {
+  subnet_id                 = azurerm_subnet.vault-awg.id
+  network_security_group_id = azurerm_network_security_group.demostack-sg.id
+}
+
+
+
 resource "azurerm_public_ip" "vault-awg" {
   count               = 1
   name                = "${var.resource_group}-vault-awg"
