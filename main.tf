@@ -1,30 +1,28 @@
-/*
 //--------------------------EMEA-SE_PLAYGROUND-2019-----------------------------------------
 # Using a single workspace:
+/**
 terraform {
   backend "remote" {
     hostname     = "app.terraform.io"
     organization = "emea-se-playground-2019"
-
-    workspaces {
+    workspaces  {
       name = "Guy-Azure-Demostack"
-    }
+  }
   }
 }
-*/
+**/
 
-//--------------------------------------------------------------------
+
 // Workspace Data
 data "terraform_remote_state" "emea_se_playground_tls_root_certificate" {
-  backend = "remote"
-
+  backend =  "remote"
   config = {
     hostname     = "app.terraform.io"
     organization = "emea-se-playground-2019"
-    workspaces = {
+    workspaces  = {
       name = "tls-root-certificate"
     }
-  } //config
+  }
 }
 
 module "primarycluster" {

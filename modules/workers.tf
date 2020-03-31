@@ -15,22 +15,22 @@ data "template_file" "workers" {
 
   vars = {
     location = var.location
-    hostname      = "${var.hostname}-workers-${count.index}"
-    private_ip    = azurerm_network_interface.workers-nic[count.index].private_ip_address
-    public_ip     = azurerm_public_ip.workers-pip[count.index].ip_address
+    hostname      = try("${var.hostname}-workers-${count.index}", "")
+    private_ip    = try(azurerm_network_interface.workers-nic[count.index].private_ip_address, "")
+    public_ip     = try(azurerm_public_ip.workers-pip[count.index].ip_address, "")
     enterprise      = var.enterprise
     vaultlicense    = var.vaultlicense
     consullicense   = var.consullicense
-    kmskey          = azurerm_key_vault.demostack.id
+    kmskey          = try(azurerm_key_vault.demostack.id, "")
     subscription_id = var.subscription_id
     tenant_id       = var.tenant_id
     client_id       = var.client_id
     client_secret   = var.client_secret
-    fqdn            = azurerm_public_ip.workers-pip[count.index].fqdn
-    node_name       = "${var.hostname}-workers-${count.index}"
+    fqdn            =  try(azurerm_public_ip.workers-pip[count.index].fqdn, "")
+    node_name       = try("${var.hostname}-workers-${count.index}", "")
     me_ca           = var.ca_cert_pem
-    me_cert         = "${element(tls_locally_signed_cert.workers.*.cert_pem, count.index)}"
-    me_key          = "${element(tls_private_key.workers.*.private_key_pem, count.index)}"
+    me_cert         = try("${element(tls_locally_signed_cert.workers.*.cert_pem, count.index)}", "")
+    me_key          = try("${element(tls_private_key.workers.*.private_key_pem, count.index)}", "")
     
     # Consul
     consul_url            = var.consul_url
@@ -70,7 +70,7 @@ data "template_cloudinit_config" "workers" {
 
   part {
     content_type = "text/x-shellscript"
-    content      = data.template_file.workers[count.index].rendered
+    content      = try(data.template_file.workers[count.index].rendered, "")
   }
 }
 
@@ -90,7 +90,7 @@ resource "azurerm_subnet_network_security_group_association" "workers" {
 
 resource "azurerm_network_interface" "workers-nic" {
   count                     = var.workers
- name                      = "${var.demo_prefix}workers-nic-${count.index}"
+ name                      = try("${var.demo_prefix}workers-nic-${count.index}","")
   location                  = var.location
  resource_group_name       = azurerm_resource_group.demostack.name
   
@@ -98,7 +98,7 @@ resource "azurerm_network_interface" "workers-nic" {
     name                          = "${var.demo_prefix}-${count.index}-ipconfig"
     subnet_id                     = azurerm_subnet.workers.id
     private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = azurerm_public_ip.workers-pip[count.index].id
+    public_ip_address_id          = try(azurerm_public_ip.workers-pip[count.index].id, "" )
   }
   tags = {
     name      =var.owner
@@ -145,7 +145,7 @@ resource "azurerm_virtual_machine" "workers" {
  resource_group_name = azurerm_resource_group.demostack.name
   vm_size             = var.vm_size
 
-  network_interface_ids         = ["${azurerm_network_interface.workers-nic[count.index].id}"]
+network_interface_ids = ["${azurerm_network_interface.workers-nic[count.index].id}"]
   delete_os_disk_on_termination = "true"
 
   storage_image_reference {

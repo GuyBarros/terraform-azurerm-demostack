@@ -77,7 +77,8 @@ ssh-apt install \
   ca-certificates \
   curl \
   gnupg-agent \
-  software-properties-common
+  software-properties-common \
+  openjdk-9-jdk-headless
 
 echo "--> Installing git secrets"
 git clone https://github.com/awslabs/git-secrets
